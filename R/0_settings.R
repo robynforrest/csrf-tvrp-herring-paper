@@ -16,7 +16,6 @@ FigsDir <- here::here("Figures")
 source("R/0a_load-packages.R")
 
 # Source customized functions
-source("R/99_make-mps-new.R")
 source("R/99_make-pac-Mscenarios.R")
 source(here("R/99_plot_funcsMP.R"))  # A few custom plots
 source(here("R/99_get_objects_OM.R"))  #functions for extracting OM objects, including ref points
@@ -34,10 +33,6 @@ confhi <- 0.95
 #display.brewer.pal(n = 8, name = 'Dark2')
 # dark2cols <- RColorBrewer::brewer.pal(n = 8, name = "Dark2")
 colpalette <- "Dark2" #"Set1" # colorBrewer palette
-#manualcolors <- unname(colorBlindness::availableColors()[c(1:4,6:8)])
-#manualcolors <- RColorBrewer::brewer.pal(8, colpalette)
-#manualcolors <- c("black",manualcolors)
-#RColorBrewer::display.brewer.pal(n=8, colpalette)
 
 # Updated these colours to match the dark2 palette used in openMSE's plot_TS plots
 nfcol <- "#E7298A" #manualcolors[7]
@@ -49,7 +44,6 @@ dyncol   <- "#1B9E77" #"#E7298A" #"#EE0000FF"
 ssbcol   <- "black"
 mortcol  <- "#A20056FF"
 fmortcol <- "darkblue"
-#sc_colours <- c("SSB" = ssbcol, "histB0" = histcol, "meanhistB0" = meanhistcol,"meanB0" = meancol, "dynB0" = dyncol)
 sc_colours <- c("SSB" = ssbcol, "histB0" = histcol, "meanB0" = meancol, "recentB0" = meanrecentcol, "dynB0" = dyncol)
 bo_colours <- c(histcol, meancol, meanrecentcol, dyncol)
 bo_colours_wnf <- c(nfcol,histcol, meancol, meanrecentcol, dyncol)
