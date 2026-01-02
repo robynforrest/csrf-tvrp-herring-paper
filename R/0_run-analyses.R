@@ -11,6 +11,8 @@
 
 # Created January 2 2026, following earlier exploratory repository (2023)
 
+# TODO: Ask QH about steepness values in OM. Too high.
+
 library(here)
 
 omspecies <- "pac-herring"
@@ -28,7 +30,7 @@ SpDirFigs <- here("Figures")
 if(!file.exists(SpDirFigs)) dir.create(SpDirFigs, recursive=TRUE)
 
 # Universal settings that are changed frequently
-nsim <- 100
+nsim <- 250
 pro_years <- 50
 Mage <- 3 # age at which to extract constant M from cpars M_age_array
 
@@ -55,9 +57,9 @@ Interval <- 1 #1 # stock assessment interval
 
 # ======================================================================================================
 # Choose whether to run the OMs and MSEs (only need to do this once)
-make_oms <- T #T/F Turn off if you have already made and saved the base OMs
-run_mses <- T #T/F Turn off if you have already run the MSEs.
-plot_mses <- T #T/F
+make_oms  <- FALSE #T/F Turn off if you have already made and saved the base OMs
+run_mses  <- TRUE #T/F Turn off if you have already run the MSEs.
+plot_mses <- TRUE #T/F
 # ======================================================================================================
 
 # Source files to load packages and set universal settings

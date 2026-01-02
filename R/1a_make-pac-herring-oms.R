@@ -23,6 +23,7 @@ saveRDS(ScenarioNamesHuman, here(SpDirOM,"ScenarioNamesHuman.rda"))
 # use iSCAM2OM to populate the basic OMs  #1:nOMs
 # This is an alternative to rcm() which is a refitting exercise
 
+#1:nstocks
 for(j in 1:nstocks){
   stock <- stocks[j]
   cat("~~~ Making OMs for", paste(stock), "~~~\n")
@@ -42,7 +43,7 @@ for(j in 1:nstocks){
   mcmc_output  <- MSEtool::read.mcmc(iscamlocs[iscamfolder])
 
   # iSCAM2OM pulls all the outputs and also makes plot of age comp fits
-  # First 2500 of 5000 samples removed from MCMC files
+  # First 2500 of 5000 MCMC samples have been removed from iscam output MCMC files
   png(paste0(StockDirFigs, "/Compare_iscam_om_comps",stocks[j], ".png"), height=720, width=720)
      hOMs[[j]]<-MSEtool::iSCAM2OM(iSCAMdir=iscamlocs[iscamfolder],
                                   nsim=nsim,
@@ -68,54 +69,12 @@ for(j in 1:nstocks){
   nproyears <- hOMs[[j]]@proyears
   maxage <- hOMs[[j]]@maxage
 
-  # look at rec deviations
-  default_perr <- hOMs[[j]]@cpars$Perr_y
-  png(paste0(StockDirFigs, "/OM_rec_devs_",stocks[j], ".png"), height=720, width=720)
-    matplot(1:(nyears+maxage+pro_years), log(t(default_perr)), type="l", col=2, main=paste(stocks[j]))
-    abline(h=0, lty=1, lwd=0.5)
-    abline(v=nyears+maxage, lty=2, lwd=0.5)
-  dev.off()
-
-  # compare rec devs with iscam outputs
-   iscam_perr_file <- file.path(iscamlocs[iscamfolder],"iscam_rdev_mcmc.csv")
-   burn <- 4500
-   iscam_perr <- read_csv(iscam_perr_file)
-   iscam_perr <- iscam_perr[(burn+1):nrow(iscam_perr),]
-   png(paste0(StockDirFigs, "/iscam_rec_devs_",stocks[j], ".png"), height=720, width=720)
-     matplot(1:(nyears-2), t(iscam_perr), type="l", col=3, main=paste(stocks[j]))
-     abline(h=0, lty=1, lwd=0.5)
-   dev.off()
-
-  # Check iscam recruitment pars and OM
-   iscam_pars_mcmc <- mcmc_output$params %>%
-     select(ro_gr1,h_gr1)
-   iscam_pars_mcmc <- iscam_pars_mcmc[(burn+1):nrow(iscam_pars_mcmc),]
-   post_mean_iscam_ro <- mean(iscam_pars_mcmc[,1])
-   post_med_iscam_ro <- median(iscam_pars_mcmc[,1])
-   post_mean_iscam_h <- mean(iscam_pars_mcmc[,2])
-   post_med_iscam_h <- median(iscam_pars_mcmc[,2])
-   post_mean_med_ro_h <- as.data.frame(cbind(post_mean_iscam_ro,
-                           post_med_iscam_ro,
-                           post_mean_iscam_h,
-                           post_med_iscam_h))
-   write_csv(post_mean_med_ro_h,file.path(StockDirFigs, "iscam_roh_mcmcsummary.csv"))
-
-  # Plot the M time series before making any adjustments to cpars$M_age_array
-  # historical only
-  cyr <- hOMs[[j]]@CurrentYr
-  syr <- cyr-hOMs[[j]]@nyears+1
-  g <- getM(hOMs[[j]], ScenarioNamesHuman[1], age=Mage, type="annual",quant=TRUE, input_type="OM") %>%
-    mutate(scenario = factor(scenario, levels = ScenarioNamesHuman)) %>%
-    filter(year<=cyr) %>%
-    as.data.frame() %>%
-    ggplot() +
-    geom_ribbon(aes(x=year, ymin=lwr, ymax=upr), alpha = 0.3) +
-    geom_line(aes(x=year,y=med), lwd=1) +
-    gfplot::theme_pbs() +
-    scale_x_continuous(breaks = seq(syr, cyr, by = 4)) +
-    labs(x = "Year", y = "M")
-    ggsave(file.path(StockDirFigs, paste0("OM-M_All_M_scenarios_hist_",stocks[j],".png")),
-           width = 8, height = 5)
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # code from Quang to fix minor error in some versions of MSEtool
+  if(is.null(hOMs[[j]]@cpars[["hs"]]) && !is.null(hOMs[[j]]@cpars[["h"]])) { # Use of $ is often confusing since R deploys partial matching
+     hOMs[[j]]@cpars[["hs"]] <- hOMs[[j]]@cpars[["h"]]
+     hOMs[[j]]@cpars[["h"]] <- NULL
+  }
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   #~ 2. Now make OMS with alternative future M scenarios ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -160,37 +119,6 @@ for(j in 1:nstocks){
 
   # Make an html summary of the OM
   plot(hOMs[[j]], output_file="OMreport.html", output_dir=StockDirOM)
-
-  # get OM alpha and beta
-  if(j==1){
-    iscamalpha=199.308
-    iscambeta=0.761672
-  }
-  if(j==2){
-    iscamalpha=144.817
-    iscambeta=0.08082
-  }
-  if(j==3){
-    iscamalpha=145.839
-    iscambeta=0.235396
-  }
-  alpha <- SRalphaconv( hist_hMSEs[[j]]@SampPars$Stock$hs,  hist_hMSEs[[j]]@SampPars$Stock$SSBpR[, 1])
-  beta <-  SRbetaconv(hist_hMSEs[[j]]@SampPars$Stock$hs, hist_hMSEs[[j]]@SampPars$Stock$R0, hist_hMSEs[[j]]@SampPars$Stock$SSBpR[, 1])
-  g <- as.data.frame(alpha) %>%
-    melt() %>%
-    mutate(iscam <- iscamalpha) %>%
-    ggplot() +
-    geom_boxplot(aes(variable,value))+
-    geom_point(aes(variable,iscamalpha), colour="red", size=4)
-  g1 <- as.data.frame(beta) %>%
-    melt() %>%
-    mutate(iscam <- iscambeta) %>%
-    ggplot() +
-    geom_boxplot(aes(variable,value))+
-    geom_point(aes(variable,iscambeta), colour="red", size=4)
-  cowplot::plot_grid(g,g1, ncol=2)
-  ggsave(file.path(StockDirFigs, paste0("iscam_v_OM_alphabeta_",stocks[j],".png")),
-         width = 8, height = 5)
 
 } # end stocks j
 

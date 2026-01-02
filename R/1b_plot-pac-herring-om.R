@@ -12,8 +12,7 @@ ScenarioNamesHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
 stocks <- names(hist_MSEs)
 nstocks <- length(stocks)
 
-#1:nstocks
-for(j in 3){
+for(j in 1:nstocks){
   cat("~~~ Plotting OM figs for", paste(stocks[j]), "~~~\n")
 
    nsim<-hist_MSEs[[j]]@OM@nsim
