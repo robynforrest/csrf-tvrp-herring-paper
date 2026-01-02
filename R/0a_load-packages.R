@@ -1,5 +1,4 @@
 # LOAD PACKAGES
-#devtools::install_github('Blue-Matter/openMSE')
 library(openMSE)
 library(tidyverse)
 library(purrr)
@@ -12,9 +11,7 @@ library(colorBlindness)
 library(cowplot)
 library(future)
 library(ggmse)
-library(rosettafish)
-#library(gfiscamutils)
 library(gfplot)
 library(ggmse)
-#library(MASS) # this will stop dplyr::select working
+
 
