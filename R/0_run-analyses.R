@@ -48,7 +48,7 @@ knotdiv <- 3 # How many years to divide proyears by for splines (smaller number 
 
 # MP SETTINGS
 # Settings for assessment model and plots (not used in this version of the repo)
-# Interval <- 1 #1 # stock assessment interval
+Interval <- 1 #1 # stock assessment interval
 # diagnosticMP <- "full" # Setting for make_MP. Can be "none"  "min" or "full". See ??make_MP
 # plot_retros <- FALSE #TRUE # set whether to plot retrospectives ... takes a while
 # plot_M_timeseries <- TRUE # set whether to plot time series of estimated M - a bit slow
