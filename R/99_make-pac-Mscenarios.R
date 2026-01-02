@@ -37,7 +37,7 @@
     pyr1 <- pyrs[1]
     # for traces on M plots
     set.seed(3)
-    traceSample <- sample(nsim,3, replace=F)
+    traceSample <- sample(nsim,5, replace=F)
     # number of knots for splines
     numknots <- as.integer(nproyears/knotsdiv)
 
@@ -277,16 +277,16 @@
       # for some reason, there is a step down from nyrs to nyrs+1 in the
       #  default OM from MSEtool
       #  The iscam mcmc files only have M up to nyrs so not sure why this happens
-      #    M_age[1,3,nyears:(nyears+1)] # they should be the same
+      #    M_age[1,Mage,nyears:(nyears+1)] # they should be the same
       # First, correct this
-      M_age[,3,proyears] <- M_age[,3,nyears]
+      M_age[,Mage,proyears] <- M_age[,Mage,nyears]
       #matplot(t(M_age[,3,]), type="l", ylim=c(0,1.8))
 
       # Get a matrix to put the projected M values:
       #   mt_pro is a matrix with 1:nsim rows and 1:nproyears cols
       # just do for one age slice as they will all be the same, then copy later
-      #   -- pick age 3
-      mt_pro <-  M_age[,3,proyears] #matrix(0,nrow=nsim, ncol=nproyears)
+      #   -- pick age Mage (age 3, set in 0_run-analyses.R)
+      mt_pro <-  M_age[,Mage,proyears] #matrix(0,nrow=nsim, ncol=nproyears)
       #matplot(t(mt_pro),type="l", ylim=c(0,1.8))
 
       # Now we want to resample the projected M with smaller sd because
@@ -294,7 +294,7 @@
       #  want to project into the future
       # For resampling, use the sd across replicates from sdn years
       #  before last historical year
-      sdm <- sd(M_age[,3,nyears-sdn])
+      sdm <- sd(M_age[,Mage,nyears-sdn])
       cat("Sdm = ",sdm,"\n")
       for(ii in 1:nproyears){
         # Get mean M for that year across replicates
@@ -347,12 +347,12 @@
     }
 
     # Plot
-    traces <- Mscenario@cpars$M_ageArray[traceSample,3,] %>% t() %>%
+    traces <- Mscenario@cpars$M_ageArray[traceSample,Mage,] %>% t() %>%
       as.data.frame() %>%
       mutate(years=all_years) %>%
       rename(trace1=V1, trace2=V2,trace3=V3)
 
-    g <- Mscenario@cpars$M_ageArray[,3,] %>%
+    g <- Mscenario@cpars$M_ageArray[,Mage,] %>%
       apply(2,quantile,probs=c(conflo,0.5,confhi)) %>% t() %>%
       as.data.frame() %>%
       mutate(year=all_years, Scenario=Scenario) %>%

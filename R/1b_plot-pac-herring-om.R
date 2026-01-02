@@ -32,7 +32,6 @@ for(j in 1:nstocks){
 
     #~~~~~~~~~~~PLOT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Plot the M time series
-    # All scenarios
     Mtout <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual", quant=TRUE, input_type="OM") %>%
       mutate(Scenario = factor(scenario, levels = ScenarioNamesHuman)) %>%
       as.data.frame()
@@ -55,26 +54,7 @@ for(j in 1:nstocks){
       ggsave(file.path(StockDirFigs, paste0("OM-M_All_M_scenarios_",stocks[j],".png")),
                width = 8, height = 5)
 
-
-    # Facet
-    g <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual",quant=TRUE, input_type="OM") %>%
-      mutate(scenario = factor(scenario, levels = ScenarioNamesHuman)) %>%
-      as.data.frame() %>%
-      ggplot() +
-      geom_ribbon(aes(x=year, ymin=lwr, ymax=upr, fill=scenario), alpha = 0.3) +
-      #ylim(0,3.)+
-      geom_line(aes(x=year,y=med, color=scenario), lwd=1) +
-      geom_vline(xintercept=pyr1, lty=3)+
-      scale_fill_startrek()+  # ggsci package
-      scale_color_startrek()+
-      facet_wrap(vars(scenario))+
-      gfplot::theme_pbs() +
-      labs(x = "Year", y = "M")+
-      mytheme+
-      theme(legend.position = "bottom")
-      ggsave(file.path(StockDirFigs, paste0("OM-M_All_M_scenarios_",stocks[j],"_Facet.png")))
-
-    # 3. Rec deviations
+    # 2. Rec deviations
     g <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getperry) %>%
       as.data.frame() %>%
       mutate(group=factor(scenario, levels=ScenarioNamesHuman)) %>%
@@ -121,4 +101,5 @@ for(j in 1:nstocks){
           legend.title = element_text(size=12, face="bold"))
     ggsave(file.path(StockDirFigs, paste0("OM-Recdevs_pro.png")),
        width = 16, height = 10)
+
 } #end j

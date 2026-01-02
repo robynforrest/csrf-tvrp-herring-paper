@@ -30,13 +30,13 @@ SpDirFigs <- here("Figures")
 if(!file.exists(SpDirFigs)) dir.create(SpDirFigs, recursive=TRUE)
 
 # Universal settings that are changed frequently
-nsim <- 250
+nsim <- 8
 pro_years <- 50
 Mage <- 3 # age at which to extract constant M from cpars M_age_array
 
 # OM SETTINGS
 # Random walk parameters for om M
-alpha_m_inc <- 0.013 # setting for random walk in M with upward drift
+alpha_m_inc <- 0.009 # setting for random walk in M with upward drift
 alpha_m_dec <- -0.012 # setting for random walk in M with downward drift (not used)
 sigma_m   <- 0.03 # setting for random walk in M
 
@@ -57,9 +57,8 @@ Interval <- 1 #1 # stock assessment interval
 
 # ======================================================================================================
 # Choose whether to run the OMs and MSEs (only need to do this once)
-make_oms  <- FALSE #T/F Turn off if you have already made and saved the base OMs
+make_oms  <- TRUE #T/F Turn off if you have already made and saved the base OMs
 run_mses  <- TRUE #T/F Turn off if you have already run the MSEs.
-plot_mses <- TRUE #T/F
 # ======================================================================================================
 
 # Source files to load packages and set universal settings

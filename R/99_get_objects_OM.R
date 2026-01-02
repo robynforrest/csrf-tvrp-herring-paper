@@ -41,6 +41,7 @@ getM <- function(object, scen,age=3, type="annual", quant=FALSE, input_type="OM"
       nreps  <- object@nsim
       OMM_Annual <- object@cpars$M_ageArray[,age,] # dim: nrow=nreps, ncol=nyears
   }# end if
+
   # First argument is an MSEtool Hist object
   if(input_type=="MSE"){
       all_years <- seq(object@Hist@Data@OM$CurrentYr[1] - object@nyears + 1, object@Hist@Data@OM$CurrentYr[1]+object@proyears)
