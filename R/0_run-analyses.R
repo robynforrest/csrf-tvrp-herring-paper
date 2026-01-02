@@ -35,6 +35,7 @@ Mage <- 3 # age at which to extract constant M from cpars M_age_array
 # OM SETTINGS
 # Random walk parameters for om M
 alpha_m_inc <- 0.013 # setting for random walk in M with upward drift
+alpha_m_dec <- -0.012 # setting for random walk in M with downward drift (not used)
 sigma_m   <- 0.03 # setting for random walk in M
 
 # what sd for M (across reps) should we base M projections on? nyears-sd_numyears.
@@ -44,8 +45,6 @@ sd_numyears <- 3
 # Smoothing parameters for future M
 msplines <- TRUE # Choose whether to smooth projected M random walks with spline
 knotdiv <- 3 # How many years to divide proyears by for splines (smaller number means more knots, e.g., 30/3 = 10 knots)
-
-fix_om_waa_sel <- FALSE # Set whether to replace waa and sel in historical OM as constant values
 
 # MP SETTINGS
 # Settings for assessment model and plots (not used in this version of the repo)
