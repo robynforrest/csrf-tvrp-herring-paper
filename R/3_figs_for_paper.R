@@ -37,14 +37,14 @@ for(j in 1:nstocks){
 
   #~~~~~~~~~~~PLOT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Plot the M time series
-  Mtout <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual", quant=TRUE, input_type="OM") %>%
+  Mtout <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual", quant=TRUE, input_type="OM")|>
     mutate(Scenario = factor(scenario, levels = ScenarioNamesHuman)) %>%
     as.data.frame()
   write_csv(Mtout, file=file.path(StockDirFigs, paste0("OM-M_All_M_scenarios_",stocks[j],".csv")))
 
-  g <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual",quant=TRUE, input_type="OM") %>%
-    mutate(scenario = factor(scenario, levels = ScenarioNamesHuman)) %>%
-    as.data.frame() %>%
+  g1 <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual",quant=TRUE, input_type="OM")  |>
+    mutate(scenario = factor(scenario, levels = ScenarioNamesHuman))  |>
+    as.data.frame()  |>
     ggplot() +
     geom_ribbon(aes(x=year, ymin=lwr, ymax=upr, fill=scenario), alpha = 0.3) +
     geom_line(aes(x=year,y=med, color=scenario), lwd=2) +
@@ -56,15 +56,79 @@ for(j in 1:nstocks){
     geom_vline(xintercept=pyr1, lty=3)+
     scale_fill_startrek()+  # ggsci package
     scale_color_startrek()+
+    scale_y_continuous(breaks = seq(0,3,by=0.25))+
     #ylim(0,3.)+
     gfplot::theme_pbs() +
-    labs(x = "Year", y = "M")+
+    labs(x = "", y = "M")+
     mytheme+
-    theme(legend.position = "bottom")
-  ggsave(file.path(StockDirFigs, paste0("OM-M_All_M_scenarios_",stocks[j],".png")),
-         width = 8, height = 5)
+    theme(legend.position = "none") #+
+    #theme(axis.text.x = element_blank())
+g1
 
-}
+g2 <- purrr::map2_df(MSEscenarios,ScenarioNamesHuman, getSSB, mp=1) |>
+  as.data.frame() |>
+  mutate(scenario = factor(scenario, levels = ScenarioNamesHuman)) |>
+  ggplot() +
+  geom_ribbon(aes(x=year, ymin=lwr, ymax=upr, fill=scenario), alpha = 0.3) +
+  geom_line(aes(x=year,y=med, color=scenario), lwd=2) +
+  theme(legend.position = "none") +
+  labs(x = "Year", y = "SSB")+
+  geom_vline(xintercept=pyr1, lty=3)+
+  scale_fill_startrek()+  # ggsci package
+  scale_color_startrek()+
+  #ylim(0,3.)+
+  gfplot::theme_pbs() +
+  mytheme+
+  theme(legend.position = "bottom")
+g2
+
+g3 <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual",quant=TRUE, input_type="OM")  |>
+  mutate(scenario = factor(scenario, levels = ScenarioNamesHuman))  |>
+  as.data.frame()  |>
+  ggplot() +
+  geom_ribbon(aes(x=year, ymin=lwr, ymax=upr, fill=scenario), alpha = 0.3) +
+  geom_line(aes(x=year,y=med, color=scenario), lwd=2) +
+  geom_line(aes(x=year,y=Trace1, color=scenario), lwd=0.25) +
+  geom_line(aes(x=year,y=Trace2, color=scenario), lwd=0.25) +
+  geom_line(aes(x=year,y=Trace3, color=scenario), lwd=0.25) +
+  geom_line(aes(x=year,y=Trace4, color=scenario), lwd=0.25) +
+  geom_line(aes(x=year,y=Trace5, color=scenario), lwd=0.25) +
+  geom_vline(xintercept=pyr1, lty=3)+
+  scale_fill_startrek()+  # ggsci package
+  scale_color_startrek()+
+  scale_y_continuous(breaks = seq(0,3,by=0.25))+
+  #ylim(0,3.)+
+  gfplot::theme_pbs() +
+  labs(x = "Year", y = "M")+
+  mytheme+
+  theme(legend.position = "none") #+
+#theme(axis.text.x = element_blank())
+g3
+
+g4 <- purrr::map2_df(MSEscenarios,ScenarioNamesHuman, getSSB, mp=1) |>
+  as.data.frame() |>
+  mutate(scenario = factor(scenario, levels = ScenarioNamesHuman)) |>
+  ggplot() +
+  geom_ribbon(aes(x=year, ymin=lwr, ymax=upr, fill=scenario), alpha = 0.3) +
+  geom_line(aes(x=year,y=med, color=scenario), lwd=2) +
+  theme(legend.position = "none") +
+  labs(x = "Year", y = "SSB")+
+  geom_vline(xintercept=pyr1, lty=3)+
+  scale_fill_startrek()+  # ggsci package
+  scale_color_startrek()+
+  #ylim(0,3.)+
+  gfplot::theme_pbs() +
+  mytheme+
+  theme(legend.position = "none")
+g4
+
+cowplot::plot_grid(g1,g2,nrow=2)
+ggsave(file.path(StockDirFigs, paste0("FIG2_M_SSB_",stocks[j],".png")),
+       width = 8, height = 5)
+
+cowplot::plot_grid(g3,g4,nrow=1)
+ggsave(file.path(StockDirFigs, paste0("FIG2_M_SSB_by_col",stocks[j],".png")),
+       width = 8, height = 5)
 
 # FIGURE 3.ANALYTICAL RELATIONSHIP BETWEEN M AND B0
 

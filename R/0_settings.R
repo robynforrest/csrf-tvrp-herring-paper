@@ -64,8 +64,8 @@ theme_set(mytheme_lg)
 mytheme <- gfplot::theme_pbs() +
   theme(title = element_text(size=12, face="bold"))+
   theme(plot.title = element_text(face="bold", size=20))+
-  theme(axis.text.x = element_text(size=6))+
-  theme(axis.text.y = element_text(size=8))+
+  theme(axis.text.x = element_text(size=12))+
+  theme(axis.text.y = element_text(size=12))+
   theme(axis.title.x = element_text(size=14,face="bold"))+
   theme(axis.title.y = element_text(size=14,face="bold"))+
   theme(strip.text.x = element_text(size=18,face="bold"))+
