@@ -17,10 +17,9 @@ source("R/0a_load-packages.R")
 
 # Source customized functions
 source("R/99_make-pac-Mscenarios.R")
-#source(here("R/99_plot_funcsMP.R"))  # A few custom plots
-source(here("R/99_get_objects_OM.R"))  #functions for extracting OM objects, including ref points
-source(here("R/99_get_objects_MSE.R"))  #functions for extracting MSE objects
-source(here("R/99_get_objects_refpts.R"))  #functions for extracting MSE objects
+source(here("R/99_plot_funcs.R"))  # A few custom plots
+source(here("R/99_get_objects.R"))  #functions for extracting OM and MSE objects
+source(here("R/99_get_objects_refpts.R"))  #functions for extracting ref point objects
 
 # Plot settings
 # bounds of confidence intervals

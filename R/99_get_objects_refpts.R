@@ -13,7 +13,7 @@
 # 1 and 2 are static. The rest are updated.
 # 1. histB0 - eqmB0 using mean M from first 5 years of hist ts (currently same as mse@SSB0)
 # 2. meanB0 - eqmB0 using mean M from whole hist ts (same as herring assessment)
-# 3.recentB0 - eqmB0 using 5 year average recent M
+# 3. recentB0 - eqmB0 using 5 year average recent M
 # 4. dynB0 - dynamic B0
 
 # IMPORTANT UPDATE

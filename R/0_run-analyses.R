@@ -57,8 +57,8 @@ Interval <- 1 #1 # stock assessment interval
 
 # ======================================================================================================
 # Choose whether to run the OMs and MSEs (only need to do this once)
-make_oms  <- TRUE #T/F Turn off if you have already made and saved the base OMs
-run_mses  <- TRUE #T/F Turn off if you have already run the MSEs.
+make_oms  <- FALSE #T/F Turn off if you have already made and saved the base OMs
+run_mses  <- FALSE #T/F Turn off if you have already run the MSEs.
 # ======================================================================================================
 
 # Source files to load packages and set universal settings
@@ -69,13 +69,17 @@ source("R/0_settings.R")
 # Build OMs
 # Looping through species is handled in 1_make-oms.R
 # If make_oms == F, this won't do anything
-# Makes plots as well
+# Makes some plots as well
 source("R/1a_make-pac-herring-oms.R")
 
 # Run MSEs with no fishing
 # If run_mses == F, this won't do anything
-# Makes plots as well
+# Makes some plots as well
 source("R/2a_run-pac-herring-mses.R")
+
+# Make the figures for the paper
+source("R/3_figs_for_paper.R")
+
 
 # ====================================================================================================================
 # ======= END OF SCRIPT ==============================================================================================

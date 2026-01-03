@@ -496,45 +496,19 @@ for(j in 3){
   ggsave(file.path(StockDirFigs_NF, paste0("MSE-DynB0_v_SSB_allScen_proYear_NF.png")),
          width = 8, height = 5)
 
- #########################################################################################################
-#5.  Plot asymptotic reference points vs M
-  # Need to pick an age to plot (last argument)
-  # For PAC stocks as M is constant across ages > 1 (age index > 2)
-   for(k in 1:nScenarios){
-    scename <- OMscenarios[[k]]@Name
-
-    g <- plotasymRefPts_allsims(OMscenarios[[k]],
-                         MSEscenarios[[k]],
-                         scename[k],
-                         scenameHuman[k],
-                         age=Mage)
-    g
-    ggsave(file.path(StockDirFigs_NF, paste0("MSE-MvRefpts_All_Sims_", scename,"_NF.png")),
-           width = 16, height = 10)
-
-    g <- plotasymRefPts_onesim(OMscenarios[[k]],
-                                MSEscenarios[[k]],
-                                scename[k],
-                                scenameHuman[k],
-                                age=Mage,
-                                sim=2)
-    g
-    ggsave(file.path(StockDirFigs_NF, paste0("MSE-MvRefpts_One_Sim_", scename,"_NF.png")),
-           width = 16, height = 10)
-  }# end Scenarios loop
 
 #########################################################################################################
 # 5. Plot P(B > 0.3B0)
   # Make 5 panel plot with probs
   # Show conservation performance metrics
   PLRPhistB0   <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="hist", mp=1) |>
-    mutate(MP=MPs[1])
+    mutate(MP="NFref")
   PLRPmeanB0   <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="mean", mp=1)|>
-    mutate(MP=MPs[1])
+    mutate(MP="NFref")
   PLRPrecentB0 <- purrr::map2_df( MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="recent", mp=1)|>
-    mutate(MP=MPs[1])
+    mutate(MP="NFref")
   PLRPdynB0    <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_dynB0, mp=1)|>
-    mutate(MP=MPs[1])
+    mutate(MP="NFref")
 
   PLRPB0_NF <- rbind(PLRPhistB0, PLRPmeanB0, PLRPrecentB0, PLRPdynB0)
 

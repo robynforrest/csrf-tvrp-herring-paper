@@ -4,7 +4,9 @@
 # ===================================================================================================================================================
 # Robyn Forrest
 # October 13 2025
+# Modified January 2 2026
 
+###################################################################################################################
 # Objects from the OM
 ###################################################################################################################
 # R0 - needed for B0 calculations - used only to get SRalpha and SRbeta
@@ -37,22 +39,35 @@ getM <- function(object, scen,age=3, type="annual", quant=FALSE, input_type="OM"
 
   # First argument is an MSEtool OM object
   if(input_type=="OM"){
-      all_years <- seq(object@CurrentYr - object@nyears + 1, object@CurrentYr+object@proyears)
-      nreps  <- object@nsim
-      OMM_Annual <- object@cpars$M_ageArray[,age,] # dim: nrow=nreps, ncol=nyears
+    all_years <- seq(object@CurrentYr - object@nyears + 1, object@CurrentYr+object@proyears)
+    nyrs <- length(all_years) #total number of years including projection
+    pyrs <- (object@nyears+1):nyrs
+    nreps  <- object@nsim
+    OMM_Annual <- object@cpars$M_ageArray[,age,] # dim: nrow=nreps, ncol=nyears
   }# end if
 
   # First argument is an MSEtool Hist object
   if(input_type=="MSE"){
-      all_years <- seq(object@Hist@Data@OM$CurrentYr[1] - object@nyears + 1, object@Hist@Data@OM$CurrentYr[1]+object@proyears)
-      nreps  <- object@nsim
-      OMM_Annual <- object@Hist@AtAge$N.Mortality[,age,] # dim: nrow=nreps, ncol=nyears
+    all_years <- seq(object@Hist@Data@OM$CurrentYr[1] - object@nyears + 1, object@Hist@Data@OM$CurrentYr[1]+object@proyears)
+    nyrs <- length(all_years) #total number of years including projection
+    nreps  <- object@nsim
+    OMM_Annual <- object@Hist@AtAge$N.Mortality[,age,] # dim: nrow=nreps, ncol=nyears
   } # end if
-
-  nyears <- length(all_years)
 
   if(type=="annual"){
     OMM_mean <- OMM_Annual
+    # get traces for projection years for plot
+    set.seed(3)
+    if(nsim<5){
+      ntrace <- nsim
+    } else{
+      ntrace <- 5
+    }
+    traceSample <- sample(nsim,ntrace, replace=F)
+    traces <- OMM_mean[traceSample,] |> t() |>
+      as.data.frame() |>
+      rename(Trace1=V1,Trace2=V2,Trace3=V3,Trace4=V4,Trace5=V5)
+
   }#end if
   # mean of first 5 years
   if(type=="hist"){
@@ -92,14 +107,28 @@ getM <- function(object, scen,age=3, type="annual", quant=FALSE, input_type="OM"
   if(quant==FALSE){
     return(OMM_mean)
   }else{
-    # get M for the two ages specified so it works for all stocks
-    Mdat <- OMM_mean %>%
-      apply(2,quantile,probs=c(conflo,0.5,confhi)) %>% t() %>%
-      as.data.frame() %>%
-      mutate(year=all_years, scenario=scen) %>%
-      dplyr::rename(lwr=1, med=`50%`, upr=3) %>%  as.data.frame()
-    return(Mdat)
-  } #end ifelse
+    if(input_type=="MSE"){
+      # get M for the two ages specified so it works for all stocks
+      Mdat <- OMM_mean %>%
+        apply(2,quantile,probs=c(conflo,0.5,confhi)) %>% t() %>%
+        as.data.frame() %>%
+        mutate(year=all_years, scenario=scen) %>%
+        dplyr::rename(lwr=1, med=`50%`, upr=3) %>%  as.data.frame()
+      return(Mdat)
+    }else{
+          Mdat <- OMM_mean %>%
+          apply(2,quantile,probs=c(conflo,0.5,confhi)) %>% t() %>%
+          as.data.frame() %>%
+          mutate(year=all_years, scenario=scen) %>%
+          dplyr::rename(lwr=1, med=`50%`, upr=3) %>%  as.data.frame()
+
+          if(type=="annual"){
+            Mdat <- Mdat |>
+              cbind(traces)
+          }
+        return(Mdat)
+    } #end ifelse(MSE)
+  } #end ifelse (quant)
 }# end function
 ###################################################################################################################
 
@@ -174,21 +203,108 @@ getFec <- function(object, scen , type="annual", input_type="OM"){
 
 ###################################################################################################################
 # Recruitment errors
-  getperry <- function(om, scen){
-    all_years <- seq(om@CurrentYr - om@nyears + 1, om@CurrentYr+om@proyears)
-    # Need to add on the devs for the 10 years prior to the start of the series (if maxage=10)
-    maxage <- om@maxage
-    preyr1 <- all_years[1]-maxage
-    preyrs <- preyr1:(all_years[1]-1)
+getperry <- function(om, scen){
+  all_years <- seq(om@CurrentYr - om@nyears + 1, om@CurrentYr+om@proyears)
+  # Need to add on the devs for the 10 years prior to the start of the series (if maxage=10)
+  maxage <- om@maxage
+  preyr1 <- all_years[1]-maxage
+  preyrs <- preyr1:(all_years[1]-1)
 
-    perr_y <- om@cpars$Perr_y %>%
-      apply(2,quantile,probs=c(conflo,0.5,confhi)) %>% t() %>%
-      as.data.frame() %>%
-      mutate(year=c(preyrs,all_years), scenario=scen) %>%
-      dplyr::rename(lwr=1, med=`50%`, upr=3) %>%  as.data.frame()
-    perr_y
-  }
+  perr_y <- om@cpars$Perr_y %>%
+    apply(2,quantile,probs=c(conflo,0.5,confhi)) %>% t() %>%
+    as.data.frame() %>%
+    mutate(year=c(preyrs,all_years), scenario=scen) %>%
+    dplyr::rename(lwr=1, med=`50%`, upr=3) %>%  as.data.frame()
+  perr_y
+}
+###################################################################################################################
 
+###################################################################################################################
+# Objects from the MSE
+###################################################################################################################
+# Objects from the MSEs
+##############################################################################################################################################################
+# Arguments:
+# mse = MSE object with alternative future M scenarios for one stock and one scenario
+# scen = scenario name (usually one of ScenarioNamesHuman.rda)
+# mp = the mp index
+# Returns: a dataframe with lower, median and upper estimates of annual SSB for the scenario
+getSSB <- function(mse, scen, mp=1){
+  all_years <- seq(mse@OM$CurrentYr[1] - mse@nyears + 1, mse@OM$CurrentYr[1]+mse@proyears)
+
+  # Historical SSB is split into nareas (minimum 2). In this case they are equal but
+  # need to be added together
+  #histSSB <- mse@Hist@TSdata$SBiomass[,,1] + mse@Hist@TSdata$SBiomass[,,2]
+  histSSB <- mse@SSB_hist # same as above but cleaner
+  proSSB  <- mse@SSB[,mp,]
+
+  SSB <- cbind(histSSB, proSSB)
+
+  SSB <- SSB |>
+    apply(2,quantile,probs=c(conflo,0.5,confhi)) |> t() |>
+    as.data.frame() |>
+    mutate(year=all_years, scenario=scen) |>
+    dplyr::rename(lwr=1, med=`50%`, upr=3) |>
+    as.data.frame() |>
+    melt(id.vars=c("year","scenario", "lwr","upr","med"), value.name="SSB")
+  SSB
+}
+
+############################################################################################
+# Get OM parameters of interest
+# 1. Basic static parameters, excluding B0
+getPars_om_static <- function(mse, scenam, species="pac-herring") {
+  sim <- mse@nsim
+  ompars <- data.frame("Scenario"=scenam,
+                       "Sim"=1:nsim,
+                       "h"= mse@OM$hs,
+                       "R0"=mse@OM$R0/1000,
+                       "q1"=mse@OM$qs,
+                       "q2"=mse@OM$qs,
+                       "SSBMSY"=mse@OM$SSBMSY/1000,
+                       "MSY"=mse@OM$MSY/1000,
+                       "FMSY"=mse@OM$FMSY) |>
+    reshape2::melt(id.vars=c("Sim","Scenario"),
+                   value.name = "Value", variable.name="Variable")
+
+  ompars
+}
+
+#########################################################################################
+# Performance metrics
+# get perf metric just for projection period
+# ONLY LOOK AT CASES WHERE MPS AND B0 TYPE IS MATCHED
+# the three mean B0 cases (hist, mean, recent)
+getPLRP_B0 <- function(mse, scen, age=3, type="mean", mp=2){
+  proyears <- seq(mse@OM$CurrentYr[1] + 1, mse@OM$CurrentYr[1] + mse@proyears)
+
+  SSB <- mse@SSB[,mp,] # just get SSB for the MP that matches the B0 type
+
+  B0 <- getmeanB0(mse, scen, age=age, type=type, quants=FALSE)
+  B0 <- B0[,(mse@nyears+1):(mse@nyears+mse@proyears)] #proyears
+  B_B0<-SSB/B0
+
+  PLRP <- apply(B_B0>0.3,2,mean,na.rm=T) |>
+    as.data.frame() |>
+    rename(PLRP=(1)) |>
+    mutate(year=proyears,scenario=scen, b0type=type)
+  PLRP
+}
+# Dynamic B0
+getPLRP_dynB0 <- function(mse, scen, mp=5){
+  proyears <- seq(mse@OM$CurrentYr[1] + 1, mse@OM$CurrentYr[1] + mse@proyears)
+  yind <- mse@nyears+(1:mse@proyears)
+
+  SSB <- mse@SSB[,mp,]
+  dynB0 <- mse@Hist@Ref$Dynamic_Unfished$SSB0[,yind]
+  B_dynB0<-SSB/dynB0
+
+  PLRP <- apply(B_dynB0>0.3,2,mean,na.rm=T) |>
+    as.data.frame() |>
+    rename(PLRP=(1)) |>
+    mutate(year=proyears,scenario=scen, b0type="dyn")
+  PLRP
+}
 
 
 
