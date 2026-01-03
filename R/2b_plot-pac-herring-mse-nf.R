@@ -12,13 +12,11 @@ hOMs <- readRDS(here("OMs/hOMs.rda"))
 stocks <- names(hOMs)
 nstocks <- length(stocks)
 nsim <- hOMs[[1]]@nsim
-
 histMSEs <- readRDS(here("MSEs/hist_hMSEs.rda"))
-
 scenameHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
 
 #1:nstocks
-for(j in 3){
+for(j in 1:nstocks){
   StockDirOM    <- here(SpDirOM, paste(stocks[j]))
   StockDirMSE   <- here(SpDirMSE, paste(stocks[j]))
   StockDirFigs  <- here(SpDirFigs, paste(stocks[j]))

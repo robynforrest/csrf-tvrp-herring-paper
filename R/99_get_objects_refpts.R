@@ -29,7 +29,7 @@
 # but it is such a simple function that we may as well have it here
 
 # getmeanB0 - Arguments:
-# hist = hist object with alternative future M scenarios for one stock and one scenario
+# mse = mse object with alternative future M scenarios for one stock and one scenario
 # scen = scenario name (usually one of ScenarioNamesHuman.rda)
 # age = the age of constant adult M - function only considers a single value of M for each year
 # type = how M and fec-at-age are averaged over the time series, as used in alternative B0 calculations
@@ -46,9 +46,9 @@ getmeanB0 <- function(mse,scen="Scenario1", age=3, type="mean", quants=TRUE){
     stop("type must be one of annual,hist,mean or recent \n")
   }
 
-  all_years <- seq(mse@Hist@Data@OM$CurrentYr[1] - mse@nyears + 1, mse@Hist@Data@OM$CurrentYr[1]+mse@proyears)
+  all_years <- seq(mse@Hist@Data@LHYear - mse@nyears + 1, mse@Hist@Data@LHYear+mse@proyears)
   nreps  <- mse@nsim
-  nyears <- length(all_years)
+  nyrs <- length(all_years)
 
   # original parameters used by MSEtool to calculate R0
   inputB0  <- mse@OM$SSB0 # A vector of SSB0 needed to get S-R  alpha. Length=nreps
@@ -62,20 +62,21 @@ getmeanB0 <- function(mse,scen="Scenario1", age=3, type="mean", quants=TRUE){
 
   # The function calc_tv_B0() has one argument: pars (a list of 6)
   # Populate the pars argument in a loop (fast), then call the function
-  SSB0_mean <- matrix(0, nrow=nreps, ncol=nyears)
-  for(j in 1:nreps){
-    for(i in 1:nyears){
+  SSB0_mean <- matrix(0, nrow=nreps, ncol=nyrs)
+
+  for(jj in 1:nreps){
+    for(ii in 1:nyrs){
       Pars <- list(
-        B0=inputB0[j],
-        R0=inputR0[j],
-        Steep=inputSteep[j],
-        meanM=inputM[j,i], # mean M (determined by type argument) for year and replicate. Correct annual mean already calculated in getM and getFec
-        meanFec=inputFec[,i], # same for all reps
-        spawn_frac=spawn_time_frac[j]
+        B0=inputB0[jj],
+        R0=inputR0[jj],
+        Steep=inputSteep[jj],
+        meanM=inputM[jj,ii], # mean M (determined by type argument) for year and replicate. Correct annual mean already calculated in getM and getFec
+        meanFec=inputFec[,ii], # same for all reps
+        spawn_frac=spawn_time_frac[jj]
       )
-      SSB0_mean[j,i] <- calc_tv_B0(Pars)$B0_new
-    } # end i
-  } # end j
+      SSB0_mean[jj,ii] <- calc_tv_B0(Pars)$B0_new
+    } # end ii
+  } # end jj
 
   if(quants==TRUE){
     B0 <- SSB0_mean |>

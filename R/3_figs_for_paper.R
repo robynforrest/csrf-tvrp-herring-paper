@@ -12,8 +12,8 @@ nstocks <- length(stocks)
 for(j in 1:nstocks){
   cat("~~~ Plotting OM figs for", paste(stocks[j]), "~~~\n")
 
-  nsim<-hist_MSEs[[j]]@OM@nsim
-  yind<-hist_MSEs[[j]]@OM@nyears+(1:hist_MSEs[[j]]@OM@proyears)
+  nsim<-histMSEs[[j]]@OM@nsim
+  yind<-histMSEs[[j]]@OM@nyears+(1:histMSEs[[j]]@OM@proyears)
 
   # Make directories
   StockDirOM    <- here(SpDirOM, paste(stocks[j]))
@@ -130,6 +130,8 @@ cowplot::plot_grid(g3,g4,nrow=1)
 ggsave(file.path(StockDirFigs, paste0("FIG2_M_SSB_by_col",stocks[j],".png")),
        width = 8, height = 5)
 
+} #end for j
+
 # FIGURE 3.ANALYTICAL RELATIONSHIP BETWEEN M AND B0
 
 
@@ -145,6 +147,6 @@ ggsave(file.path(StockDirFigs, paste0("FIG2_M_SSB_by_col",stocks[j],".png")),
 # FIGURE 7. NO FISHING SCENARIO WITH ALTERNATIVE LRPS - BIOMASS AND PROBABILITIES
 
 
-# SUPP:
+# SUPP
 # APPENDIX A. OM SETTINGS
 # APPENDIX B. FITS TO AGE COMPS, COMPARISON OF M, RECRUITS AND BIOMASS (ISCAM VS OPENMSE)

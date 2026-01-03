@@ -46,9 +46,9 @@ getM <- function(object, scen,age=3, type="annual", quant=FALSE, input_type="OM"
     OMM_Annual <- object@cpars$M_ageArray[,age,] # dim: nrow=nreps, ncol=nyears
   }# end if
 
-  # First argument is an MSEtool Hist object
+  # First argument is an MSE object
   if(input_type=="MSE"){
-    all_years <- seq(object@Hist@Data@OM$CurrentYr[1] - object@nyears + 1, object@Hist@Data@OM$CurrentYr[1]+object@proyears)
+    all_years <- seq(object@Hist@Data@LHYear - object@nyears + 1, object@Hist@Data@LHYear+object@proyears)
     nyrs <- length(all_years) #total number of years including projection
     nreps  <- object@nsim
     OMM_Annual <- object@Hist@AtAge$N.Mortality[,age,] # dim: nrow=nreps, ncol=nyears
@@ -71,29 +71,29 @@ getM <- function(object, scen,age=3, type="annual", quant=FALSE, input_type="OM"
   }#end if
   # mean of first 5 years
   if(type=="hist"){
-    OMM_mean <- matrix(nrow=nreps, ncol=nyears)
+    OMM_mean <- matrix(nrow=nreps, ncol=nyrs)
     for(j in 1:nreps){
-      for(i in 1:nyears){
+      for(i in 1:nyrs){
         OMM_mean[j,i] <- mean(OMM_Annual[j,1:5]) # same for all years
       }}
   }#end if
   # long-term mean
   if(type=="mean"){
-    OMM_mean <- matrix(nrow=nreps, ncol=nyears)
+    OMM_mean <- matrix(nrow=nreps, ncol=nyrs)
     for(j in 1:nreps){
       OMM_mean[j,1] <- OMM_Annual[j,1]
-      for(i in 2:nyears){
+      for(i in 2:nyrs){
         OMM_mean[j,i] <- mean(OMM_Annual[j,1:i])
       }
     }
   } #end if
   # mean of most recent 5 years
   if(type=="recent"){
-    OMM_mean <- matrix(nrow=nreps, ncol=nyears)
+    OMM_mean <- matrix(nrow=nreps, ncol=nyrs)
     for(j in 1:nreps){
       OMM_mean[j,1] <- OMM_Annual[j,1]
 
-      for(i in 2:nyears){
+      for(i in 2:nyrs){
         if(i <= 4) OMM_mean[j,i] <- mean(OMM_Annual[j,1:i])
         if(i > 4)  OMM_mean[j,i] <- mean(OMM_Annual[j,(i-4):i])
       }
@@ -220,8 +220,6 @@ getperry <- function(om, scen){
 ###################################################################################################################
 
 ###################################################################################################################
-# Objects from the MSE
-###################################################################################################################
 # Objects from the MSEs
 ##############################################################################################################################################################
 # Arguments:
@@ -247,6 +245,23 @@ getSSB <- function(mse, scen, mp=1){
     dplyr::rename(lwr=1, med=`50%`, upr=3) |>
     as.data.frame() |>
     melt(id.vars=c("year","scenario", "lwr","upr","med"), value.name="SSB")
+  SSB
+}
+
+getSSBrel <- function(mse, scen, mp=1){
+  all_years <- seq(mse@OM$CurrentYr[1] - mse@nyears + 1, mse@OM$CurrentYr[1]+mse@proyears)
+
+  histSSB <- mse@SSB_hist
+  proSSB  <- mse@SSB[,mp,] # specify the first slice (only 1 MP here)
+
+  SSB <- cbind(histSSB, proSSB)
+  SSB <- SSB/SSB[1]
+
+  SSB <- SSB |>
+    apply(2,quantile,probs=c(conflo,0.5,confhi)) |> t() |>
+    as.data.frame() |>
+    mutate(year=all_years, scenario=scen) |>
+    dplyr::rename(lwr=1, med=`50%`, upr=3) |>  as.data.frame()
   SSB
 }
 
