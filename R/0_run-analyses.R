@@ -30,8 +30,8 @@ SpDirFigs <- here("Figures")
 if(!file.exists(SpDirFigs)) dir.create(SpDirFigs, recursive=TRUE)
 
 # Universal settings that are changed frequently
-nsim <- 8
-pro_years <- 30
+nsim <- 250
+pro_years <- 40
 Mage <- 3 # age at which to extract constant M from cpars M_age_array
 
 # OM SETTINGS
@@ -79,7 +79,6 @@ source("R/2a_run-pac-herring-mses.R")
 
 # Make the figures for the paper
 source("R/3_figs_for_paper.R")
-
 
 # ====================================================================================================================
 # ======= END OF SCRIPT ==============================================================================================
