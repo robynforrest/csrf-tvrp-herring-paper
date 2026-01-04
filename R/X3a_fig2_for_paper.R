@@ -1,0 +1,134 @@
+# Make the figures for the paper
+# January 2, 2026
+
+# Load the historical MSEs.
+# The OM scenarios will be loaded in the loop
+histMSEs <- readRDS(here(SpDirMSE, "hist_hMSEs.rda"))
+ScenarioNamesHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
+stocks <- names(hist_MSEs)
+nstocks <- length(stocks)
+
+# FIGURE 2. TIME SERIES OF HISTORICAL ANC PROJECTED SSB AND M (NO FISHING MP)
+for(j in 1:nstocks){
+  cat("~~~ Plotting Fig 2 for", paste(stocks[j]), "~~~\n")
+
+  nsim<-histMSEs[[j]]@OM@nsim
+  yind<-histMSEs[[j]]@OM@nyears+(1:histMSEs[[j]]@OM@proyears)
+
+  # Make directories
+  StockDirOM    <- here(SpDirOM, paste(stocks[j]))
+  StockDirMSE   <- here(SpDirMSE, paste(stocks[j]))
+  StockDirFigs  <- here(SpDirFigs, paste(stocks[j]))
+  if(!file.exists(StockDirFigs)) dir.create(StockDirFigs, recursive=TRUE)
+  StockDirFigs_NF <- here(StockDirFigs, "NF")
+  if(!file.exists(StockDirMSE)) stop("Stop. No MSEs found. Please run 2_run-mse.R first. \n")
+  if(!file.exists(StockDirFigs_NF)) dir.create(StockDirFigs_NF, recursive=TRUE)
+
+  OMscenarios  <- readRDS(here(StockDirOM, "OMscenarios.rda"))
+  MSEscenarios <- readRDS(here(StockDirMSE, "hMSEs_NF.rda"))
+  histMSE <- histMSEs[j][[1]]
+  cyr <- MSEscenarios[[1]]@OM$CurrentYr[1] # current year (2019)
+  syr <- cyr-MSEscenarios[[1]]@nyears+1
+  pyr <- pyr1 <- cyr + 1 # get the first of the projection years (currently 2020)
+  fyr <- cyr + pro_years #final year of projections
+  stock <- stocks[j]
+  ScenarioNames <- names(OMscenarios)
+  nsc <- length(ScenarioNames)
+
+  #~~~~~~~~~~~PLOT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Plot the M time series
+  Mtout <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual", quant=TRUE, input_type="OM")|>
+    mutate(Scenario = factor(scenario, levels = ScenarioNamesHuman)) %>%
+    as.data.frame()
+  write_csv(Mtout, file=file.path(StockDirFigs, paste0("OM-M_All_M_scenarios_",stocks[j],".csv")))
+
+  g1 <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual",quant=TRUE, input_type="OM")  |>
+    mutate(scenario = factor(scenario, levels = ScenarioNamesHuman))  |>
+    as.data.frame()  |>
+    ggplot() +
+    geom_ribbon(aes(x=year, ymin=lwr, ymax=upr, fill=scenario), alpha = 0.3) +
+    geom_line(aes(x=year,y=med, color=scenario), lwd=2) +
+    geom_line(aes(x=year,y=Trace1, color=scenario), lwd=0.25) +
+    geom_line(aes(x=year,y=Trace2, color=scenario), lwd=0.25) +
+    geom_line(aes(x=year,y=Trace3, color=scenario), lwd=0.25) +
+    geom_line(aes(x=year,y=Trace4, color=scenario), lwd=0.25) +
+    geom_line(aes(x=year,y=Trace5, color=scenario), lwd=0.25) +
+    geom_vline(xintercept=pyr1, lty=3)+
+    scale_fill_startrek()+  # ggsci package
+    scale_color_startrek()+
+    scale_y_continuous(breaks = seq(0,3,by=0.25))+
+    #ylim(0,3.)+
+    gfplot::theme_pbs() +
+    labs(x = "", y = "M")+
+    mytheme+
+    theme(legend.position = "none") #+
+    #theme(axis.text.x = element_blank())
+g1
+
+g2 <- purrr::map2_df(MSEscenarios,ScenarioNamesHuman, getSSB, mp=1) |>
+  as.data.frame() |>
+  mutate(scenario = factor(scenario, levels = ScenarioNamesHuman)) |>
+  ggplot() +
+  geom_ribbon(aes(x=year, ymin=lwr, ymax=upr, fill=scenario), alpha = 0.3) +
+  geom_line(aes(x=year,y=med, color=scenario), lwd=2) +
+  theme(legend.position = "none") +
+  labs(x = "Year", y = "SSB")+
+  geom_vline(xintercept=pyr1, lty=3)+
+  scale_fill_startrek()+  # ggsci package
+  scale_color_startrek()+
+  #ylim(0,3.)+
+  gfplot::theme_pbs() +
+  mytheme+
+  theme(legend.position = "bottom")
+g2
+
+g3 <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual",quant=TRUE, input_type="OM")  |>
+  mutate(scenario = factor(scenario, levels = ScenarioNamesHuman))  |>
+  as.data.frame()  |>
+  ggplot() +
+  geom_ribbon(aes(x=year, ymin=lwr, ymax=upr, fill=scenario), alpha = 0.3) +
+  geom_line(aes(x=year,y=med, color=scenario), lwd=2) +
+  geom_line(aes(x=year,y=Trace1, color=scenario), lwd=0.25) +
+  geom_line(aes(x=year,y=Trace2, color=scenario), lwd=0.25) +
+  geom_line(aes(x=year,y=Trace3, color=scenario), lwd=0.25) +
+  geom_line(aes(x=year,y=Trace4, color=scenario), lwd=0.25) +
+  geom_line(aes(x=year,y=Trace5, color=scenario), lwd=0.25) +
+  geom_vline(xintercept=pyr1, lty=3)+
+  scale_fill_startrek()+  # ggsci package
+  scale_color_startrek()+
+  scale_y_continuous(breaks = seq(0,3,by=0.25))+
+  #ylim(0,3.)+
+  gfplot::theme_pbs() +
+  labs(x = "Year", y = "M")+
+  mytheme+
+  theme(legend.position = "none") #+
+#theme(axis.text.x = element_blank())
+g3
+
+g4 <- purrr::map2_df(MSEscenarios,ScenarioNamesHuman, getSSB, mp=1) |>
+  as.data.frame() |>
+  mutate(scenario = factor(scenario, levels = ScenarioNamesHuman)) |>
+  ggplot() +
+  geom_ribbon(aes(x=year, ymin=lwr, ymax=upr, fill=scenario), alpha = 0.3) +
+  geom_line(aes(x=year,y=med, color=scenario), lwd=2) +
+  theme(legend.position = "none") +
+  labs(x = "Year", y = "SSB")+
+  geom_vline(xintercept=pyr1, lty=3)+
+  scale_fill_startrek()+  # ggsci package
+  scale_color_startrek()+
+  #ylim(0,3.)+
+  gfplot::theme_pbs() +
+  mytheme+
+  theme(legend.position = "none")
+g4
+
+cowplot::plot_grid(g1,g2,nrow=2)
+ggsave(file.path(StockDirFigs, paste0("FIG2_M_SSB_",stocks[j],".png")),
+       width = 8, height = 5)
+
+cowplot::plot_grid(g3,g4,nrow=1)
+ggsave(file.path(StockDirFigs, paste0("FIG2_M_SSB_by_col",stocks[j],".png")),
+       width = 8, height = 5)
+
+} #end for j
+
