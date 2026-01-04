@@ -99,6 +99,8 @@ integer_breaks <- function(x)
 #   meanM is a mean value of M from an OM with time-varying M
 #   meanFec is a mean vector of fecundity-at-age from an OM with time-varying M (wt@age * maturity@age)
 #   spawnfrac is the fraction of total mortality that occurs prior to spawning
+
+# This version uses leading steepness
 calc_tv_B0 <- function(pars){
   # inputs
   B0orig  <- pars$B0 # this is SSB0 in the Hist@OM object, not B0. Needed to get the original phie0
@@ -141,6 +143,39 @@ calc_tv_B0 <- function(pars){
   out
 }
 
+# FOR FIGURES 3 AND 4 IN PAPER
+# This version uses leading alpha and beta
+calc_tv_B0_alphabeta <- function(pars){
+  # inputs
+  SRalpha <- pars$SRalpha
+  SRbeta <- pars$SRbeta
+  # Time-varying parameters
+  M   <- pars$M
+  Fec <- pars$Fec
+  # Fixed parameters
+  spawn_frac <- pars$spawn_frac
+
+  # Now get the new phie0 (function below)
+  phie0new <- calc_phie0(M, Fec, spawn_frac)
+
+  # Now have to re-calculate new R0, Steepness and B0 from the original SRR parameters and the new phie0
+  # (from new, time-varying M and fec)
+  R0new <- (SRalpha*phie0new - 1)/(SRbeta*phie0new)
+  B0new <- phie0new*R0new
+  Steepnew <- MSEtool::hconv(SRalpha, phie0new, SR=1,type = 1)
+
+  out <- list()
+  out$SRalpha <- SRalpha
+  out$SRbeta  <- SRbeta
+  out$B0_new  <- B0new
+  out$R0_new  <- R0new
+  out$phie0_new <- phie0new
+  out$steep_new <- Steepnew
+
+  out
+}
+
+
 # function to calculate phie0 from M, fecundity-at-age and spawn-timing fraction
 calc_phie0 <- function(M,fec,spawn_frac){
 
@@ -166,3 +201,4 @@ calc_phie0 <- function(M,fec,spawn_frac){
 
     phie0
 }
+

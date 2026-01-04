@@ -10,7 +10,7 @@ nstocks <- length(stocks)
 
 # FIGURE 2. TIME SERIES OF HISTORICAL ANC PROJECTED SSB AND M (NO FISHING MP)
 for(j in 1:nstocks){
-  cat("~~~ Plotting OM figs for", paste(stocks[j]), "~~~\n")
+  cat("~~~ Plotting Fig 2 for", paste(stocks[j]), "~~~\n")
 
   nsim<-histMSEs[[j]]@OM@nsim
   yind<-histMSEs[[j]]@OM@nyears+(1:histMSEs[[j]]@OM@proyears)
@@ -132,21 +132,3 @@ ggsave(file.path(StockDirFigs, paste0("FIG2_M_SSB_by_col",stocks[j],".png")),
 
 } #end for j
 
-# FIGURE 3.ANALYTICAL RELATIONSHIP BETWEEN M AND B0
-
-
-# FIGURE 4. STOCK-RECRUIT CURVE WITH ALTERNATIVE B0, R0 AND REPLACEMENT LINES
-
-
-# FIGURE 5. TIME SERIES OF M AND LRP UNDER ALTERNATIVE AVERAGING SCENARIOS
-
-
-# FIGURE 6. SURPLUS PRODUCTION VS SSB
-
-
-# FIGURE 7. NO FISHING SCENARIO WITH ALTERNATIVE LRPS - BIOMASS AND PROBABILITIES
-
-
-# SUPP
-# APPENDIX A. OM SETTINGS
-# APPENDIX B. FITS TO AGE COMPS, COMPARISON OF M, RECRUITS AND BIOMASS (ISCAM VS OPENMSE)

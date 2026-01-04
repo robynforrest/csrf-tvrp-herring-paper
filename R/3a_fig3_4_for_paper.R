@@ -1,0 +1,123 @@
+# Make the figures for the paper
+# January 2, 2026
+
+# Load the historical MSEs.
+# The OM scenarios will be loaded in the loop
+histMSEs <- readRDS(here(SpDirMSE, "hist_hMSEs.rda"))
+ScenarioNamesHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
+stocks <- names(histMSEs)
+nstocks <- length(stocks)
+Steep <- c(0.783,0.713,0.731) #median from iscam MCMC
+
+# FIGURE 3.ANALYTICAL RELATIONSHIP BETWEEN M AND B0
+# FIGURE 4. STOCK-RECRUIT CURVE WITH ALTERNATIVE B0, R0 AND REPLACEMENT LINES
+for(j in 1:nstocks){
+  cat("~~~ Plotting Fig 3 for", paste(stocks[j]), "~~~\n")
+
+  nsim <- histMSEs[[j]]@OM@nsim
+  nyears <- histMSEs[[j]]@OM@nyears
+  yind <- histMSEs[[j]]@OM@nyears+(1:histMSEs[[j]]@OM@proyears) #projection years
+
+  # Make directories
+  StockDirOM    <- here(SpDirOM, paste(stocks[j]))
+  StockDirMSE   <- here(SpDirMSE, paste(stocks[j]))
+  StockDirFigs  <- here(SpDirFigs, paste(stocks[j]))
+  if(!file.exists(StockDirFigs)) dir.create(StockDirFigs, recursive=TRUE)
+  StockDirFigs_NF <- here(StockDirFigs, "NF")
+  if(!file.exists(StockDirMSE)) stop("Stop. No MSEs found. Please run 2_run-mse.R first. \n")
+  if(!file.exists(StockDirFigs_NF)) dir.create(StockDirFigs_NF, recursive=TRUE)
+
+  OM  <- readRDS(here(StockDirOM, "OMscenarios.rda"))[[1]]
+  histMSE <- histMSEs[[j]]
+  stock <- stocks[j]
+  ScenarioNames <- names(OM)
+  nsc <- length(ScenarioNames)
+
+  # inputs for calc_B0
+  # First get the original values that MSEtool used to get the stock-recruit parameters
+  inputM   <- getM(OM,"scenario 1",age=3,type="mean", quant=FALSE) # A matrix of long-term mean M Dim: nrow=nreps, ncol=nyears
+  inputFec <- getFec(OM,"scenario 1",type="mean") # A matrix of annual long-term mean fecundity-at-age (same for all reps). Dim: nrow=nages, ncol=nyears
+  inputSteep <- histMSE@OMPars$hs
+  spawn_time_frac <- histMSE@OMPars$spawn_time_frac
+
+  # 1. Get alpha and beta (these are assumed fixed with changing M)
+  #    Reproduce original phi0 with choice of years for meanM and meanFec
+  #    MSEtool is using mean of first 4 years of M to calculate B0,
+  #      with mean of first two years of fecundity
+  SRpars <- matrix(nrow=nsim,ncol=5) |> as.data.frame()
+  colnames(SRpars) <- c("SRalpha","SRbeta", "M", "Steep", "B0")
+  for(simno in 1:nsim){
+      Pars <- list(
+        B0=histMSE@OMPars$SSB0[simno], # A vector of B0 needed to get S-R  alpha and beta. Length=nreps
+        R0=histMSE@OMPars$R0[simno],
+        Steep=histMSE@OMPars$hs[simno],
+        meanM=inputM[simno,4],# Trying to reproduce what MSEtool is doing - this is the mean of first 4 years
+        meanFec=inputFec[,2], # Trying to reproduce what MSEtool is doing - this is the mean of first 2 years
+        spawn_frac=spawn_time_frac[simno]
+      )
+      Out <- calc_tv_B0(Pars)
+      SRpars[simno,1] <- Out$SRalpha
+      SRpars[simno,2] <- Out$SRbeta
+      SRpars[simno,3] <- Pars$meanM # mean historical M from OM (default)
+      SRpars[simno,4] <- Pars$Steep # original steepness from OM (default, calculated from hist M)
+      SRpars[simno,5] <- Pars$B0 # original B0 from OM (default, calculated from hist M)
+  } # end simno
+
+  # Look at relationship between M and B0 within OM (each point has different SR pars)
+  g <- SRpars |>
+    ggplot(aes(x=M, y=B0))+
+    geom_point()+
+    mytheme
+  g
+
+  # 2. Loop over the nsim SR parameters to get relationships between B0 and M
+  #    across the range of SR parameters
+  inputM   <- seq(0.2,1.,by=0.05)
+  nM <- length(inputM)
+  for(simno in 1:nsim){
+    # Now we have the alpha and beta parameters, we can plot relationship between
+    #  M and B0 over a sequence of M (with a fixed set of SR parameters) for each replicate
+    #  Use a version of calc_B0 which has leading SR pars (not R0 and Steepness)
+    inputSRalpha <- SRpars[simno,1]
+    inputSRbeta  <- SRpars[simno,2]
+
+    Outpars_tmp <- matrix(nrow=nM,ncol=8) |> as.data.frame()
+    colnames(Outpars_tmp) <- c("M","B0", "R0", "Steep", "SRalpha", "SRbeta", "phie0", "Sim")
+    for(mval in 1:nM){
+        Pars <- list(
+          SRalpha=inputSRalpha,
+          SRbeta=inputSRbeta,
+          M=inputM[mval],
+          Fec=inputFec[,2], # Trying to reproduce what MSEtool is doing - this is the mean of first 2 years
+          spawn_frac=1
+        )
+        Out <- calc_tv_B0_alphabeta(Pars) # this version uses inputs of alpha, beta, M and fecundity
+        Outpars_tmp[mval,1] <- Pars$M # The sequence of input values
+        Outpars_tmp[mval,2] <- Out$B0_new # Implied B0 from M and SR pars
+        Outpars_tmp[mval,3] <- Out$R0_new # Implied R0 from M and SR pars
+        Outpars_tmp[mval,4] <- Out$steep_new # Implied Steepness from M and SR pars
+        Outpars_tmp[mval,5] <- Pars$SRalpha # Input SRalpha
+        Outpars_tmp[mval,6] <- Pars$SRbeta # Input SRbeta
+        Outpars_tmp[mval,7] <- Out$phie0_new # Implied Phie from M and fecundity
+        Outpars_tmp[mval,8] <- paste("Sim",simno)
+    } # end mval
+    if(simno==1){
+      Outpars <- Outpars_tmp
+    }else{
+      Outpars <- rbind(Outpars,Outpars_tmp)
+    }
+  } # end simno
+
+  # Look at relationship between M and B0 within OM (each point has different SR pars)
+  g <- Outpars2 |>
+    ggplot(aes(x=M, y=B0))+
+    geom_point()+
+    mytheme
+  g
+
+  # Now look at the relationship across all sims
+
+
+
+} #end for j
+

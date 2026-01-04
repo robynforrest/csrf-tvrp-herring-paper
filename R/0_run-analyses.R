@@ -30,7 +30,7 @@ SpDirFigs <- here("Figures")
 if(!file.exists(SpDirFigs)) dir.create(SpDirFigs, recursive=TRUE)
 
 # Universal settings that are changed frequently
-nsim <- 250
+nsim <- 8
 pro_years <- 40
 Mage <- 3 # age at which to extract constant M from cpars M_age_array
 
@@ -78,7 +78,12 @@ source("R/1a_make-pac-herring-oms.R")
 source("R/2a_run-pac-herring-mses.R")
 
 # Make the figures for the paper
-source("R/3_figs_for_paper.R")
+source("R/3a_fig2_for_paper.R")
+# source("R/3a_fig3_4_for_paper.R")
+# source("R/3a_fig5_for_paper.R")
+# source("R/3a_fig6_for_paper.R")
+# source("R/3a_fig7_for_paper.R")
+# source("R/3a_fig8_for_paper.R")
 
 # ====================================================================================================================
 # ======= END OF SCRIPT ==============================================================================================
