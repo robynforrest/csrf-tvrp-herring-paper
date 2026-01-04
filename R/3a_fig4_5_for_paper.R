@@ -17,6 +17,8 @@ histMSEs <- readRDS(here("MSEs/hist_hMSEs.rda"))
 scenameHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
 
 for(j in 1:nstocks){
+  cat("~~~ Plotting Fig 4 for", paste(stocks[j]), "~~~\n")
+
   StockDirOM    <- here(SpDirOM, paste(stocks[j]))
   StockDirMSE   <- here(SpDirMSE, paste(stocks[j]))
   StockDirFigs  <- here(SpDirFigs, paste(stocks[j]))
@@ -34,6 +36,25 @@ for(j in 1:nstocks){
   pyr <- cyr + 1 # get the first of the projection years (currently 2020)
   fyr <- cyr + pro_years #final year of projections
   stock <- stocks[j]
+
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  # Plot time series of Spawning Biomass - only annual M applies here, this is the true stock size
+  # 1. Plot SSB
+  g <- purrr::map2_df(MSEscenarios,scenameHuman, getSSB, mp=1) |>
+    as.data.frame() |>
+    mutate(group=factor(scenario, levels=scenameHuman)) |>
+    ggplot() +
+    geom_ribbon(aes(x=year, ymin=lwr, ymax=upr), fill=ssbcol, alpha = 0.1) +
+    geom_line(aes(x=year,y=med), color=ssbcol, lwd=1.5) +
+    facet_wrap(vars(group), nrow=1)+
+    theme(legend.position = "none") +
+    labs(x = "Year", y = "Spawning biomass", title= "")+
+    geom_vline(xintercept=cyr, lty=3)+
+    mytheme_lg
+  ggsave(file.path(StockDirFigs_NF, paste0("MSE-Biomass_allScen_allYear_NF.png")),
+         width = 8, height = 5)
+  ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-SSB_allScen_allYear_NF.png")),
+         width = 16, height = 10)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Plot time series of all alternative Ms
@@ -57,6 +78,10 @@ for(j in 1:nstocks){
     geom_vline(xintercept=cyr, lty=3)+
     scale_color_manual(values=manualcolors[2:5])+
     scale_fill_manual(values=manualcolors[2:5])+
+    scale_linetype_manual(values = c("hist" = 2,
+                                     "mean" = 4,
+                                     "recent" =5,
+                                     "annual" = 3))+
     facet_wrap(vars(group), nrow=1)+
     scale_x_continuous(breaks=seq(syr,fyr,16))+
     geom_vline(xintercept=cyr, lty=3)+
@@ -93,6 +118,11 @@ for(j in 1:nstocks){
     scale_color_manual(values=manualcolors)+
     scale_fill_manual(values=manualcolors)+
     facet_wrap(vars(group), nrow=1)+
+    scale_linetype_manual(values = c("SSB"=1,
+                                     "hist" = 2,
+                                     "mean" = 4,
+                                     "recent" =5,
+                                     "dyn" = 3))+
     scale_x_continuous(breaks=seq(syr,fyr,16))+
     geom_vline(xintercept=cyr, lty=3)+
     labs(x = "Year", y = "Reference point", title= "")+
@@ -103,71 +133,69 @@ for(j in 1:nstocks){
   ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-allB0_allScen_allYear_NF.png")),
          width = 16, height = 10)
 
-
-
     # ##############################################################
-  # 4. Plot relative SSB and dynamicB0 (Like Berger 2019 Fig)
-  dynB0_rel <- purrr::map2_df(MSEscenarios,scenameHuman, getdynB0rel) |>
-    dplyr::select(year, scenario, med) |>
-    rename(dynB0=med)
-  SSB_rel <- purrr::map2_df(MSEscenarios,scenameHuman, getSSBrel, mp=1) |>
-    dplyr::select(year, scenario, med) |>
-    rename(SSB=med)
-  relSSBdynB0 <- left_join(SSB_rel, dynB0_rel) |>
-    melt(id.vars= c("year", "scenario")) |>
-    rename(refpt=variable) |>
-    mutate(group=factor(scenario, levels=scenameHuman))
+  # Plot relative SSB and dynamicB0 (Like Berger 2019 Fig)  FOR SUPP MAYBE
+  # dynB0_rel <- purrr::map2_df(MSEscenarios,scenameHuman, getdynB0rel) |>
+  #   dplyr::select(year, scenario, med) |>
+  #   rename(dynB0=med)
+  # SSB_rel <- purrr::map2_df(MSEscenarios,scenameHuman, getSSBrel, mp=1) |>
+  #   dplyr::select(year, scenario, med) |>
+  #   rename(SSB=med)
+  # relSSBdynB0 <- left_join(SSB_rel, dynB0_rel) |>
+  #   melt(id.vars= c("year", "scenario")) |>
+  #   rename(refpt=variable) |>
+  #   mutate(group=factor(scenario, levels=scenameHuman))
+  #
+  # Ymax <- max(relSSBdynB0$value)
+  # Ymaxpro <- max(relSSBdynB0[which(relSSBdynB0$year>cyr),]$value)
+  #
+  # # all years
+  # g <- relSSBdynB0 |>
+  #   ggplot() +
+  #   geom_line(aes(x=year,y=value, colour=refpt, lty=refpt), lwd=2) +
+  #   geom_vline(xintercept = cyr, lty=3) +
+  #   facet_wrap(~group, ncol=2)+
+  #   scale_color_manual(values=c(ssbcol, dyncol)) +
+  #   labs(x = "Year", y = "", title="")+
+  #   mytheme+
+  #   ylim(0,Ymax)
+  # ggsave(file.path(StockDirFigs_NF, paste0("MSE-DynB0_v_SSB_allScen_allYear_NF.png")),
+  #        width = 8, height = 5)
+  # ggsave(file.path(StockDirFigs, paste0("SUPPFIG_MSE-DynB0_v_SSB_allScen_allYear_NF.png")),
+  #        width = 8, height = 5)
 
-  Ymax <- max(relSSBdynB0$value)
-  Ymaxpro <- max(relSSBdynB0[which(relSSBdynB0$year>cyr),]$value)
 
-  # all years
-  g <- relSSBdynB0 |>
-    ggplot() +
-    geom_line(aes(x=year,y=value, colour=refpt, lty=refpt), lwd=2) +
-    geom_vline(xintercept = cyr, lty=3) +
-    facet_wrap(~group, ncol=2)+
-    scale_color_manual(values=c(ssbcol, dyncol)) +
-    labs(x = "Year", y = "", title="")+
-    mytheme+
-    ylim(0,Ymax)
-  ggsave(file.path(StockDirFigs_NF, paste0("MSE-DynB0_v_SSB_allScen_allYear_NF.png")),
-         width = 8, height = 5)
-  ggsave(file.path(StockDirFigs, paste0("SUPPFIG_MSE-DynB0_v_SSB_allScen_allYear_NF.png")),
-         width = 8, height = 5)
-
-
-  # FIGURE 7. NO FISHING SCENARIO WITH ALTERNATIVE LRPS - BIOMASS AND PROBABILITIES
-    #########################################################################################################
-  # Plot P(B > 0.3B0)
-  # Make 5 panel plot with probs
-  # Show conservation performance metrics
-  PLRPhistB0   <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="hist", mp=1) |>
-    mutate(MP="NFref")
-  PLRPmeanB0   <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="mean", mp=1)|>
-    mutate(MP="NFref")
-  PLRPrecentB0 <- purrr::map2_df( MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="recent", mp=1)|>
-    mutate(MP="NFref")
-  PLRPdynB0    <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_dynB0, mp=1)|>
-    mutate(MP="NFref")
-
-  PLRPB0_NF <- rbind(PLRPhistB0, PLRPmeanB0, PLRPrecentB0, PLRPdynB0)
-
-  write_csv(PLRPB0_NF,file.path(StockDirFigs_NF, "PLRP_Metrics_B0_NF.csv"))
-
-  # Plot all B0 performance metrics on one plot
-  g <- plotPLRP(PLRPB0_NF,
-                scentext=TRUE,
-                panel=FALSE)
-  ggsave(file.path(StockDirFigs_NF, paste0("MSE-PLRP_B0_allScen_NF.png")),
-         width = 16, height = 10)
-
-  # Repeat with each metric on its own panel
-  g <- plotPLRP(PLRPB0_NF,
-                scentext=TRUE,
-                panel=TRUE)
-  ggsave(file.path(StockDirFigs_NF, paste0("MSE-PLRP_B0_allScen_panel_NF.png")),
-         width = 16, height = 10)
+  # # FIGURE 5. NO FISHING SCENARIO WITH ALTERNATIVE LRPS - BIOMASS AND PROBABILITIES
+  #   #########################################################################################################
+  # # Plot P(B > 0.3B0)
+  # # Make 5 panel plot with probs
+  # # Show conservation performance metrics
+  # PLRPhistB0   <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="hist", mp=1) |>
+  #   mutate(MP="NFref")
+  # PLRPmeanB0   <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="mean", mp=1)|>
+  #   mutate(MP="NFref")
+  # PLRPrecentB0 <- purrr::map2_df( MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="recent", mp=1)|>
+  #   mutate(MP="NFref")
+  # PLRPdynB0    <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_dynB0, mp=1)|>
+  #   mutate(MP="NFref")
+  #
+  # PLRPB0_NF <- rbind(PLRPhistB0, PLRPmeanB0, PLRPrecentB0, PLRPdynB0)
+  #
+  # write_csv(PLRPB0_NF,file.path(StockDirFigs_NF, "PLRP_Metrics_B0_NF.csv"))
+  #
+  # # Plot all B0 performance metrics on one plot
+  # g <- plotPLRP(PLRPB0_NF,
+  #               scentext=TRUE,
+  #               panel=FALSE)
+  # ggsave(file.path(StockDirFigs_NF, paste0("MSE-PLRP_B0_allScen_NF.png")),
+  #        width = 16, height = 10)
+  #
+  # # Repeat with each metric on its own panel
+  # g <- plotPLRP(PLRPB0_NF,
+  #               scentext=TRUE,
+  #               panel=TRUE)
+  # ggsave(file.path(StockDirFigs_NF, paste0("MSE-PLRP_B0_allScen_panel_NF.png")),
+  #        width = 16, height = 10)
 
 } # end for j in stocks
 
