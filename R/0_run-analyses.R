@@ -78,12 +78,10 @@ source("R/1a_make-pac-herring-oms.R")
 source("R/2a_run-pac-herring-mses.R")
 
 # Make the figures for the paper
-source("R/3a_fig2_for_paper.R")
-# source("R/3a_fig3_4_for_paper.R")
-# source("R/3a_fig5_for_paper.R")
-# source("R/3a_fig6_for_paper.R")
-# source("R/3a_fig7_for_paper.R")
-# source("R/3a_fig8_for_paper.R")
+source("R/3a_fig2_3_for_paper.R") # M B0 S-R relationships
+source("R/3a_fig4_5_for_paper.R") # Time series M, B0 and Biomass
+# source("R/3a_fig6_for_paper.R") # Surplus production
+
 
 # ====================================================================================================================
 # ======= END OF SCRIPT ==============================================================================================

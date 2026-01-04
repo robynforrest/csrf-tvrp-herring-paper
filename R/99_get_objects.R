@@ -67,8 +67,8 @@ getM <- function(object, scen,age=3, type="annual", quant=FALSE, input_type="OM"
     traces <- OMM_mean[traceSample,] |> t() |>
       as.data.frame() |>
       rename(Trace1=V1,Trace2=V2,Trace3=V3,Trace4=V4,Trace5=V5)
-
   }#end if
+
   # mean of first 5 years
   if(type=="hist"){
     OMM_mean <- matrix(nrow=nreps, ncol=nyrs)
@@ -112,14 +112,14 @@ getM <- function(object, scen,age=3, type="annual", quant=FALSE, input_type="OM"
       Mdat <- OMM_mean %>%
         apply(2,quantile,probs=c(conflo,0.5,confhi)) %>% t() %>%
         as.data.frame() %>%
-        mutate(year=all_years, scenario=scen) %>%
+        mutate(year=all_years, scenario=scen, Mtype=type) %>%
         dplyr::rename(lwr=1, med=`50%`, upr=3) %>%  as.data.frame()
       return(Mdat)
     }else{
           Mdat <- OMM_mean %>%
           apply(2,quantile,probs=c(conflo,0.5,confhi)) %>% t() %>%
           as.data.frame() %>%
-          mutate(year=all_years, scenario=scen) %>%
+          mutate(year=all_years, scenario=scen, Mtype=type) %>%
           dplyr::rename(lwr=1, med=`50%`, upr=3) %>%  as.data.frame()
 
           if(type=="annual"){
