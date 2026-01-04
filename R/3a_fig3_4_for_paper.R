@@ -70,11 +70,20 @@ for(j in 1:nstocks){
     mytheme
   g
 
+
   # 2. Loop over the nsim SR parameters to get relationships between B0 and M
   #    across the range of SR parameters
-  inputM   <- seq(0.2,1.,by=0.05)
+  # Randomly subset the replicates if nsim is >10
+  if(nsim <= 10){
+    Nsim = 1:nsim
+  }else{
+    Nsim = sample(2:nsim, 10 ,replace=FALSE)
+    Nsim[1] <- 1 # Always take the first sample so loop works below
+  }
+
+  inputM   <- seq(0.2,1.,by=0.025)
   nM <- length(inputM)
-  for(simno in 1:nsim){
+  for(simno in Nsim){
     # Now we have the alpha and beta parameters, we can plot relationship between
     #  M and B0 over a sequence of M (with a fixed set of SR parameters) for each replicate
     #  Use a version of calc_B0 which has leading SR pars (not R0 and Steepness)
@@ -109,15 +118,65 @@ for(j in 1:nstocks){
   } # end simno
 
   # Look at relationship between M and B0 within OM (each point has different SR pars)
-  g <- Outpars2 |>
-    ggplot(aes(x=M, y=B0))+
-    geom_point()+
+  g <- Outpars |>
+    ggplot(aes(x=M, y=B0, colour=Sim))+
+    geom_point(size=3)+
+    scale_colour_viridis_d()+
     mytheme
   g
+  ggsave(file.path(StockDirFigs, paste0("FIG3_M_B0_v1_",stocks[j],".png")),
+         width = 8, height = 5)
 
-  # Now look at the relationship across all sims
+  # Look at ribbon plot version (use all sims)
+  inputM   <- seq(0.2,1.,by=0.025)
+  nM <- length(inputM)
+  for(simno in 1:nsim){
+    # Now we have the alpha and beta parameters, we can plot relationship between
+    #  M and B0 over a sequence of M (with a fixed set of SR parameters) for each replicate
+    #  Use a version of calc_B0 which has leading SR pars (not R0 and Steepness)
+    inputSRalpha <- SRpars[simno,1]
+    inputSRbeta  <- SRpars[simno,2]
 
+    Outpars_tmp <- matrix(nrow=nM,ncol=8) |> as.data.frame()
+    colnames(Outpars_tmp) <- c("M","B0", "R0", "Steep", "SRalpha", "SRbeta", "phie0", "Sim")
+    for(mval in 1:nM){
+      Pars <- list(
+        SRalpha=inputSRalpha,
+        SRbeta=inputSRbeta,
+        M=inputM[mval],
+        Fec=inputFec[,2], # Trying to reproduce what MSEtool is doing - this is the mean of first 2 years
+        spawn_frac=1
+      )
+      Out <- calc_tv_B0_alphabeta(Pars) # this version uses inputs of alpha, beta, M and fecundity
+      Outpars_tmp[mval,1] <- Pars$M # The sequence of input values
+      Outpars_tmp[mval,2] <- Out$B0_new # Implied B0 from M and SR pars
+      Outpars_tmp[mval,3] <- Out$R0_new # Implied R0 from M and SR pars
+      Outpars_tmp[mval,4] <- Out$steep_new # Implied Steepness from M and SR pars
+      Outpars_tmp[mval,5] <- Pars$SRalpha # Input SRalpha
+      Outpars_tmp[mval,6] <- Pars$SRbeta # Input SRbeta
+      Outpars_tmp[mval,7] <- Out$phie0_new # Implied Phie from M and fecundity
+      Outpars_tmp[mval,8] <- paste("Sim",simno)
+    } # end mval
+    if(simno==1){
+      Outpars <- Outpars_tmp
+    }else{
+      Outpars <- rbind(Outpars,Outpars_tmp)
+    }
+  } # end simno
 
+  Outpars_range <- Outpars |>
+    select(Sim, M, B0) |>
+    group_by(M) |>
+    summarise("Lwr"=quantile(B0, probs=0.025), "Med"=median(B0), "Upr"=quantile(B0, probs=0.975))
+
+  g <-  ggplot(Outpars_range)+
+    geom_ribbon(aes(x=M,ymin=Lwr,ymax=Upr), alpha=0.3, colour="purple", fill="purple")+
+    geom_line(aes(x=M,y=Med), alpha=0.3, colour="purple", lwd=2)+
+    ylab("B0")+
+    mytheme
+  g
+  ggsave(file.path(StockDirFigs, paste0("FIG3_M_B0_v2_",stocks[j],".png")),
+         width = 8, height = 5)
 
 } #end for j
 
