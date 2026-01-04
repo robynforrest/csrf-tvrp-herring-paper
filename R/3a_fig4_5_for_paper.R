@@ -40,20 +40,23 @@ for(j in 1:nstocks){
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Plot time series of Spawning Biomass - only annual M applies here, this is the true stock size
   # 1. Plot SSB
-  g <- purrr::map2_df(MSEscenarios,scenameHuman, getSSB, mp=1) |>
+  dat <- purrr::map2_df(MSEscenarios,scenameHuman, getSSB, mp=1) |>
     as.data.frame() |>
-    mutate(group=factor(scenario, levels=scenameHuman)) |>
-    ggplot() +
+    mutate(group=factor(scenario, levels=scenameHuman))
+
+  g <- ggplot(dat) +
     geom_ribbon(aes(x=year, ymin=lwr, ymax=upr), fill=ssbcol, alpha = 0.1) +
     geom_line(aes(x=year,y=med), color=ssbcol, lwd=1.5) +
     facet_wrap(vars(group), nrow=1)+
     theme(legend.position = "none") +
     labs(x = "Year", y = "Spawning biomass", title= "")+
     geom_vline(xintercept=cyr, lty=3)+
-    mytheme_lg
+    mytheme_lg #+
+    #annotate("text", x=1953, y=maxY, label= "(a)")
+
   ggsave(file.path(StockDirFigs_NF, paste0("MSE-Biomass_allScen_allYear_NF.png")),
          width = 8, height = 5)
-  ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-SSB_allScen_allYear_NF.png")),
+  ggsave(file.path(StockDirFigs, paste0("FIGURE4_MSE-SSB_allScen_allYear_NF.png")),
          width = 16, height = 10)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -65,7 +68,8 @@ for(j in 1:nstocks){
   annualM <- purrr::map2_df(MSEscenarios,scenameHuman, getM, age=Mage, type="annual", quant=TRUE, input_type="MSE")
 
   allM <- rbind(histM,meanM,recentM, annualM) |>
-    mutate(Mtype=factor(Mtype, levels=M_levels))
+    mutate(`M type`=factor(Mtype, levels=M_levels)) |>
+    select(-Mtype)
 
   write_csv(allM, file.path(StockDirFigs_NF, paste0("MSE-allM_allScen_allYear.csv")))
 
@@ -73,8 +77,8 @@ for(j in 1:nstocks){
   g <- allM |>
     mutate(group=factor(scenario, levels=scenameHuman)) |>
     ggplot()+
-    geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=Mtype), alpha = 0.1)+
-    geom_line(aes(x=year, y=med, col=Mtype, lty=Mtype),lwd=1.5)+
+    geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`M type`), alpha = 0.1)+
+    geom_line(aes(x=year, y=med, col=`M type`, lty=`M type`),lwd=1.5)+
     geom_vline(xintercept=cyr, lty=3)+
     scale_color_manual(values=manualcolors[2:5])+
     scale_fill_manual(values=manualcolors[2:5])+
@@ -90,7 +94,7 @@ for(j in 1:nstocks){
     mytheme_lg
   ggsave(file.path(StockDirFigs_NF, paste0("MSE-allM_allScen_allYear_NF.png")),
          width = 16, height = 10)
-  ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-allM_allScen_allYear_NF.png")),
+  ggsave(file.path(StockDirFigs, paste0("FIGURE4_MSE-allM_allScen_allYear_NF.png")),
          width = 16, height = 10)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -103,7 +107,7 @@ for(j in 1:nstocks){
   SSBnf <- purrr::map2_df(MSEscenarios,scenameHuman, getSSB, mp=1) |>
     mutate(RefPtName="SSB") # dynamic B0 (from MSE object)# dynamic B0 for NF mp (from MSE object)
   allB0 <- rbind(histB0,meanB0,recentB0,dynB0,SSBnf) |>
-    mutate(`Ref. Pt`=factor(RefPtName, levels=refpt_levels)) |>
+    mutate(`B0 type`=factor(RefPtName, levels=refpt_levels)) |>
     select(-RefPtName)
 
   write_csv(allB0, file.path(StockDirFigs_NF, paste0("MSE-allB0_allScen_allYear_NF.csv")))
@@ -112,8 +116,8 @@ for(j in 1:nstocks){
   g <- allB0 |>
     mutate(group=factor(scenario, levels=scenameHuman)) |>
     ggplot()+
-    geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`Ref. Pt`), alpha = 0.1)+
-    geom_line(aes(x=year, y=med, col=`Ref. Pt`, lty=`Ref. Pt`),lwd=1.5)+
+    geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`B0 type`), alpha = 0.1)+
+    geom_line(aes(x=year, y=med, col=`B0 type`, lty=`B0 type`),lwd=1.5)+
     geom_vline(xintercept=cyr, lty=3)+
     scale_color_manual(values=manualcolors)+
     scale_fill_manual(values=manualcolors)+
@@ -125,77 +129,117 @@ for(j in 1:nstocks){
                                      "dyn" = 3))+
     scale_x_continuous(breaks=seq(syr,fyr,16))+
     geom_vline(xintercept=cyr, lty=3)+
-    labs(x = "Year", y = "Reference point", title= "")+
+    labs(x = "Year", y = "SSB or B0", title= "")+
     theme(panel.spacing = unit(1, "lines"))+
     mytheme_lg
   ggsave(file.path(StockDirFigs_NF, paste0("MSE-allB0_allScen_allYear_NF.png")),
          width = 16, height = 10)
-  ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-allB0_allScen_allYear_NF.png")),
+  ggsave(file.path(StockDirFigs, paste0("FIGURE4_MSE-allB0_allScen_allYear_NF.png")),
          width = 16, height = 10)
 
-    # ##############################################################
-  # Plot relative SSB and dynamicB0 (Like Berger 2019 Fig)  FOR SUPP MAYBE
-  # dynB0_rel <- purrr::map2_df(MSEscenarios,scenameHuman, getdynB0rel) |>
-  #   dplyr::select(year, scenario, med) |>
-  #   rename(dynB0=med)
-  # SSB_rel <- purrr::map2_df(MSEscenarios,scenameHuman, getSSBrel, mp=1) |>
-  #   dplyr::select(year, scenario, med) |>
-  #   rename(SSB=med)
-  # relSSBdynB0 <- left_join(SSB_rel, dynB0_rel) |>
-  #   melt(id.vars= c("year", "scenario")) |>
-  #   rename(refpt=variable) |>
-  #   mutate(group=factor(scenario, levels=scenameHuman))
-  #
-  # Ymax <- max(relSSBdynB0$value)
-  # Ymaxpro <- max(relSSBdynB0[which(relSSBdynB0$year>cyr),]$value)
-  #
-  # # all years
-  # g <- relSSBdynB0 |>
-  #   ggplot() +
-  #   geom_line(aes(x=year,y=value, colour=refpt, lty=refpt), lwd=2) +
-  #   geom_vline(xintercept = cyr, lty=3) +
-  #   facet_wrap(~group, ncol=2)+
-  #   scale_color_manual(values=c(ssbcol, dyncol)) +
-  #   labs(x = "Year", y = "", title="")+
-  #   mytheme+
-  #   ylim(0,Ymax)
-  # ggsave(file.path(StockDirFigs_NF, paste0("MSE-DynB0_v_SSB_allScen_allYear_NF.png")),
-  #        width = 8, height = 5)
-  # ggsave(file.path(StockDirFigs, paste0("SUPPFIG_MSE-DynB0_v_SSB_allScen_allYear_NF.png")),
-  #        width = 8, height = 5)
-
-
-  # # FIGURE 5. NO FISHING SCENARIO WITH ALTERNATIVE LRPS - BIOMASS AND PROBABILITIES
+  # FIGURE 5. NO FISHING SCENARIO WITH ALTERNATIVE LRPS - BIOMASS AND PROBABILITIES
   #   #########################################################################################################
+  cat("~~~ Plotting Fig 5 for", paste(stocks[j]), "~~~\n")
+  # Now plot all years again as LRP (0.3B0)
+  # multiply all ref points by 0.3
+  LRP <- allB0 |>
+    filter(!`B0 type` %in% "SSB") |>
+    mutate(lwr=0.3*lwr, med=0.3*med, upr=0.3*upr)
+
+  # add back to df with SSB
+  LRP <- allB0 |>
+    filter(`B0 type` %in% "SSB") |>
+    rbind(LRP)
+
+  # Pro years only
+  g <- LRP |>
+    filter(year>cyr) |>
+    mutate(group=factor(scenario, levels=scenameHuman)) |>
+    ggplot()+
+    geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`B0 type`), alpha = 0.1)+
+    geom_line(aes(x=year, y=med, col=`B0 type`, lty=`B0 type`),lwd=1.5)+
+    geom_vline(xintercept=cyr, lty=2)+
+    scale_color_manual(values=manualcolors)+
+    scale_fill_manual(values=manualcolors)+
+    scale_linetype_manual(values = c("SSB"=1,
+                                     "hist" = 2,
+                                     "mean" = 4,
+                                     "recent" =5,
+                                     "dyn" = 3))+
+    facet_wrap(vars(group), nrow=1)+
+    scale_x_continuous(breaks=seq(cyr+1,fyr,6))+
+    geom_vline(xintercept=cyr, lty=3)+
+    labs(x = "Year", y = "Reference point", title= "")+
+    theme(panel.spacing = unit(1, "lines"))+
+    mytheme_lg+
+    theme(legend.position = "right")
+  ggsave(file.path(StockDirFigs_NF, paste0("MSE-allLRP_allScen_proYear_NF.png")),
+         width = 16, height = 10)
+  ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-allLRP_proYear_NF.png")),
+         width = 16, height = 10)
+
   # # Plot P(B > 0.3B0)
   # # Make 5 panel plot with probs
   # # Show conservation performance metrics
-  # PLRPhistB0   <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="hist", mp=1) |>
-  #   mutate(MP="NFref")
-  # PLRPmeanB0   <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="mean", mp=1)|>
-  #   mutate(MP="NFref")
-  # PLRPrecentB0 <- purrr::map2_df( MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="recent", mp=1)|>
-  #   mutate(MP="NFref")
-  # PLRPdynB0    <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_dynB0, mp=1)|>
-  #   mutate(MP="NFref")
-  #
-  # PLRPB0_NF <- rbind(PLRPhistB0, PLRPmeanB0, PLRPrecentB0, PLRPdynB0)
-  #
-  # write_csv(PLRPB0_NF,file.path(StockDirFigs_NF, "PLRP_Metrics_B0_NF.csv"))
-  #
-  # # Plot all B0 performance metrics on one plot
-  # g <- plotPLRP(PLRPB0_NF,
-  #               scentext=TRUE,
-  #               panel=FALSE)
-  # ggsave(file.path(StockDirFigs_NF, paste0("MSE-PLRP_B0_allScen_NF.png")),
-  #        width = 16, height = 10)
-  #
-  # # Repeat with each metric on its own panel
-  # g <- plotPLRP(PLRPB0_NF,
-  #               scentext=TRUE,
-  #               panel=TRUE)
-  # ggsave(file.path(StockDirFigs_NF, paste0("MSE-PLRP_B0_allScen_panel_NF.png")),
-  #        width = 16, height = 10)
+  PLRPhistB0   <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="hist", mp=1) |>
+    mutate(MP="NFref")
+  PLRPmeanB0   <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="mean", mp=1)|>
+    mutate(MP="NFref")
+  PLRPrecentB0 <- purrr::map2_df( MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="recent", mp=1)|>
+    mutate(MP="NFref")
+  PLRPdynB0    <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_dynB0, mp=1)|>
+    mutate(MP="NFref")
+
+  PLRPB0_NF <- rbind(PLRPhistB0, PLRPmeanB0, PLRPrecentB0, PLRPdynB0) |>
+    mutate(`B0 type`=factor(b0type, levels=c("hist", "mean", "recent", "dyn"))) |>
+    select(-b0type)
+
+  write_csv(PLRPB0_NF,file.path(StockDirFigs_NF, "PLRP_Metrics_B0_NF.csv"))
+
+  # Plot all B0 performance metrics on one plot
+  g <- plotPLRP(PLRPB0_NF,
+                scentext=TRUE,
+                panel=FALSE)
+  g
+  ggsave(file.path(StockDirFigs_NF, paste0("MSE-PLRP_B0_allScen_NF.png")),
+         width = 16, height = 10)
+  ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-PLRP_B0_allScen_NF.png")),
+         width = 16, height = 10)
+
+  # ##############################################################
+  # Plot relative SSB and dynamicB0 (Like Berger 2019 Fig)  FOR SUPP MAYBE
+  cat("~~~ Plotting supplemental dynamic B0 fig for", paste(stocks[j]), "~~~\n")
+  dynB0_rel <- purrr::map2_df(MSEscenarios,scenameHuman, getdynB0rel) |>
+    dplyr::select(year, scenario, med) |>
+    rename(dynB0=med)
+  SSB_rel <- purrr::map2_df(MSEscenarios,scenameHuman, getSSBrel, mp=1) |>
+    dplyr::select(year, scenario, med) |>
+    rename(SSB=med)
+  relSSBdynB0 <- left_join(SSB_rel, dynB0_rel) |>
+    melt(id.vars= c("year", "scenario")) |>
+    rename(refpt=variable) |>
+    mutate(group=factor(scenario, levels=scenameHuman))
+
+  Ymax <- max(relSSBdynB0$value)
+  Ymaxpro <- max(relSSBdynB0[which(relSSBdynB0$year>cyr),]$value)
+
+  # all years
+  g <- relSSBdynB0 |>
+    ggplot() +
+    geom_line(aes(x=year,y=value, colour=refpt, lty=refpt), lwd=2) +
+    geom_vline(xintercept = cyr, lty=3) +
+    facet_wrap(~group, ncol=2)+
+    scale_color_manual(values=c(ssbcol, dyncol)) +
+    labs(x = "Year", y = "", title="")+
+    mytheme+
+    ylim(0,Ymax)
+  ggsave(file.path(StockDirFigs_NF, paste0("MSE-DynB0_v_SSB_allScen_allYear_NF.png")),
+         width = 8, height = 5)
+  ggsave(file.path(StockDirFigs, paste0("SUPPFIG_MSE-DynB0_v_SSB_allScen_allYear_NF.png")),
+         width = 8, height = 5)
+
+
+
 
 } # end for j in stocks
 

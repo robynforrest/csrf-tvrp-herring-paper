@@ -301,13 +301,13 @@ plotPLRP <- function(PLRPobject,
 
     g <- PLRPobject |>
       ggplot() +
-      geom_line(aes(x=year,y=PLRPobject[,1], color=b0type), lwd=1) +
+      geom_line(aes(x=year,y=PLRPobject[,1], color=`B0 type`), lwd=1.5) +
       geom_hline(yintercept=0., lty=1, linewidth=0.5)+
       geom_hline(yintercept=0.25, lty=2, linewidth=0.25)+
       geom_hline(yintercept=0.5, lty=2, linewidth=0.5)+
       geom_hline(yintercept=0.75, lty=2, linewidth=0.25)+
       geom_hline(yintercept=1., lty=2, linewidth=0.5)+
-      facet_grid(scenario~.)+
+      facet_wrap(vars(scenario), nrow=1)+
       theme(legend.position = "none") +
       labs(x = "Year", y = "")+
       ylim(0,1.05) +
@@ -320,7 +320,8 @@ plotPLRP <- function(PLRPobject,
       theme(legend.text = element_text(size=20))+
       theme(legend.title = element_text(size=20))+
       scale_colour_manual(values=c("hist"=histcol,"mean"=meancol,"recent"=meanrecentcol,"dyn"=dyncol))+
-      guides(colour=guide_legend(title="B0"))
+      guides(colour=guide_legend(title="B0 type"))+
+      ylab("P(SSB > LRP)")
 
     if(scentext==FALSE){
       g <- g +theme(strip.text.y = element_blank())
@@ -330,7 +331,7 @@ plotPLRP <- function(PLRPobject,
   if(panel==TRUE){
     g <- PLRPobject |>
       ggplot() +
-      geom_line(aes(x=year,y=PLRPobject[,1], color=b0type), lwd=1) +
+      geom_line(aes(x=year,y=PLRPobject[,1], color=`B0 type`), lwd=1.5) +
       geom_hline(yintercept=0., lty=1, linewidth=0.5)+
       geom_hline(yintercept=0.25, lty=2, linewidth=0.25)+
       geom_hline(yintercept=0.5, lty=2, linewidth=0.5)+
@@ -349,7 +350,7 @@ plotPLRP <- function(PLRPobject,
       theme(legend.text = element_text(size=20))+
       theme(legend.title = element_text(size=20))+
       scale_colour_manual(values=c("hist"=histcol,"mean"=meancol,"recent"=meanrecentcol,"dyn"=dyncol))+
-      guides(colour=guide_legend(title="B0"))
+      guides(colour=guide_legend(title="B0 type"))
   } #end if
   g
 } #end function
