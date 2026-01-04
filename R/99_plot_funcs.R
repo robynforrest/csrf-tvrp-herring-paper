@@ -147,142 +147,71 @@ plot_pars_om_static <- function(dfPars,Dir, Stock="", param="h") {
          width = 8, height = 5)
 }
 
-#LOOK AT THIS NEXT
-# plot time-varying harvest control rules, either from om or assessment
-# Uses the output object from getPars_rel_error
-# which already matched the SSB0 estimates to the right MP
-plotTVHCR <- function(df_relative_errors,
-                      yr1,
+# plot time-varying harvest control rules from om
+plotTVHCRom <- function(allB0,
                       pyr1,
                       lrp=0.3,
                       usr=0.6,
                       maxf=0.2,
                       phaseplot=FALSE,
                       om=TRUE,
-                      dir,
-                      species="pac-herring"){
+                      dir){
 
-  # Get the relative errors dataframe, which summarises all the parameters
-  # matched up from the OM and assessments
-  # It has already matched up SSB with the appropriate MP
-  # Note that SSB in this function for both OM and AM is assess_yr + 1,
+  # Note that SSB in this function for the OM is assess_yr + 1,
   # i.e., projected year (terminal year +1)
-  df <- df_relative_errors
-  mps <- unique(df$MP)
-  nmps <- length(mps)
-  species <- species
+  df <- allB0 |>
+    filter( `B0 type`!= "SSB") |>
+    select(-upr,-lwr) |>
+    rename(B0=med)
 
-  # plot the "true" OM HCR or the one from contemporary assessed values
-  # SSB0 has already been matched with the MP
+  SSB <- allB0 |>
+    filter( `B0 type`== "SSB") |>
+    select(-upr,-lwr)
 
-  #OM
-  medParsOM <- df |>
-  select(-relError, -asValue) |>
-  filter(Variable %in% c("SSB0",
-                         "FMort",
-                         "SSB")) |>
-  spread(Variable, omValue) |>
-  group_by(Scenario, MP,Year_assess) |>
-  summarise(SSB0_m=quantile(as.numeric(SSB0), probs=0.50, na.rm=T),
-            FMort_m=quantile(as.numeric(FMort), probs=0.50, na.rm=T),
-            SSB_m=quantile(as.numeric(SSB), probs=0.50, na.rm=T))
-
-  #Assessment
-  medParsAS <- df |>
-  select(-relError, -omValue) |>
-  filter(Variable %in% c("SSB0",
-                         "FMort",
-                         "SSB")) |>
-  spread(Variable, asValue) |>
-  group_by(Scenario, MP,Year_assess) |>
-  summarise(SSB0_m=quantile(as.numeric(SSB0), probs=0.50, na.rm=T),
-            FMort_m=quantile(as.numeric(FMort), probs=0.50, na.rm=T),
-            SSB_m=quantile(as.numeric(SSB), probs=0.50, na.rm=T))
-
-
-  write_csv(medParsOM,file.path(dir, paste0("MSE-HCR_Pars_OM.csv")))
-  write_csv(medParsAS,file.path(dir, paste0("MSE-HCR_Pars_Assess.csv")))
+  # Now need to put the same time series SSB with each B0 type/scenario combo
+  df <- df |>
+    mutate(SSB=rep(SSB$med,4))
 
   # MAKE PLOTS
-  maxyrFAS <- medParsAS #|> filter(Year_assess > pyr1)
-  maxyrFOM <- medParsOM #|> filter(Year_assess > pyr1)
-
   # maximum for x axis for plots - make all on the same scale
-  #maxX <- 1.1*max(c(usr*medParsOM$SSB0_m),(usr*medParsAS$SSB0_m))
-  maxX <- 2.*max(usr*medParsOM$SSB0_m)
-  if(phaseplot==FALSE) maxY <- 2*maxf
-  if(phaseplot==TRUE)  maxY <- max(c(maxyrFOM$FMort_m),(maxyrFAS$FMort_m)) #lrr
+  maxX <- 0.8*max(df$SSB)
+  maxY <- 1.1*maxf
 
-  if(om==TRUE){
-    Type="OM"
-    medPars <- medParsOM
-  }else{
-    Type="Assess"
-    medPars <- medParsAS
-  }
+  if(j==2)maxX <- 1.75*max(df$SSB)
 
-  for(ii in 1:nmps){
-    g <- medPars |>
-      dplyr::filter(MP==mps[ii],
-                    Year_assess > pyr1) |>
-      mutate(LRP=lrp*SSB0_m,
-             USR=usr*SSB0_m,
+  # Set up the mps we would be using if we were running an assessment with the alternative LRPs
+  b0types <- c("hist","mean","recent","dyn")
+  nb0 <- length(b0types)
+
+  for(ii in 1:nb0){
+    g <- df |>
+     filter(`B0 type`==b0types[ii],
+            year>=pyr1) |>
+      mutate(LRP=lrp*B0,
+             USR=usr*B0,
              LRR=maxf) |>
       mutate(x1=0,xend1=LRP,y1=0,yend1=0,
              x2=LRP,xend2=USR,y2=0,yend2=LRR,
              x3=USR,xend3=maxX,y3=LRR,yend3=LRR) |>
-      ggplot(aes(x=SSB_m, y=FMort_m,label=Year_assess))+
-      geom_segment(aes(x=x1,y=y1,xend=xend1,yend=yend1, colour=Year_assess),linewidth=1.,
+      ggplot(aes(x=SSB_m, y=FMort_m,label=year))+
+      geom_segment(aes(x=x1,y=y1,xend=xend1,yend=yend1, colour=year),linewidth=1.,
                     inherit.aes = FALSE) +
-      geom_segment(aes(x=x2,y=y2,xend=xend2,yend=yend2, colour=Year_assess),linewidth=1.,
+      geom_segment(aes(x=x2,y=y2,xend=xend2,yend=yend2, colour=year),linewidth=1.,
                     inherit.aes = FALSE) +
-      geom_segment(aes(x=x3,y=y3,xend=xend3,yend=yend3, colour=Year_assess),linewidth=1.,
+      geom_segment(aes(x=x3,y=y3,xend=xend3,yend=yend3, colour=year),linewidth=1.,
                    inherit.aes = FALSE) +
-      facet_wrap(~Scenario,nrow=2)+
+      facet_wrap(~scenario,nrow=1)+
       ylim(0,maxY) +
       xlim(0,maxX)+
-      facet_wrap(~Scenario,nrow=2)+
       scale_colour_viridis_c() +
       gfplot::theme_pbs()+
-      labs(x = "Spawning biomass", y = "Fishing mortality", title=paste("MP =", mps[ii]))+
+      labs(x = "Spawning biomass", y = "Fishing mortality", title=paste("B0 type =", b0types[ii]))+
       mytheme_lg
-
-     if(phaseplot==TRUE) {
-     g <- g +
-        geom_point(size=0.75)+
-        geom_path(linewidth=0.5)+
-        ggrepel::geom_text_repel(aes(colour=Year_assess), size=4)
-      }
-
-    ggsave(file.path(dir, paste0("MSE-HCR_",Type , "_",mps[ii],"_phase_",phaseplot,".png")),
+    g
+    ggsave(file.path(dir, paste0("FIGURE6_MSE-HCR_OM_",b0types[ii],".png")),
            width = 16, height = 10)
 
-    if(phaseplot==TRUE) {
-      # Also plot the phase plot by itself
-      phasedat <- medPars |>
-        dplyr::filter(Year_assess > pyr1)|>
-        mutate(LRP=lrp*SSB0_m,
-               USR=usr*SSB0_m,
-               LRR=maxf)
-      #maxY <- 1.1*max(phasedat$FMort_m)
 
-
-      g <- phasedat |>
-        dplyr::filter(MP==mps[ii])|>
-        ggplot(aes(x=SSB_m, y=FMort_m,label=Year_assess))+
-        geom_point(size=0.75)+
-        geom_path(linewidth=0.5)+
-        ggrepel::geom_text_repel(aes(colour=Year_assess), size=4)+
-        facet_wrap(~Scenario,nrow=2)+
-        ylim(0,maxY)+
-        xlim(0,maxX)+
-        scale_colour_viridis_c() +
-        gfplot::theme_pbs()+
-        labs(x = "Spawning biomass", y = "Fishing mortality", title=paste("MP =", mps[ii]))+
-        mytheme
-      ggsave(file.path(dir, paste0("MSE-Phase_Plot_",Type , "_",mps[ii],".png")),
-             width = 16, height = 10)
-    } # end if
   } # end ii
 
 }# end function

@@ -154,7 +154,7 @@ for(j in 1:nstocks){
   LRP2023 <- LRP |>
     filter(year==cyr, `B0 type`=="mean")
 
-  write_csv(allLRP_quants, file.path(StockDirFigs_NF, paste0("MSE-allLRP_allScen_allYear_NF.csv")))
+  write_csv(LRP, file.path(StockDirFigs_NF, paste0("MSE-allLRPquants_allScen_allYear_NF.csv")))
 
   # Pro years only
   g <- LRP |>
@@ -164,7 +164,7 @@ for(j in 1:nstocks){
     geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`B0 type`), alpha = 0.1)+
     geom_line(aes(x=year, y=med, col=`B0 type`, lty=`B0 type`),lwd=1.5)+
     geom_vline(xintercept=cyr, lty=2)+
-    geom_pointrange(data=LRP2023,aes(x=cyr ,y=med, ymin=lwr , ymax=upr), colour=meancol, lwd=2, size=3)+
+    geom_pointrange(data=LRP2023,aes(x=cyr ,y=med, ymin=lwr , ymax=upr), colour=meancol, lwd=1.5, size=1)+
     scale_color_manual(values=manualcolors)+
     scale_fill_manual(values=manualcolors)+
     scale_linetype_manual(values = c("SSB"=1,

@@ -80,7 +80,7 @@ source("R/2a_run-pac-herring-mses.R")
 # Make the figures for the paper
 source("R/3a_fig2_3_for_paper.R") # M B0 S-R relationships
 source("R/3a_fig4_5_for_paper.R") # Time series M, B0 and Biomass
-# source("R/3a_fig6_for_paper.R") # Surplus production
+source("R/3a_fig6_for_paper.R") # Harvest control rules
 
 
 # ====================================================================================================================
