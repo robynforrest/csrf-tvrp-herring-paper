@@ -31,9 +31,9 @@ for(j in 1:nstocks){
   MSEscenarios <- readRDS(here(StockDirMSE, "hMSEs_NF.rda"))
   histMSE <- histMSEs[j][[1]]
   nScenarios <- length(OMscenarios)
-  cyr <- MSEscenarios[[1]]@OM$CurrentYr[1] # current year (2019)
+  cyr <- MSEscenarios[[1]]@OM$CurrentYr[1] # current year (2023)
   syr <- cyr-MSEscenarios[[1]]@nyears+1
-  pyr <- cyr + 1 # get the first of the projection years (currently 2020)
+  pyr <- cyr + 1 # get the first of the projection years (currently 2024)
   fyr <- cyr + pro_years #final year of projections
   stock <- stocks[j]
 
@@ -151,6 +151,11 @@ for(j in 1:nstocks){
     filter(`B0 type` %in% "SSB") |>
     rbind(LRP)
 
+  LRP2023 <- LRP |>
+    filter(year==cyr, `B0 type`=="mean")
+
+  write_csv(allLRP_quants, file.path(StockDirFigs_NF, paste0("MSE-allLRP_allScen_allYear_NF.csv")))
+
   # Pro years only
   g <- LRP |>
     filter(year>cyr) |>
@@ -159,6 +164,7 @@ for(j in 1:nstocks){
     geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`B0 type`), alpha = 0.1)+
     geom_line(aes(x=year, y=med, col=`B0 type`, lty=`B0 type`),lwd=1.5)+
     geom_vline(xintercept=cyr, lty=2)+
+    geom_pointrange(data=LRP2023,aes(x=cyr ,y=med, ymin=lwr , ymax=upr), colour=meancol, lwd=2, size=3)+
     scale_color_manual(values=manualcolors)+
     scale_fill_manual(values=manualcolors)+
     scale_linetype_manual(values = c("SSB"=1,
@@ -173,6 +179,7 @@ for(j in 1:nstocks){
     theme(panel.spacing = unit(1, "lines"))+
     mytheme_lg+
     theme(legend.position = "right")
+  g
   ggsave(file.path(StockDirFigs_NF, paste0("MSE-allLRP_allScen_proYear_NF.png")),
          width = 16, height = 10)
   ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-allLRP_proYear_NF.png")),
