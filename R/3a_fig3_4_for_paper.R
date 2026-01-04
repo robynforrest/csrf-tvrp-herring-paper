@@ -10,7 +10,6 @@ nstocks <- length(stocks)
 Steep <- c(0.783,0.713,0.731) #median from iscam MCMC
 
 # FIGURE 3.ANALYTICAL RELATIONSHIP BETWEEN M AND B0
-# FIGURE 4. STOCK-RECRUIT CURVE WITH ALTERNATIVE B0, R0 AND REPLACEMENT LINES
 for(j in 1:nstocks){
   cat("~~~ Plotting Fig 3 for", paste(stocks[j]), "~~~\n")
 
@@ -69,7 +68,6 @@ for(j in 1:nstocks){
     geom_point()+
     mytheme
   g
-
 
   # 2. Loop over the nsim SR parameters to get relationships between B0 and M
   #    across the range of SR parameters
@@ -137,8 +135,8 @@ for(j in 1:nstocks){
     inputSRalpha <- SRpars[simno,1]
     inputSRbeta  <- SRpars[simno,2]
 
-    Outpars_tmp <- matrix(nrow=nM,ncol=8) |> as.data.frame()
-    colnames(Outpars_tmp) <- c("M","B0", "R0", "Steep", "SRalpha", "SRbeta", "phie0", "Sim")
+    Outpars_tmp <- matrix(nrow=nM,ncol=9) |> as.data.frame()
+    colnames(Outpars_tmp) <- c("M","B0", "R0", "Steep", "SRalpha", "SRbeta", "phie0", "JuvSurvival", "Sim")
     for(mval in 1:nM){
       Pars <- list(
         SRalpha=inputSRalpha,
@@ -155,7 +153,8 @@ for(j in 1:nstocks){
       Outpars_tmp[mval,5] <- Pars$SRalpha # Input SRalpha
       Outpars_tmp[mval,6] <- Pars$SRbeta # Input SRbeta
       Outpars_tmp[mval,7] <- Out$phie0_new # Implied Phie from M and fecundity
-      Outpars_tmp[mval,8] <- paste("Sim",simno)
+      Outpars_tmp[mval,8] <- 1/Out$phie0_new # Implied Juv Survival from M and fecundity
+      Outpars_tmp[mval,9] <- paste("Sim",simno)
     } # end mval
     if(simno==1){
       Outpars <- Outpars_tmp
@@ -177,6 +176,39 @@ for(j in 1:nstocks){
   g
   ggsave(file.path(StockDirFigs, paste0("FIG3_M_B0_v2_",stocks[j],".png")),
          width = 8, height = 5)
+
+# FIGURE 4. STOCK-RECRUIT CURVE WITH ALTERNATIVE B0, R0 AND REPLACEMENT LINES
+# Now take a random replicate from Outpars and make the S-R curve
+cat("~~~ Plotting Fig 4 for", paste(stocks[j]), "~~~\n")
+
+Outpars_rep <- Outpars |>
+  filter(Sim=="Sim 5", M %in% seq(0.2,1,by=0.1))
+
+# Plot SR curve
+B <- seq(0, 1.25*max(Outpars_rep$B0), 0.01)
+R <- Outpars_rep$SRalpha[1] * B / (1 + Outpars_rep$SRbeta[1] * B)
+SR_xy <- cbind(B,R) |> as.data.frame()
+
+g <- Outpars_rep |>
+  mutate(x1=0,xend1=B0,y1=0,yend1=R0) |>
+  ggplot()+
+  geom_segment(aes(x=x1,y=y1,xend=xend1,yend=yend1, colour=M),linewidth=0.5,
+               inherit.aes = FALSE)+
+  geom_line(data=SR_xy, aes(x=B,y=R),linewidth=1)+
+  geom_point(aes(x=xend1,y=yend1, colour=M), size=3)+
+  scale_colour_viridis()+
+  mytheme+
+  xlab("SSB")+ylab("Recruits")
+g
+ggsave(file.path(StockDirFigs, paste0("FIG4_Stock-Recruit_",stocks[j],".png")),
+       width = 8, height = 5)
+
+# Write out table of values for a single replicate
+write_csv(Outpars_rep, file=file.path(StockDirFigs, paste0("TABLE1_Stock-Recruit_fromFig4",stocks[j],".png")))
+
+# Write all reps out for supp
+write_csv(Outpars, file=file.path(StockDirFigs, paste0("TABLE1_Stock-Recruit_allreps_for_supp",stocks[j],".png")))
+
 
 } #end for j
 
