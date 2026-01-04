@@ -8,8 +8,7 @@ ScenarioNamesHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
 stocks <- names(hist_MSEs)
 nstocks <- length(stocks)
 
-# FIGURE 5. TIME SERIES OF M AND LRP UNDER ALTERNATIVE AVERAGING SCENARIOS
 
-
+# FIGURE 7. NO FISHING SCENARIO WITH ALTERNATIVE LRPS - BIOMASS AND PROBABILITIES
 
 
