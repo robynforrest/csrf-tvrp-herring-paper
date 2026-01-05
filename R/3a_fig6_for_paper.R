@@ -1,5 +1,6 @@
 # Make the figures for the paper
 # January 2, 2026
+# Robyn Forrest
 
 # Load the historical MSEs.
 # The OM scenarios will be loaded in the loop
@@ -62,7 +63,7 @@ for(j in 1:nstocks){
             dir=StockDirFigs)
 
   # Add the figures to lists
-  fig6[[i]] <- g1
+  fig6[[j]] <- g1
 
 }# end j
 

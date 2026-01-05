@@ -1,5 +1,6 @@
 # Make the figures for the paper (figs 5 and 7)
 # January 3, 2026
+# Robyn Forrest
 
 # FIGURE 5. TIME SERIES OF M AND LRP UNDER ALTERNATIVE AVERAGING SCENARIOS
 # This is a subset of the plots made in my csrf-tvrp-herring-pac repo in the file
@@ -254,12 +255,12 @@ for(j in 1:nstocks){
          width = 8, height = 5)
 
   # Add the figures to lists
-  fig4a[[i]] <- g1
-  fig4b[[i]] <- g2
-  fig4c[[i]] <- g3
-  fig5a[[i]] <- g4
-  fig5b[[i]] <- g5
-  fig_supp_dynb0[[i]] <- g6
+  fig4a[[j]] <- g1
+  fig4b[[j]] <- g2
+  fig4c[[j]] <- g3
+  fig5a[[j]] <- g4
+  fig5b[[j]] <- g5
+  fig_supp_dynb0[[j]] <- g6
 
 } # end for j in stocks
 

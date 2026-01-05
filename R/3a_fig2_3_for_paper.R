@@ -1,5 +1,6 @@
 # Make the figures for the paper
 # January 2, 2026
+# Robyn Forrest
 
 # Load the historical MSEs.
 # The OM scenarios will be loaded in the loop
@@ -209,9 +210,9 @@ ggsave(file.path(StockDirFigs, paste0("FIG3_Stock-Recruit_",stocks[j],".png")),
        width = 8, height = 5)
 
 # Add the figures to lists
-fig2[[i]] <- g2
-fig2_alternative[[i]] <- g1
-fig3[[i]] <- g3
+fig2[[j]] <- g2
+fig2_alternative[[j]] <- g1
+fig3[[j]] <- g3
 
 # Write out table of values for a single replicate
 write_csv(Outpars_rep, file=file.path(StockDirFigs, paste0("TABLE1_Stock-Recruit_fromFig3",stocks[j],".csv")))
