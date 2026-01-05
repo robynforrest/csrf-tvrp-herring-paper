@@ -230,7 +230,7 @@ plotPLRP <- function(PLRPobject,
 
     g <- PLRPobject |>
       ggplot() +
-      geom_line(aes(x=year,y=PLRPobject[,1], color=`B0 type`), lwd=1.5) +
+      geom_line(aes(x=year,y=PLRPobject[,1], color=`B0 type`), lwd=1.25) +
       geom_hline(yintercept=0., lty=1, linewidth=0.5)+
       geom_hline(yintercept=0.25, lty=2, linewidth=0.25)+
       geom_hline(yintercept=0.5, lty=2, linewidth=0.5)+
@@ -240,14 +240,8 @@ plotPLRP <- function(PLRPobject,
       theme(legend.position = "none") +
       labs(x = "Year", y = "")+
       ylim(0,1.05) +
-      mytheme+
-      theme(axis.text.x = element_text(size=22))+
-      theme(axis.text.y = element_text(size=22))+
-      theme(axis.title.x = element_text(size=24,face="bold"))+
-      theme(axis.title.y = element_text(size=24,face="bold"))+
-      theme(strip.text.x = element_text(size=20,face="bold"))+
-      theme(legend.text = element_text(size=20))+
-      theme(legend.title = element_text(size=20))+
+      mytheme_paper+
+      theme(strip.text.x = element_blank())+
       scale_colour_manual(values=c("hist"=histcol,"mean"=meancol,"recent"=meanrecentcol,"dyn"=dyncol))+
       guides(colour=guide_legend(title="B0 type"))+
       ylab("P(SSB > LRP)")
@@ -270,14 +264,8 @@ plotPLRP <- function(PLRPobject,
       theme(legend.position = "none") +
       labs(x = "Year", y = "")+
       ylim(0,1.05) +
-      mytheme+
-      theme(axis.text.x = element_text(size=22))+
-      theme(axis.text.y = element_text(size=22))+
-      theme(axis.title.x = element_text(size=24,face="bold"))+
-      theme(axis.title.y = element_text(size=24,face="bold"))+
-      theme(strip.text.x = element_text(size=20,face="bold"))+
-      theme(legend.text = element_text(size=20))+
-      theme(legend.title = element_text(size=20))+
+      mytheme_paper+
+      theme(strip.text.x = element_blank())+
       scale_colour_manual(values=c("hist"=histcol,"mean"=meancol,"recent"=meanrecentcol,"dyn"=dyncol))+
       guides(colour=guide_legend(title="B0 type"))
   } #end if

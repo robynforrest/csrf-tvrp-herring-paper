@@ -61,19 +61,6 @@ mytheme_lg <- gfplot::theme_pbs() +
   theme(legend.title = element_text(size=22))
 theme_set(mytheme_lg)
 
-mytheme_lg_nostrip <- gfplot::theme_pbs() +
-  theme(title = element_text(size=12, face="bold"))+
-  theme(plot.title = element_text(face="bold", size=20))+
-  theme(axis.text.x = element_text(size=20))+
-  theme(axis.text.y = element_text(size=20))+
-  theme(axis.title.x = element_text(size=22,face="bold"))+
-  theme(axis.title.y = element_text(size=22,face="bold"))+
-  theme(strip.text.x = element_blank())+
-  theme(strip.text.y =  element_blank())+
-  theme(legend.text = element_text(size=18))+
-  theme(legend.title = element_text(size=22))
-theme_set(mytheme_lg_nostrip)
-
 mytheme <- gfplot::theme_pbs() +
   theme(title = element_text(size=12, face="bold"))+
   theme(plot.title = element_text(face="bold", size=20))+
@@ -83,9 +70,25 @@ mytheme <- gfplot::theme_pbs() +
   theme(axis.title.y = element_text(size=14,face="bold"))+
   theme(strip.text.x = element_text(size=18,face="bold"))+
   theme(strip.text.y = element_text(size=18))+
-  theme(legend.text = element_text(size=16))+
-  theme(legend.title = element_text(size=18))
+  theme(legend.text = element_text(size=12))+
+  theme(legend.title = element_text(size=14))
 theme_set(mytheme)
+
+mytheme_paper <- gfplot::theme_pbs() +
+  theme(title = element_text(size=12, face="bold"))+
+  theme(plot.title = element_text(face="bold", size=20))+
+  theme(axis.text.x = element_text(size=12))+
+  theme(axis.text.y = element_text(size=12))+
+  theme(axis.title.x = element_text(size=12,face="bold"))+
+  theme(axis.title.y = element_text(size=12,face="bold"))+
+  theme(strip.text.x = element_text(size=18,face="bold"))+
+  theme(strip.text.y = element_text(size=18))+
+  theme(legend.text = element_text(size=12))+
+  theme(legend.title = element_text(size=14))+
+  theme(strip.text.x = element_blank())+
+  theme(strip.text.y =  element_blank())+
+  theme(plot.margin = unit(c(0, 0.1, 0, 0), "cm"))
+theme_set(mytheme_paper)
 
 # smaller fonts
 mytheme_sm <- gfplot::theme_pbs() +

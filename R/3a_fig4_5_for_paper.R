@@ -55,13 +55,18 @@ for(j in 1:nstocks){
 
   g1 <- ggplot(dat) +
     geom_ribbon(aes(x=year, ymin=lwr, ymax=upr), fill=ssbcol, alpha = 0.1) +
-    geom_line(aes(x=year,y=med), color=ssbcol, lwd=1.5) +
+    geom_line(aes(x=year,y=med), color=ssbcol, lwd=1.25) +
     facet_wrap(vars(group), nrow=1)+
     theme(legend.position = "none")+
     labs(x = "Year", y = "SSB", title= "")+
     geom_vline(xintercept=cyr, lty=3)+
-    mytheme_lg_nostrip
+    mytheme_paper
  g1
+  ggsave(file.path(StockDirFigs_NF, paste0("MSE-Biomass_allScen_allYear_NF.png")),
+         width = 8, height = 5)
+  ggsave(file.path(StockDirFigs, paste0("FIGURE4_MSE-SSB_allScen_allYear_NF.png")),
+         width = 16, height = 10)
+
   ggsave(file.path(StockDirFigs_NF, paste0("MSE-Biomass_allScen_allYear_NF.png")),
          width = 8, height = 5)
   ggsave(file.path(StockDirFigs, paste0("FIGURE4_MSE-SSB_allScen_allYear_NF.png")),
@@ -86,12 +91,12 @@ for(j in 1:nstocks){
     mutate(group=factor(scenario, levels=scenameHuman)) |>
     ggplot()+
     geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`M type`), alpha = 0.1)+
-    geom_line(aes(x=year, y=med, col=`M type`, lty=`M type`),lwd=1.5)+
+    geom_line(aes(x=year, y=med, col=`M type`, lty=`M type`),lwd=1.25)+
     geom_vline(xintercept=cyr, lty=3)+
     scale_color_manual(values=manualcolors[2:5])+
     scale_fill_manual(values=manualcolors[2:5])+
     scale_linetype_manual(values = c("hist" = 2,
-                                     "mean" = 4,
+                                     "mean" = 2,
                                      "recent" =5,
                                      "annual" = 3))+
     facet_wrap(vars(group), nrow=1)+
@@ -99,7 +104,8 @@ for(j in 1:nstocks){
     geom_vline(xintercept=cyr, lty=3)+
     labs(x = "Year", y = "M", title= "")+
     theme(panel.spacing = unit(1, "lines"))+
-    mytheme_lg_nostrip
+    theme(legend.position = "bottom")+
+    mytheme_paper
   ggsave(file.path(StockDirFigs_NF, paste0("MSE-allM_allScen_allYear_NF.png")),
          width = 16, height = 10)
   ggsave(file.path(StockDirFigs, paste0("FIGURE4_MSE-allM_allScen_allYear_NF.png")),
@@ -124,25 +130,26 @@ for(j in 1:nstocks){
   g3 <- allB0 |>
     mutate(group=factor(scenario, levels=scenameHuman)) |>
     ggplot()+
-    geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`B0 type`), alpha = 0.1)+
-    geom_line(aes(x=year, y=med, col=`B0 type`, lty=`B0 type`),lwd=1.5)+
+    #geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`B0 type`), alpha = 0.1)+
+    geom_line(aes(x=year, y=med, col=`B0 type`, lty=`B0 type`),lwd=1.25)+
     geom_vline(xintercept=cyr, lty=3)+
     scale_color_manual(values=manualcolors)+
     scale_fill_manual(values=manualcolors)+
     facet_wrap(vars(group), nrow=1)+
     scale_linetype_manual(values = c("SSB"=1,
                                      "hist" = 2,
-                                     "mean" = 4,
+                                     "mean" = 2,
                                      "recent" =5,
                                      "dyn" = 3))+
     scale_x_continuous(breaks=seq(syr,fyr,16))+
     geom_vline(xintercept=cyr, lty=3)+
     labs(x = "Year", y = "SSB or B0", title= "")+
-    theme(panel.spacing = unit(1, "lines"))+
-    mytheme_lg_nostrip
-  ggsave(file.path(StockDirFigs_NF, paste0("MSE-allB0_allScen_allYear_NF.png")),
+    theme(panel.spacing = unit(0.5, "lines"))+
+    theme(legend.position = "bottom")+
+    mytheme_paper
+  ggsave(file.path(StockDirFigs_NF, paste0("MSE-allB0_allScen_allYear_NF_med.png")),
          width = 16, height = 10)
-  ggsave(file.path(StockDirFigs, paste0("FIGURE4_MSE-allB0_allScen_allYear_NF.png")),
+  ggsave(file.path(StockDirFigs, paste0("FIGURE4_MSE-allB0_allScen_allYear_NF_med.png")),
          width = 16, height = 10)
 
   # FIGURE 5. NO FISHING SCENARIO WITH ALTERNATIVE LRPS - BIOMASS AND PROBABILITIES
@@ -170,22 +177,22 @@ for(j in 1:nstocks){
     mutate(group=factor(scenario, levels=scenameHuman)) |>
     ggplot()+
     geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`B0 type`), alpha = 0.1)+
-    geom_line(aes(x=year, y=med, col=`B0 type`, lty=`B0 type`),lwd=1.5)+
+    geom_line(aes(x=year, y=med, col=`B0 type`, lty=`B0 type`),lwd=1.25)+
     geom_vline(xintercept=cyr, lty=2)+
     geom_pointrange(data=LRP2023,aes(x=cyr ,y=med, ymin=lwr , ymax=upr), colour=meancol, lwd=1.5, size=1)+
     scale_color_manual(values=manualcolors)+
     scale_fill_manual(values=manualcolors)+
     scale_linetype_manual(values = c("SSB"=1,
                                      "hist" = 2,
-                                     "mean" = 4,
+                                     "mean" = 2,
                                      "recent" =5,
                                      "dyn" = 3))+
     facet_wrap(vars(group), nrow=1)+
     scale_x_continuous(breaks=seq(cyr+1,fyr,6))+
     geom_vline(xintercept=cyr, lty=3)+
-    labs(x = "Year", y = "Reference point", title= "")+
+    labs(x = "Year", y = "SSB or LRP", title= "")+
     theme(panel.spacing = unit(1, "lines"))+
-    mytheme_lg+
+    mytheme_paper+
     theme(legend.position = "right")
   g4
   ggsave(file.path(StockDirFigs_NF, paste0("MSE-allLRP_allScen_proYear_NF.png")),
