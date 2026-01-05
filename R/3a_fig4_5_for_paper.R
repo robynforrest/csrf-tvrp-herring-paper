@@ -57,12 +57,11 @@ for(j in 1:nstocks){
     geom_ribbon(aes(x=year, ymin=lwr, ymax=upr), fill=ssbcol, alpha = 0.1) +
     geom_line(aes(x=year,y=med), color=ssbcol, lwd=1.5) +
     facet_wrap(vars(group), nrow=1)+
-    theme(legend.position = "none") +
-    labs(x = "Year", y = "Spawning biomass", title= "")+
+    theme(legend.position = "none")+
+    labs(x = "Year", y = "SSB", title= "")+
     geom_vline(xintercept=cyr, lty=3)+
-    mytheme_lg #+
-    #annotate("text", x=1953, y=maxY, label= "(a)")
-
+    mytheme_lg_nostrip
+ g1
   ggsave(file.path(StockDirFigs_NF, paste0("MSE-Biomass_allScen_allYear_NF.png")),
          width = 8, height = 5)
   ggsave(file.path(StockDirFigs, paste0("FIGURE4_MSE-SSB_allScen_allYear_NF.png")),
@@ -100,7 +99,7 @@ for(j in 1:nstocks){
     geom_vline(xintercept=cyr, lty=3)+
     labs(x = "Year", y = "M", title= "")+
     theme(panel.spacing = unit(1, "lines"))+
-    mytheme_lg
+    mytheme_lg_nostrip
   ggsave(file.path(StockDirFigs_NF, paste0("MSE-allM_allScen_allYear_NF.png")),
          width = 16, height = 10)
   ggsave(file.path(StockDirFigs, paste0("FIGURE4_MSE-allM_allScen_allYear_NF.png")),
@@ -140,7 +139,7 @@ for(j in 1:nstocks){
     geom_vline(xintercept=cyr, lty=3)+
     labs(x = "Year", y = "SSB or B0", title= "")+
     theme(panel.spacing = unit(1, "lines"))+
-    mytheme_lg
+    mytheme_lg_nostrip
   ggsave(file.path(StockDirFigs_NF, paste0("MSE-allB0_allScen_allYear_NF.png")),
          width = 16, height = 10)
   ggsave(file.path(StockDirFigs, paste0("FIGURE4_MSE-allB0_allScen_allYear_NF.png")),

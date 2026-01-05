@@ -61,6 +61,19 @@ mytheme_lg <- gfplot::theme_pbs() +
   theme(legend.title = element_text(size=22))
 theme_set(mytheme_lg)
 
+mytheme_lg_nostrip <- gfplot::theme_pbs() +
+  theme(title = element_text(size=12, face="bold"))+
+  theme(plot.title = element_text(face="bold", size=20))+
+  theme(axis.text.x = element_text(size=20))+
+  theme(axis.text.y = element_text(size=20))+
+  theme(axis.title.x = element_text(size=22,face="bold"))+
+  theme(axis.title.y = element_text(size=22,face="bold"))+
+  theme(strip.text.x = element_blank())+
+  theme(strip.text.y =  element_blank())+
+  theme(legend.text = element_text(size=18))+
+  theme(legend.title = element_text(size=22))
+theme_set(mytheme_lg_nostrip)
+
 mytheme <- gfplot::theme_pbs() +
   theme(title = element_text(size=12, face="bold"))+
   theme(plot.title = element_text(face="bold", size=20))+
