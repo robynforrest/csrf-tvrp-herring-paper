@@ -41,7 +41,7 @@ if(run_mses==TRUE){
 
     cat("~~~ Finished No Fishing MSEs for Pacific Herring stocks ~~~\n")
 
-    source("R/2b_plot-pac-herring-mse-nf.R")
+    #source("R/2b_plot-pac-herring-mse-nf.R")
 
     cat("~~~ Finished plotting No Fishing MSEs for Pacific Herring stocks ~~~\n")
   }else{

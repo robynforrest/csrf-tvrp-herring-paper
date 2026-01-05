@@ -9,6 +9,11 @@ stocks <- names(histMSEs)
 nstocks <- length(stocks)
 Steep <- c(0.783,0.713,0.731) #median from iscam MCMC
 
+# Create lists for putting figures
+fig2 <- list()
+fig2_alternative <- list()
+fig3 <- list()
+
 # FIGURE 2.ANALYTICAL RELATIONSHIP BETWEEN M AND B0
 for(j in 1:nstocks){
   cat("~~~ Plotting Fig 2 for", paste(stocks[j]), "~~~\n")
@@ -116,12 +121,12 @@ for(j in 1:nstocks){
   } # end simno
 
   # Look at relationship between M and B0 within OM (each point has different SR pars)
-  g <- Outpars |>
+  g1 <- Outpars |>
     ggplot(aes(x=M, y=B0, colour=Sim))+
     geom_point(size=3)+
     scale_colour_viridis_d()+
     mytheme
-  g
+  g1
   ggsave(file.path(StockDirFigs, paste0("FIG2_M_B0_v1_",stocks[j],".png")),
          width = 8, height = 5)
 
@@ -168,12 +173,12 @@ for(j in 1:nstocks){
     group_by(M) |>
     summarise("Lwr"=quantile(B0, probs=0.025), "Med"=median(B0), "Upr"=quantile(B0, probs=0.975))
 
-  g <-  ggplot(Outpars_range)+
+  g2 <-  ggplot(Outpars_range)+
     geom_ribbon(aes(x=M,ymin=Lwr,ymax=Upr), alpha=0.3, colour="purple", fill="purple")+
     geom_line(aes(x=M,y=Med), alpha=0.3, colour="purple", lwd=2)+
     ylab("B0")+
     mytheme
-  g
+  g2
   ggsave(file.path(StockDirFigs, paste0("FIG2_M_B0_v2_",stocks[j],".png")),
          width = 8, height = 5)
 
@@ -189,7 +194,7 @@ B <- seq(0, 1.25*max(Outpars_rep$B0), 0.01)
 R <- Outpars_rep$SRalpha[1] * B / (1 + Outpars_rep$SRbeta[1] * B)
 SR_xy <- cbind(B,R) |> as.data.frame()
 
-g <- Outpars_rep |>
+g3 <- Outpars_rep |>
   mutate(x1=0,xend1=B0,y1=0,yend1=R0) |>
   ggplot()+
   geom_segment(aes(x=x1,y=y1,xend=xend1,yend=yend1, colour=M),linewidth=0.5,
@@ -199,9 +204,14 @@ g <- Outpars_rep |>
   scale_colour_viridis()+
   mytheme+
   xlab("SSB")+ylab("Recruits")
-g
+g3
 ggsave(file.path(StockDirFigs, paste0("FIG3_Stock-Recruit_",stocks[j],".png")),
        width = 8, height = 5)
+
+# Add the figures to lists
+fig2[[i]] <- g2
+fig2_alternative[[i]] <- g1
+fig3[[i]] <- g3
 
 # Write out table of values for a single replicate
 write_csv(Outpars_rep, file=file.path(StockDirFigs, paste0("TABLE1_Stock-Recruit_fromFig3",stocks[j],".csv")))

@@ -10,6 +10,9 @@ nsim <- hOMs[[1]]@nsim
 histMSEs <- readRDS(here("MSEs/hist_hMSEs.rda"))
 scenameHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
 
+# Create list for putting figures
+fig6 <- list()
+
 # # FIGURE 7. HARVEST CONTROL RULES
 # This is a new plot for the paper
 for(j in 1:nstocks){
@@ -49,7 +52,7 @@ for(j in 1:nstocks){
 
   # OM HCR - no phase plot - this will save the plots into dir
   # This function is in 99_plot_funcs.R
-  plotTVHCRom(allB0,
+  g1 <- plotTVHCRom(allB0,
             pyr=cyr+1,
             lrp = 0.3,
             usr = 0.6,
@@ -57,5 +60,9 @@ for(j in 1:nstocks){
             phaseplot = FALSE,
             om=TRUE,
             dir=StockDirFigs)
+
+  # Add the figures to lists
+  fig6[[i]] <- g1
+
 }# end j
 

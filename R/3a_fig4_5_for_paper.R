@@ -16,6 +16,14 @@ nsim <- hOMs[[1]]@nsim
 histMSEs <- readRDS(here("MSEs/hist_hMSEs.rda"))
 scenameHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
 
+# Create lists for putting figures
+fig4a <- list()
+fig4b <- list()
+fig4c <- list()
+fig5a <- list()
+fig5b <- list()
+fig_supp_dynb0 <- list()
+
 for(j in 1:nstocks){
   cat("~~~ Plotting Fig 4 for", paste(stocks[j]), "~~~\n")
 
@@ -44,7 +52,7 @@ for(j in 1:nstocks){
     as.data.frame() |>
     mutate(group=factor(scenario, levels=scenameHuman))
 
-  g <- ggplot(dat) +
+  g1 <- ggplot(dat) +
     geom_ribbon(aes(x=year, ymin=lwr, ymax=upr), fill=ssbcol, alpha = 0.1) +
     geom_line(aes(x=year,y=med), color=ssbcol, lwd=1.5) +
     facet_wrap(vars(group), nrow=1)+
@@ -74,7 +82,7 @@ for(j in 1:nstocks){
   write_csv(allM, file.path(StockDirFigs_NF, paste0("MSE-allM_allScen_allYear.csv")))
 
   # all years with uncertainty
-  g <- allM |>
+  g2 <- allM |>
     mutate(group=factor(scenario, levels=scenameHuman)) |>
     ggplot()+
     geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`M type`), alpha = 0.1)+
@@ -113,7 +121,7 @@ for(j in 1:nstocks){
   write_csv(allB0, file.path(StockDirFigs_NF, paste0("MSE-allB0_allScen_allYear_NF.csv")))
 
   # all years with uncertainty
-  g <- allB0 |>
+  g3 <- allB0 |>
     mutate(group=factor(scenario, levels=scenameHuman)) |>
     ggplot()+
     geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`B0 type`), alpha = 0.1)+
@@ -157,7 +165,7 @@ for(j in 1:nstocks){
   write_csv(LRP, file.path(StockDirFigs_NF, paste0("MSE-allLRPquants_allScen_allYear_NF.csv")))
 
   # Pro years only
-  g <- LRP |>
+  g4 <- LRP |>
     filter(year>cyr) |>
     mutate(group=factor(scenario, levels=scenameHuman)) |>
     ggplot()+
@@ -179,7 +187,7 @@ for(j in 1:nstocks){
     theme(panel.spacing = unit(1, "lines"))+
     mytheme_lg+
     theme(legend.position = "right")
-  g
+  g4
   ggsave(file.path(StockDirFigs_NF, paste0("MSE-allLRP_allScen_proYear_NF.png")),
          width = 16, height = 10)
   ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-allLRP_proYear_NF.png")),
@@ -204,10 +212,10 @@ for(j in 1:nstocks){
   write_csv(PLRPB0_NF,file.path(StockDirFigs_NF, "PLRP_Metrics_B0_NF.csv"))
 
   # Plot all B0 performance metrics on one plot
-  g <- plotPLRP(PLRPB0_NF,
+  g5 <- plotPLRP(PLRPB0_NF,
                 scentext=TRUE,
                 panel=FALSE)
-  g
+  g5
   ggsave(file.path(StockDirFigs_NF, paste0("MSE-PLRP_B0_allScen_NF.png")),
          width = 16, height = 10)
   ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-PLRP_B0_allScen_NF.png")),
@@ -231,7 +239,7 @@ for(j in 1:nstocks){
   Ymaxpro <- max(relSSBdynB0[which(relSSBdynB0$year>cyr),]$value)
 
   # all years
-  g <- relSSBdynB0 |>
+  g6 <- relSSBdynB0 |>
     ggplot() +
     geom_line(aes(x=year,y=value, colour=refpt, lty=refpt), lwd=2) +
     geom_vline(xintercept = cyr, lty=3) +
@@ -245,8 +253,13 @@ for(j in 1:nstocks){
   ggsave(file.path(StockDirFigs, paste0("SUPPFIG_MSE-DynB0_v_SSB_allScen_allYear_NF.png")),
          width = 8, height = 5)
 
-
-
+  # Add the figures to lists
+  fig4a[[i]] <- g1
+  fig4b[[i]] <- g2
+  fig4c[[i]] <- g3
+  fig5a[[i]] <- g4
+  fig5b[[i]] <- g5
+  fig_supp_dynb0[[i]] <- g6
 
 } # end for j in stocks
 
