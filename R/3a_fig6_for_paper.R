@@ -11,9 +11,6 @@ nsim <- hOMs[[1]]@nsim
 histMSEs <- readRDS(here("MSEs/hist_hMSEs.rda"))
 scenameHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
 
-# Create list for putting figures
-fig6 <- list()
-
 # # FIGURE 6. HARVEST CONTROL RULES
 for(j in 1:nstocks){
   cat("~~~ Plotting Fig 6 for", paste(stocks[j]), "~~~\n")
@@ -96,7 +93,7 @@ for(j in 1:nstocks){
     theme(axis.text.x=element_blank())
   g4 <- g4
 
-  cowplot::plot_grid(g1,g2,g3,g4, nrow=4) #, labels=c("(a)","(b)","(c)"), align="h")
+  cowplot::plot_grid(g1,g2,g3,g4, nrow=4, labels=c("(a)","(b)","(c)","(d)"))#, align="h")
   ggsave(here("Figures",paste0("Figure6_",stocks[j],".png")))
 
 
