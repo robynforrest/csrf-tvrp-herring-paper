@@ -36,7 +36,8 @@ fig3sg <- fig3[[2]]+
   xlab("")
 fig3wc <- fig3[[3]]
 
-cowplot::plot_grid(fig3hg,fig3sg,fig3wc, nrow=3, labels=c("(a)","(b)","(c)"), align="v")
+cowplot::plot_grid(fig3hg,fig3sg,fig3wc, nrow=3, labels=c("(a)","(b)","(c)"),
+                   align="v",  hjust = 0.25)
 ggsave(here("Figures","Figure3.png"))
 
 # MAKE FIGURE 4 (time series of SSB, M and B0)
@@ -151,7 +152,7 @@ cowplot::plot_grid(fig5ahg,NULL,fig5asg,NULL,fig5awc, nrow=5, labels=c("(a)","",
 ggsave(here("Figures","Figure5_LRP_all_stocks.png"))
 
 cowplot::plot_grid(fig5bhg,NULL,fig5bsg,NULL,fig5bwc, nrow=5, labels=c("(a)","","(b)","","(c)"),
-                   align="v", rel_heights=c(1,-0.1,1,-0.1,1))
+                   align="v", rel_heights=c(1,-0.1,1,-0.1,1),  hjust = 0.25)
 ggsave(here("Figures","Figure5_PLRP_all_stocks.png"))
 
 ## ~Join plots by stock and maybe put two in the supp material~ ##
@@ -174,15 +175,15 @@ fig5bwc <- fig5b[[3]]+
   theme(legend.position = "none")
 
 cowplot::plot_grid(fig5ahg,NULL,fig5bhg, nrow=3, labels=c("(a)","","(b)"),
-                   align="v", rel_heights=c(1,-0.12,1))
+                   align="v", rel_heights=c(1,-0.11,1), hjust = 0.25)
 ggsave(here("Figures","Figure5_HG.png"))
 
 cowplot::plot_grid(fig5asg,NULL,fig5bsg, nrow=3, labels=c("(a)","","(b)"),
-                   align="v", rel_heights=c(1,-0.12,1))
+                   align="v", rel_heights=c(1,-0.11,1), hjust = 0.25)
 ggsave(here("Figures","Figure5_SOG.png"))
 
 cowplot::plot_grid(fig5awc,NULL,fig5bwc, nrow=3, labels=c("(a)","","(b)"),
-                   align="v", rel_heights=c(1,-0.12,1))
+                   align="v", rel_heights=c(1,-0.11,1), hjust = 0.25)
 ggsave(here("Figures","Figure5_WCVI.png"))
 
 
