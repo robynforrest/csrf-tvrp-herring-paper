@@ -6,6 +6,8 @@
 # 3a files are run. These files put the figure lists into the environment, which are
 #  used here.
 
+# NOTE. Fig six is made directly in 3a_fig6_for_paper.R
+
 # MAKE FIGURE 2 (relationship between M and B0, 3 stocks)
 fig2hg <- fig2[[1]]
 fig2sg <- fig2[[2]]+
@@ -182,4 +184,5 @@ ggsave(here("Figures","Figure5_SOG.png"))
 cowplot::plot_grid(fig5awc,NULL,fig5bwc, nrow=3, labels=c("(a)","","(b)"),
                    align="v", rel_heights=c(1,-0.12,1))
 ggsave(here("Figures","Figure5_WCVI.png"))
+
 

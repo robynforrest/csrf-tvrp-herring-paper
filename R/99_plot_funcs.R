@@ -207,12 +207,69 @@ plotTVHCRom <- function(allB0,
       gfplot::theme_pbs()+
       labs(x = "Spawning biomass", y = "Fishing mortality", title=paste("B0 type =", b0types[ii]))+
       mytheme_lg
-    g
-    ggsave(file.path(dir, paste0("FIGURE6_MSE-HCR_OM_",b0types[ii],".png")),
+   ggsave(file.path(dir, paste0("FIGURE6_MSE-HCR_OM_",b0types[ii],".png")),
            width = 16, height = 10)
-
-
   } # end ii
+
+}# end function
+
+# plot time-varying harvest control rules from om for one B0 type and scenario only
+plotTVHCRom_oneplot <- function(allB0,
+                        b0type="mean",
+                        scenario,
+                        pyr1,
+                        lrp=0.3,
+                        usr=0.6,
+                        maxf=0.2,
+                        om=TRUE){
+
+  # Note that SSB in this function for the OM is assess_yr + 1,
+  # i.e., projected year (terminal year +1)
+  df <- allB0 |>
+    filter( `B0 type`!= "SSB",
+            scenario %in% scenario) |>
+    select(-upr,-lwr) |>
+    rename(B0=med)
+
+  SSB <- allB0 |>
+    filter( `B0 type`== "SSB") |>
+    select(-upr,-lwr)
+
+  # Now need to put the same time series SSB with each B0 type/scenario combo
+  df <- df |>
+    mutate(SSB=rep(SSB$med,4))
+
+  # MAKE PLOTS
+  # maximum for x axis for plots - make all on the same scale
+  maxX <- 0.8*max(df$SSB)
+  maxY <- 1.1*maxf
+
+  if(j==2)maxX <- 1.75*max(df$SSB)
+
+  # Set up the mps we would be using if we were running an assessment with the alternative LRPs
+  g <- df |>
+      filter(`B0 type`==b0type,
+             year>=pyr1) |>
+      mutate(LRP=lrp*B0,
+             USR=usr*B0,
+             LRR=maxf) |>
+      mutate(x1=0,xend1=LRP,y1=0,yend1=0,
+             x2=LRP,xend2=USR,y2=0,yend2=LRR,
+             x3=USR,xend3=maxX,y3=LRR,yend3=LRR) |>
+      ggplot(aes(x=SSB_m, y=FMort_m,label=year))+
+      geom_segment(aes(x=x1,y=y1,xend=xend1,yend=yend1, colour=year),linewidth=1.,
+                   inherit.aes = FALSE) +
+      geom_segment(aes(x=x2,y=y2,xend=xend2,yend=yend2, colour=year),linewidth=1.,
+                   inherit.aes = FALSE) +
+      geom_segment(aes(x=x3,y=y3,xend=xend3,yend=yend3, colour=year),linewidth=1.,
+                   inherit.aes = FALSE) +
+      ylim(0,maxY) +
+      xlim(0,maxX)+
+      scale_colour_viridis_c() +
+      gfplot::theme_pbs()+
+      labs(x = "Spawning biomass", y = "F")+
+      mytheme_paper
+ g
 
 }# end function
 

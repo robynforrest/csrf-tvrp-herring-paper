@@ -14,8 +14,7 @@ scenameHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
 # Create list for putting figures
 fig6 <- list()
 
-# # FIGURE 7. HARVEST CONTROL RULES
-# This is a new plot for the paper
+# # FIGURE 6. HARVEST CONTROL RULES
 for(j in 1:nstocks){
   cat("~~~ Plotting Fig 6 for", paste(stocks[j]), "~~~\n")
 
@@ -53,17 +52,53 @@ for(j in 1:nstocks){
 
   # OM HCR - no phase plot - this will save the plots into dir
   # This function is in 99_plot_funcs.R
-  g1 <- plotTVHCRom(allB0,
-            pyr=cyr+1,
-            lrp = 0.3,
-            usr = 0.6,
-            maxf=0.2,
-            phaseplot = FALSE,
-            om=TRUE,
-            dir=StockDirFigs)
+  g1 <- plotTVHCRom_oneplot(allB0,
+                    b0type="hist",
+                    scenario=ScenarioNamesHuman[2],
+                    pyr=cyr+1,
+                    lrp = 0.3,
+                    usr = 0.6,
+                    maxf=0.2,
+                    om=TRUE)
+  g2 <- plotTVHCRom_oneplot(allB0,
+                            b0type="mean",
+                            scenario=ScenarioNamesHuman[2],
+                            pyr=cyr+1,
+                            lrp = 0.3,
+                            usr = 0.6,
+                            maxf=0.2,
+                            om=TRUE)
+  g3 <- plotTVHCRom_oneplot(allB0,
+                            b0type="recent",
+                            scenario=ScenarioNamesHuman[2],
+                            pyr=cyr+1,
+                            lrp = 0.3,
+                            usr = 0.6,
+                            maxf=0.2,
+                            om=TRUE)
+  g4 <- plotTVHCRom_oneplot(allB0,
+                            b0type="dyn",
+                            scenario=ScenarioNamesHuman[2],
+                            pyr=cyr+1,
+                            lrp = 0.3,
+                            usr = 0.6,
+                            maxf=0.2,
+                            om=TRUE)
 
-  # Add the figures to lists
-  fig6[[j]] <- g1
+  g1 <- g1+
+    xlab("")+
+    theme(axis.text.x=element_blank())
+  g2 <- g2+
+    xlab("")+
+    theme(axis.text.x=element_blank())
+  g3 <- g3+
+    xlab("")+
+    theme(axis.text.x=element_blank())
+  g4 <- g4
+
+  cowplot::plot_grid(g1,g2,g3,g4, nrow=4) #, labels=c("(a)","(b)","(c)"), align="h")
+  ggsave(here("Figures",paste0("Figure6_",stocks[j],".png")))
+
 
 }# end j
 
