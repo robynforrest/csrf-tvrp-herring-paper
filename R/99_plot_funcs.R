@@ -267,7 +267,7 @@ plotTVHCRom_oneplot <- function(allB0,
       xlim(0,maxX)+
       scale_colour_viridis_c() +
       gfplot::theme_pbs()+
-      labs(x = "Spawning biomass", y = "F")+
+      labs(x = "Spawning biomass", y = "HR")+
       mytheme_paper+
       theme(plot.margin = unit(c(0, 0.2, 0, 0), "cm"))
  g
