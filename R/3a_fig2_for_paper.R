@@ -54,7 +54,7 @@ for(j in 1:nstocks){
     # geom_line(aes(x=year,y=Trace4), color=1, lwd=0.25) +
     # geom_line(aes(x=year,y=Trace5), color=1, lwd=0.25) +
     scale_y_continuous(breaks = seq(0,3,by=0.25))+
-    scale_x_continuous(breaks = seq(1951,2023,by=5))+
+    scale_x_continuous(breaks = seq(1951,2023,by=10))+
     gfplot::theme_pbs() +
     labs(x = "Year", y = "M")+
     mytheme_paper+
@@ -83,7 +83,7 @@ g2 <- purrr::map2_df(MSEscenarios,ScenarioNamesHuman, getSSB, mp=1) |>
   geom_line(data=LRP_ribbon,aes(x=year,y=med), color=2, lwd=1, lty=2) +
   theme(legend.position = "none") +
   labs(x = "Year", y = "SSB")+
-  scale_x_continuous(breaks = seq(1951,2023,by=5))+
+  scale_x_continuous(breaks = seq(1951,2023,by=10))+
   gfplot::theme_pbs() +
   mytheme_paper+
   theme(legend.position = "none")
@@ -94,8 +94,8 @@ ggsave(file.path(StockDirFigs, paste0("FIG2_M_SSB_",stocks[j],".png")),
        width = 8, height = 5)
 
 # Add the figures to lists
-fig5a[[j]] <- g1
-fig5b[[j]] <- g2
+fig2a[[j]] <- g1
+fig2b[[j]] <- g2
 
 } #end for j
 

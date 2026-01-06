@@ -6,9 +6,32 @@
 # 3a files are run. These files put the figure lists into the environment, which are
 #  used here.
 
-# NOTE. Fig 7x is made directly in 3a_fig7_for_paper.R
+# NOTE. Fig 7 is made directly in 3a_fig7_for_paper.R
 
-# MAKE FIGURE 2 (relationship between M and B0, 3 stocks)
+# MAKE FIGURE 2 (Historical M and B0, 3 stocks)
+fig2ahg <- fig2a[[1]]+
+  theme(axis.text.x=element_blank())+
+  theme(axis.title.x = element_blank())
+fig2asg <- fig2a[[2]]+
+  theme(axis.text.x=element_blank())+
+  theme(axis.title.x = element_blank())
+fig2awc <- fig2a[[3]]
+
+fig2bhg <- fig2b[[1]]+
+  theme(axis.text.x=element_blank())+
+  theme(axis.title.x = element_blank())
+fig2bsg <- fig2b[[2]]+
+  theme(axis.text.x=element_blank())+
+  theme(axis.title.x = element_blank())
+fig2bwc <- fig2b[[3]]
+
+cowplot::plot_grid(fig2ahg,fig2bhg,NULL,NULL,fig2asg,fig2bsg,NULL,NULL,fig2awc,fig2bwc,nrow=5,
+                   labels=c("(a)","","","","(b)","","","","(c)"),
+                   rel_heights=c(1,-0.11,1,-0.11,1),
+                   align="h",  hjust = 0.25)
+ggsave(here("Figures","Figure2.png"))
+
+# MAKE FIGURE 3 (relationship between M and B0, 3 stocks)
 fig3hg <- fig3[[1]]
 fig3sg <- fig3[[2]]+
   ylab("")
