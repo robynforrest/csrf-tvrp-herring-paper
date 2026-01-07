@@ -191,8 +191,6 @@ calc_tv_B0_alphabeta <- function(pars){
   out
 }
 
-
-# function to calculate phie0 from M, fecundity-at-age and spawn-timing fraction
 calc_phie0 <- function(M,fec,spawn_frac){
 
   nage <- length(fec)
@@ -211,10 +209,66 @@ calc_phie0 <- function(M,fec,spawn_frac){
     }
     lw[j] <- lx[j] * exp(-M*spawn_frac) # adjust for spawn timing
   }
-    lw[nage] <- lw[nage] / (1.0 - exp(-M)) # plus group
+  lw[nage] <- lw[nage] / (1.0 - exp(-M)) # plus group
 
-    phie0 <- sum(lw*fec)
+  phie0 <- sum(lw*fec)
 
-    phie0
+  phie0
 }
+
+#####################################################################################
+# Testing spawn fraction with eq 1 in paper
+inputFec <- c(0.01206243,0.06466500,0.09290000,0.10735000,0.12520000,0.13905000,0.14245000,0.09600000,0.15850000)
+# a b parameterisation
+Pars <- list(
+  SRalpha=135.7,
+  SRbeta=0.64,
+  M=0.5,
+ Fec=inputFec, # Trying to reproduce what MSEtool is doing - this is the mean of first 2 years
+  spawn_frac=1
+)
+
+bo1 <- calc_tv_B0_alphabeta(Pars)$B0_new
+
+M <- 0.5
+fec <- Pars$Fec
+R0 <- calc_tv_B0_alphabeta(Pars)$R0_new
+
+spr <- numeric(length=9)
+for(i in 1:9){
+   spr[i] <- fec[i]*exp(-M*(i-1))*exp(-M*Pars$spawn_frac)
+}
+spr[i] <- spr[i]/(1. - exp(-M))
+
+bo2 <- sum(spr)*R0
+bo1
+bo2
+
+# steep R0 parameterisation
+Pars <- list(
+  B0 = 118,
+  R0 =292,
+  Steep  = 0.914,
+  meanM=0.229,
+  meanFec=inputFec,
+  spawn_frac=1
+)
+
+bo1 <- calc_tv_B0(Pars)$B0_new
+
+M <- 0.229
+fec <- Pars$meanFec
+R0 <- calc_tv_B0(Pars)$R0_new
+
+spr <- numeric(length=9)
+for(i in 1:9){
+  spr[i] <- fec[i]*exp(-M*(i-1))*exp(-M*Pars$spawn_frac)
+}
+spr[i] <- spr[i]/(1. - exp(-M))
+
+bo2 <- sum(spr)*R0
+bo1
+bo2
+
+
 
