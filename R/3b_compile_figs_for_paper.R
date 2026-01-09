@@ -29,7 +29,7 @@ cowplot::plot_grid(fig2ahg,fig2bhg,NULL,NULL,fig2asg,fig2bsg,NULL,NULL,fig2awc,f
                    labels=c("(a)","","","","(b)","","","","(c)"),
                    rel_heights=c(1,-0.11,1,-0.11,1),
                    align="h",  hjust = 0.25)
-ggsave(here("Figures","Figure2.png"))
+ggsave(here("Figures","Figure2.png"), width = 8, height = 5)
 
 # MAKE FIGURE 3 (relationship between M and B0, 3 stocks)
 fig3hg <- fig3[[1]]
@@ -39,7 +39,7 @@ fig3wc <- fig3[[3]]+
   ylab("")
 
 cowplot::plot_grid(fig3hg,fig3sg,fig3wc, nrow=1, labels=c("(a)","(b)","(c)"), align="h")
-ggsave(here("Figures","Figure3.png"))
+ggsave(here("Figures","Figure3.png"), width = 8, height = 5)
 
 # MAKE FIGURE 3 alternative (relationship between M and B0, 3 stocks, 10 replicates)
 fig3hg_alt <- fig3_alternative[[1]]+
@@ -50,7 +50,7 @@ fig3wc_alt <- fig3_alternative[[3]]+
   ylab("")+theme(legend.position = "none")
 
 cowplot::plot_grid(fig3hg_alt,fig3sg_alt,fig3wc_alt, nrow=1, labels=c("(a)","(b)","(c)"), align="h")
-ggsave(here("Figures","Figure3_alternative.png"))
+ggsave(here("Figures","Figure3_alternative.png"), width = 8, height = 5)
 
 # MAKE FIGURE 4 (S-R relationships and replacement lines)
 fig4hg <- fig4[[1]]+
@@ -61,7 +61,7 @@ fig4wc <- fig4[[3]]
 
 cowplot::plot_grid(fig4hg,fig4sg,fig4wc, nrow=3, labels=c("(a)","(b)","(c)"),
                    align="v",  hjust = 0.25)
-ggsave(here("Figures","Figure4.png"))
+ggsave(here("Figures","Figure4.png"), width = 8, height = 5)
 
 # MAKE FIGURE 5 (time series of SSB, M and B0)
 # SSB
@@ -98,16 +98,16 @@ fig5cwc <- fig5c[[3]]+
 ## ~Join plots by type~ ##
 # add null plots with negative relative heights to reduce white space
 cowplot::plot_grid(fig5ahg,NULL,fig5asg,NULL,fig5awc, nrow=5, labels=c("(a)","","(b)","","(c)"),
-                   align="v", rel_heights=c(1,-0.11,1,-0.11,1))
-ggsave(here("Figures","Figure5_ssb_all_stocks.png"))
+                   align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
+ggsave(here("Figures","Figure5_ssb_all_stocks.png"), width = 8, height = 5)
 
 cowplot::plot_grid(fig5bhg,NULL,fig5bsg,NULL,fig5bwc, nrow=5, labels=c("(a)","","(b)","","(c)"),
-                   align="v", rel_heights=c(1,-0.11,1,-0.11,1))
-ggsave(here("Figures","Figure5_M_all_stocks.png"))
+                   align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
+ggsave(here("Figures","Figure5_M_all_stocks.png"), width = 8, height = 5)
 
 cowplot::plot_grid(fig5chg,NULL,fig5csg,NULL,fig5cwc, nrow=5, labels=c("(a)","","(b)","","(c)"),
-                   align="v", rel_heights=c(1,-0.11,1,-0.11,1))
-ggsave(here("Figures","Figure5_B0_all_stocks_med_only.png"))
+                   align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
+ggsave(here("Figures","Figure5_B0_all_stocks_med_only.png"), width = 8, height = 5)
 
 ## ~Join plots by stock and maybe put two in the supp material~ ##
 # SSB
@@ -134,17 +134,17 @@ fig5chg <- fig5c[[1]]
 fig5csg <- fig5c[[2]]
 fig5cwc <- fig5c[[3]]
 
-cowplot::plot_grid(fig5bhg,NULL,fig5ahg,NULL,fig5chg, nrow=5, labels=c("(a)","","(b)","","(c)"),
-                   align="v", rel_heights=c(1,-0.11,1,-0.11,1))
-ggsave(here("Figures","Figure5_HG.png"))
+cowplot::plot_grid(fig5ahg,NULL,fig5bhg,NULL,fig5chg, nrow=5, labels=c("(a)","","(b)","","(c)"),
+                   align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
+ggsave(here("Figures","Figure5_HG.png"), width = 8, height = 5)
 
-cowplot::plot_grid(fig5bsg,NULL,fig5asg,NULL,fig5csg, nrow=5, labels=c("(a)","","(b)","","(c)"),
-                   align="v", rel_heights=c(1,-0.11,1,-0.11,1))
-ggsave(here("Figures","Figure5_SOG.png"))
+cowplot::plot_grid(fig5asg,NULL,fig5bsg,NULL,fig5csg, nrow=5, labels=c("(a)","","(b)","","(c)"),
+                   align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
+ggsave(here("Figures","Figure5_SOG.png"), width = 8, height = 5)
 
-cowplot::plot_grid(fig5bwc,NULL,fig5awc,NULL,fig5cwc, nrow=5, labels=c("(a)","","(b)","","(c)"),
-                   align="v", rel_heights=c(1,-0.11,1,-0.11,1))
-ggsave(here("Figures","Figure5_WCVI.png"))
+cowplot::plot_grid(fig5awc,NULL,fig5bwc,NULL,fig5cwc, nrow=5, labels=c("(a)","","(b)","","(c)"),
+                   align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
+ggsave(here("Figures","Figure5_WCVI.png"), width = 8, height = 5)
 
 # MAKE FIGURE 6 (LRP and PLRP plots)
 # LRP
@@ -172,11 +172,11 @@ fig6bwc <- fig6b[[3]]+
 ## ~Join plots by type~ ##
 cowplot::plot_grid(fig6ahg,NULL,fig6asg,NULL,fig6awc, nrow=5, labels=c("(a)","","(b)","","(c)"),
                    align="v", rel_heights=c(1,-0.12,1,-0.12,1))
-ggsave(here("Figures","Figure6_LRP_all_stocks.png"))
+ggsave(here("Figures","Figure6_LRP_all_stocks.png"), width = 8, height = 5)
 
 cowplot::plot_grid(fig6bhg,NULL,fig6bsg,NULL,fig6bwc, nrow=5, labels=c("(a)","","(b)","","(c)"),
                    align="v", rel_heights=c(1,-0.1,1,-0.1,1),  hjust = 0.25)
-ggsave(here("Figures","Figure6_PLRP_all_stocks.png"))
+ggsave(here("Figures","Figure6_PLRP_all_stocks.png"), width = 8, height = 5)
 
 ## ~Join plots by stock and maybe put two in the supp material~ ##
 # LRP
@@ -198,15 +198,15 @@ fig6bwc <- fig6b[[3]]+
   theme(legend.position = "none")
 
 cowplot::plot_grid(fig6ahg,NULL,fig6bhg, nrow=3, labels=c("(a)","","(b)"),
-                   align="v", rel_heights=c(1,-0.11,1), hjust = 0.25)
-ggsave(here("Figures","Figure6_HG.png"))
+                   align="v", rel_heights=c(1,-0.05,1), hjust = 0.25)
+ggsave(here("Figures","Figure6_HG.png"), width = 8, height = 5)
 
 cowplot::plot_grid(fig6asg,NULL,fig6bsg, nrow=3, labels=c("(a)","","(b)"),
-                   align="v", rel_heights=c(1,-0.11,1), hjust = 0.25)
-ggsave(here("Figures","Figure6_SOG.png"))
+                   align="v", rel_heights=c(1,-0.05,1), hjust = 0.25)
+ggsave(here("Figures","Figure6_SOG.png"), width = 8, height = 5)
 
 cowplot::plot_grid(fig6awc,NULL,fig6bwc, nrow=3, labels=c("(a)","","(b)"),
-                   align="v", rel_heights=c(1,-0.11,1), hjust = 0.25)
-ggsave(here("Figures","Figure6_WCVI.png"))
+                   align="v", rel_heights=c(1,-0.05,1), hjust = 0.25)
+ggsave(here("Figures","Figure6_WCVI.png"), width = 8, height = 5)
 
 
