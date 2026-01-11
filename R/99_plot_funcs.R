@@ -244,7 +244,7 @@ plotTVHCRom_oneplot <- function(allB0,
   maxX <- 0.8*max(df$SSB)
   maxY <- 1.1*maxf
 
-  if(j==2)maxX <- 1.75*max(df$SSB)
+  if(j==2)maxX <- 2.25*max(df$SSB)
 
   # Set up the mps we would be using if we were running an assessment with the alternative LRPs
   g <- df |>

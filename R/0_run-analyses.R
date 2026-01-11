@@ -81,7 +81,7 @@ source("R/2a_run-pac-herring-mses.R")
 source("R/3a_fig2_for_paper.R") # historical SSB M
 source("R/3a_fig3_4_for_paper.R") # M B0 S-R relationships
 source("R/3a_fig5_6_for_paper.R") # Time series M, B0 and Biomass
-source("R/3a_fig7_for_paper.R") # Harvest control rules
+source("R/3a_fig11_for_paper.R") # Harvest control rules
 source("R/3b_compile_figs_for_paper.R") # Compile all the figs for the paper
 
 

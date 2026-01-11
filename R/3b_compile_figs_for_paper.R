@@ -140,11 +140,11 @@ ggsave(here("Figures","Figure5_HG.png"), width = 8, height = 5)
 
 cowplot::plot_grid(fig5asg,NULL,fig5bsg,NULL,fig5csg, nrow=5, labels=c("(a)","","(b)","","(c)"),
                    align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
-ggsave(here("Figures","Figure5_SOG.png"), width = 8, height = 5)
+ggsave(here("Figures","Figure6_SOG.png"), width = 8, height = 5)
 
 cowplot::plot_grid(fig5awc,NULL,fig5bwc,NULL,fig5cwc, nrow=5, labels=c("(a)","","(b)","","(c)"),
                    align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
-ggsave(here("Figures","Figure5_WCVI.png"), width = 8, height = 5)
+ggsave(here("Figures","Figure7_WCVI.png"), width = 8, height = 5)
 
 # MAKE FIGURE 6 (LRP and PLRP plots)
 # LRP
@@ -199,14 +199,14 @@ fig6bwc <- fig6b[[3]]+
 
 cowplot::plot_grid(fig6ahg,NULL,fig6bhg, nrow=3, labels=c("(a)","","(b)"),
                    align="v", rel_heights=c(1,-0.05,1), hjust = 0.25)
-ggsave(here("Figures","Figure6_HG.png"), width = 8, height = 5)
+ggsave(here("Figures","Figure8_HG.png"), width = 8, height = 5)
 
 cowplot::plot_grid(fig6asg,NULL,fig6bsg, nrow=3, labels=c("(a)","","(b)"),
                    align="v", rel_heights=c(1,-0.05,1), hjust = 0.25)
-ggsave(here("Figures","Figure6_SOG.png"), width = 8, height = 5)
+ggsave(here("Figures","Figure9_SOG.png"), width = 8, height = 5)
 
 cowplot::plot_grid(fig6awc,NULL,fig6bwc, nrow=3, labels=c("(a)","","(b)"),
                    align="v", rel_heights=c(1,-0.05,1), hjust = 0.25)
-ggsave(here("Figures","Figure6_WCVI.png"), width = 8, height = 5)
+ggsave(here("Figures","Figure10_WCVI.png"), width = 8, height = 5)
 
 
