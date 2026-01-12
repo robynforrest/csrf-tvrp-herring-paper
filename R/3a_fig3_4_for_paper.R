@@ -1,14 +1,17 @@
-# Make the figures for the paper
+# Make the figures for the paper - this is called from 0_run-analyses.R but
+# can stand alone
 # January 2, 2026
 # Robyn Forrest
 
+library(here)
+source(here("R","0_settings.R")) # this includes the function calc_tv_B0
+
 # Load the historical MSEs.
 # The OM scenarios will be loaded in the loop
-histMSEs <- readRDS(here(SpDirMSE, "hist_hMSEs.rda"))
-ScenarioNamesHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
+
+histMSEs <- readRDS(here("MSEs", "hist_hMSEs.rda"))
 stocks <- names(histMSEs)
 nstocks <- length(stocks)
-Steep <- c(0.783,0.713,0.731) #median from iscam MCMC
 
 # Create lists for putting figures
 fig3 <- list()
@@ -24,58 +27,44 @@ for(j in 1:nstocks){
   yind <- histMSEs[[j]]@OM@nyears+(1:histMSEs[[j]]@OM@proyears) #projection years
 
   # Make directories
-  StockDirOM    <- here(SpDirOM, paste(stocks[j]))
-  StockDirMSE   <- here(SpDirMSE, paste(stocks[j]))
-  StockDirFigs  <- here(SpDirFigs, paste(stocks[j]))
+  StockDirOM    <- here("OMs", paste(stocks[j]))
+  StockDirMSE   <- here("MSEs", paste(stocks[j]))
+  StockDirFigs  <- here("Figures", paste(stocks[j]))
   if(!file.exists(StockDirFigs)) dir.create(StockDirFigs, recursive=TRUE)
-  StockDirFigs_NF <- here(StockDirFigs, "NF")
-  if(!file.exists(StockDirMSE)) stop("Stop. No MSEs found. Please run 2_run-mse.R first. \n")
-  if(!file.exists(StockDirFigs_NF)) dir.create(StockDirFigs_NF, recursive=TRUE)
+  if(!file.exists(StockDirMSE)) stop("Stop. No MSEs found. Please run MSEs first. \n")
 
   OM  <- readRDS(here(StockDirOM, "OMscenarios.rda"))[[1]]
   histMSE <- histMSEs[[j]]
   stock <- stocks[j]
-  ScenarioNames <- names(OM)
-  nsc <- length(ScenarioNames)
 
   # inputs for calc_B0
-  # First get the original values that MSEtool used to get the stock-recruit parameters
+  # First get the stock-recruit parameters, using long-term mean and fec
+  # iscam uses long-term mean and fec in calcStockRecruitment()
   inputM   <- getM(OM,"scenario 1",age=3,type="mean", quant=FALSE) # A matrix of long-term mean M Dim: nrow=nreps, ncol=nyears
   inputFec <- getFec(OM,"scenario 1",type="mean") # A matrix of annual long-term mean fecundity-at-age (same for all reps). Dim: nrow=nages, ncol=nyears
   inputSteep <- histMSE@OMPars$hs
   spawn_time_frac <- histMSE@OMPars$spawn_time_frac
 
-  # 1. Get alpha and beta (these are assumed fixed with changing M)
-  #    Reproduce original phi0 with choice of years for meanM and meanFec
-  #    MSEtool is using mean of first 4 years of M to calculate B0,
-  #      with mean of first two years of fecundity
-  SRpars <- matrix(nrow=nsim,ncol=5) |> as.data.frame()
-  colnames(SRpars) <- c("SRalpha","SRbeta", "M", "Steep", "B0")
+  # Get alpha and beta (these are assumed fixed with changing M)
+  SRpars <- matrix(nrow=nsim,ncol=4) |> as.data.frame()
+  colnames(SRpars) <- c("SRalpha","SRbeta", "M", "B0")
   for(simno in 1:nsim){
       Pars <- list(
         B0=histMSE@OMPars$SSB0[simno], # A vector of B0 needed to get S-R  alpha and beta. Length=nreps
         R0=histMSE@OMPars$R0[simno],
         Steep=histMSE@OMPars$hs[simno],
-        meanM=inputM[simno,4],# Trying to reproduce what MSEtool is doing - this is the mean of first 4 years
-        meanFec=inputFec[,2], # Trying to reproduce what MSEtool is doing - this is the mean of first 2 years
+        meanM=inputM[simno,nyears], # long term mean M in 2023 (final iscam year)
+        meanFec=inputFec[,nyears],  # long term mean M in 2023 (final iscam year)
         spawn_frac=spawn_time_frac[simno]
       )
       Out <- calc_tv_B0(Pars)
       SRpars[simno,1] <- Out$SRalpha
       SRpars[simno,2] <- Out$SRbeta
-      SRpars[simno,3] <- Pars$meanM # mean historical M from OM (default)
-      SRpars[simno,4] <- Pars$Steep # original steepness from OM (default, calculated from hist M)
-      SRpars[simno,5] <- Pars$B0 # original B0 from OM (default, calculated from hist M)
+      SRpars[simno,3] <- Pars$meanM # long-term mean M from OM
+      SRpars[simno,4] <- Pars$B0 # original B0 from OM (default, calculated from hist M)
   } # end simno
 
-  # Look at relationship between M and B0 within OM (each point has different SR pars)
-  g <- SRpars |>
-    ggplot(aes(x=M, y=B0))+
-    geom_point()+
-    mytheme
-  g
-
-  # 2. Loop over the nsim SR parameters to get relationships between B0 and M
+  # 2. Loop over the nsim SR parameters and M to get relationships between B0 and M
   #    across the range of SR parameters
   # Randomly subset the replicates if nsim is >10
   if(nsim <= 10){
@@ -94,8 +83,8 @@ for(j in 1:nstocks){
     inputSRalpha <- SRpars[simno,1]
     inputSRbeta  <- SRpars[simno,2]
 
-    Outpars_tmp <- matrix(nrow=nM,ncol=8) |> as.data.frame()
-    colnames(Outpars_tmp) <- c("M","B0", "R0", "Steep", "SRalpha", "SRbeta", "phie0", "Sim")
+    Outpars_tmp <- matrix(nrow=nM,ncol=7) |> as.data.frame()
+    colnames(Outpars_tmp) <- c("M","SRalpha", "SRbeta","B0", "R0", "phie0", "Sim")
     for(mval in 1:nM){
         Pars <- list(
           SRalpha=inputSRalpha,
@@ -106,13 +95,12 @@ for(j in 1:nstocks){
         )
         Out <- calc_tv_B0_alphabeta(Pars) # this version uses inputs of alpha, beta, M and fecundity
         Outpars_tmp[mval,1] <- Pars$M # The sequence of input values
-        Outpars_tmp[mval,2] <- Out$B0_new # Implied B0 from M and SR pars
-        Outpars_tmp[mval,3] <- Out$R0_new # Implied R0 from M and SR pars
-        Outpars_tmp[mval,4] <- Out$steep_new # Implied Steepness from M and SR pars
-        Outpars_tmp[mval,5] <- Pars$SRalpha # Input SRalpha
-        Outpars_tmp[mval,6] <- Pars$SRbeta # Input SRbeta
-        Outpars_tmp[mval,7] <- Out$phie0_new # Implied Phie from M and fecundity
-        Outpars_tmp[mval,8] <- paste("Sim",simno)
+        Outpars_tmp[mval,2] <- Pars$SRalpha # Input SRalpha
+        Outpars_tmp[mval,3] <- Pars$SRbeta # Input SRbeta
+        Outpars_tmp[mval,4] <- Out$B0_new # Implied B0 from M and SR pars
+        Outpars_tmp[mval,5] <- Out$R0_new # Implied R0 from M and SR pars
+        Outpars_tmp[mval,6] <- Out$phie0_new # Implied Phie from M and fecundity
+        Outpars_tmp[mval,7] <- paste("Sim",simno)
     } # end mval
     if(simno==1){
       Outpars <- Outpars_tmp
@@ -121,7 +109,7 @@ for(j in 1:nstocks){
     }
   } # end simno
 
-  # Look at relationship between M and B0 within OM (each point has different SR pars)
+  # Look at relationship between M and B0 within OM replicate (each point has different SR pars)
   g1 <- Outpars |>
     ggplot(aes(x=M, y=B0, colour=Sim))+
     geom_point(size=3)+
@@ -141,8 +129,8 @@ for(j in 1:nstocks){
     inputSRalpha <- SRpars[simno,1]
     inputSRbeta  <- SRpars[simno,2]
 
-    Outpars_tmp <- matrix(nrow=nM,ncol=9) |> as.data.frame()
-    colnames(Outpars_tmp) <- c("M","B0", "R0", "Steep", "SRalpha", "SRbeta", "phie0", "JuvSurvival", "Sim")
+    Outpars_tmp <- matrix(nrow=nM,ncol=8) |> as.data.frame()
+    colnames(Outpars_tmp) <- c("M", "SRalpha", "SRbeta","B0", "R0", "phie0", "JuvSurvival", "Sim")
     for(mval in 1:nM){
       Pars <- list(
         SRalpha=inputSRalpha,
@@ -153,14 +141,13 @@ for(j in 1:nstocks){
       )
       Out <- calc_tv_B0_alphabeta(Pars) # this version uses inputs of alpha, beta, M and fecundity
       Outpars_tmp[mval,1] <- Pars$M # The sequence of input values
-      Outpars_tmp[mval,2] <- Out$B0_new # Implied B0 from M and SR pars
-      Outpars_tmp[mval,3] <- Out$R0_new # Implied R0 from M and SR pars
-      Outpars_tmp[mval,4] <- Out$steep_new # Implied Steepness from M and SR pars
-      Outpars_tmp[mval,5] <- Pars$SRalpha # Input SRalpha
-      Outpars_tmp[mval,6] <- Pars$SRbeta # Input SRbeta
-      Outpars_tmp[mval,7] <- Out$phie0_new # Implied Phie from M and fecundity
-      Outpars_tmp[mval,8] <- 1/Out$phie0_new # Implied Juv Survival from M and fecundity
-      Outpars_tmp[mval,9] <- paste("Sim",simno)
+      Outpars_tmp[mval,2] <- Pars$SRalpha # Input SRalpha
+      Outpars_tmp[mval,3] <- Pars$SRbeta # Input SRbeta
+      Outpars_tmp[mval,4] <- Out$B0_new # Implied B0 from M and SR pars
+      Outpars_tmp[mval,5] <- Out$R0_new # Implied R0 from M and SR pars
+      Outpars_tmp[mval,6] <- Out$phie0_new # Implied Phie from M and fecundity
+      Outpars_tmp[mval,7] <- 1/Out$phie0_new # Implied Juv Survival from M and fecundity
+      Outpars_tmp[mval,8] <- paste("Sim",simno)
     } # end mval
     if(simno==1){
       Outpars <- Outpars_tmp
@@ -187,8 +174,11 @@ for(j in 1:nstocks){
 # Now take a random replicate from Outpars and make the S-R curve
 cat("~~~ Plotting Fig 4 for", paste(stocks[j]), "~~~\n")
 
+Reps <- unique(Outpars$Sim)
+randrep <- sample(Reps,1,replace=F)
+
 Outpars_rep <- Outpars |>
-  filter(Sim=="Sim 5", M %in% seq(0.2,1,by=0.1))
+  filter(Sim %in% randrep, M %in% seq(0.2,1,by=0.1))
 
 # Plot SR curve
 B <- seq(0, 1.25*max(Outpars_rep$B0), 0.01)
@@ -219,7 +209,6 @@ write_csv(Outpars_rep, file=file.path(StockDirFigs, paste0("TABLE1_Stock-Recruit
 
 # Write all reps out for supp
 write_csv(Outpars, file=file.path(StockDirFigs, paste0("TABLE1_Stock-Recruit_allreps_for_supp",stocks[j],".csv")))
-
 
 } #end for j
 
