@@ -265,6 +265,29 @@ getSSBrel <- function(mse, scen, mp=1){
   SSB
 }
 
+# Arguments:
+# mse = MSE object with alternative future M scenarios for one stock and one scenario
+# scen = scenario name (usually one of ScenarioNamesHuman.rda)
+# mp = the mp index
+# Returns: a dataframe with lower, median and upper estimates of annual SSB for the scenario
+getRec <- function(mse, scen, mp=1){
+  all_years <- seq(mse@OM$CurrentYr[1] - mse@nyears + 1, mse@OM$CurrentYr[1]+mse@proyears)
+
+  histRec <- mse@Hist@AtAge$Number[,3,,1]+mse@Hist@AtAge$Number[,3,,2] # rep,age, histyears,area
+  proRec  <- mse@N[,3,mp,,1] + mse@N[,3,mp,,2] #rep,age,mp,proyears,area
+
+  Rec <- cbind(histRec, proRec)
+
+  Rec <- Rec |>
+    apply(2,quantile,probs=c(conflo,0.5,confhi)) |> t() |>
+    as.data.frame() |>
+    mutate(year=all_years, scenario=scen) |>
+    dplyr::rename(lwr=1, med=`50%`, upr=3) |>
+    as.data.frame() |>
+    melt(id.vars=c("year","scenario", "lwr","upr","med"), value.name="Recruits")
+  Rec
+}
+
 ############################################################################################
 # Get OM parameters of interest
 # 1. Basic static parameters, excluding B0
@@ -273,6 +296,7 @@ getPars_om_static <- function(mse, scenam, species="pac-herring") {
   ompars <- data.frame("Scenario"=scenam,
                        "Sim"=1:nsim,
                        "h"= mse@OM$hs,
+                       "M"= mse@OM$hs,  # baseM
                        "R0"=mse@OM$R0/1000,
                        "q1"=mse@OM$qs,
                        "q2"=mse@OM$qs,
