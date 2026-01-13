@@ -54,7 +54,7 @@ for(j in 1:nstocks){
         R0=histMSE@OMPars$R0[simno],
         Steep=histMSE@OMPars$hs[simno],
         meanM=inputM[simno,nyears], # long term mean M in 2023 (final iscam year)
-        meanFec=inputFec[,nyears],  # long term mean M in 2023 (final iscam year)
+        meanFec=inputFec[,nyears],  # long term mean fec in 2023 (final iscam year)
         spawn_frac=spawn_time_frac[simno]
       )
       Out <- calc_tv_B0(Pars)
@@ -74,7 +74,7 @@ for(j in 1:nstocks){
     Nsim[1] <- 1 # Always take the first sample so loop works below
   }
 
-  inputM   <- seq(0.2,1.,by=0.025)
+  inputM   <- seq(0.2,1.2,by=0.025)
   nM <- length(inputM)
   for(simno in Nsim){
     # Now we have the alpha and beta parameters, we can plot relationship between
@@ -90,7 +90,7 @@ for(j in 1:nstocks){
           SRalpha=inputSRalpha,
           SRbeta=inputSRbeta,
           M=inputM[mval],
-          Fec=inputFec[,2], # Trying to reproduce what MSEtool is doing - this is the mean of first 2 years
+          Fec=inputFec[,nyears], # long term mean fec in 2023 (final iscam year)
           spawn_frac=1
         )
         Out <- calc_tv_B0_alphabeta(Pars) # this version uses inputs of alpha, beta, M and fecundity
@@ -120,7 +120,7 @@ for(j in 1:nstocks){
          width = 8, height = 5)
 
   # Look at ribbon plot version (use all sims)
-  inputM   <- seq(0.2,1.,by=0.025)
+  inputM   <- seq(0.2,1.2,by=0.025)
   nM <- length(inputM)
   for(simno in 1:nsim){
     # Now we have the alpha and beta parameters, we can plot relationship between
@@ -136,7 +136,7 @@ for(j in 1:nstocks){
         SRalpha=inputSRalpha,
         SRbeta=inputSRbeta,
         M=inputM[mval],
-        Fec=inputFec[,2], # Trying to reproduce what MSEtool is doing - this is the mean of first 2 years
+        Fec=inputFec[,nyears], # long term mean fec in 2023 (final iscam year)
         spawn_frac=1
       )
       Out <- calc_tv_B0_alphabeta(Pars) # this version uses inputs of alpha, beta, M and fecundity
@@ -165,7 +165,8 @@ for(j in 1:nstocks){
     geom_ribbon(aes(x=M,ymin=Lwr,ymax=Upr), alpha=0.3, colour="purple", fill="purple")+
     geom_line(aes(x=M,y=Med), alpha=0.3, colour="purple", lwd=2)+
     ylab("B0")+
-    mytheme
+    scale_x_continuous(breaks=seq(0.2,1.22,by=0.2))+
+    mytheme_paper
   g2
   ggsave(file.path(StockDirFigs, paste0("FIG3_M_B0_v2_",stocks[j],".png")),
          width = 8, height = 5)
@@ -193,7 +194,7 @@ g3 <- Outpars_rep |>
   geom_line(data=SR_xy, aes(x=B,y=R),linewidth=1)+
   geom_point(aes(x=xend1,y=yend1, colour=M), size=3)+
   scale_colour_viridis()+
-  mytheme+
+  mytheme_paper+
   xlab("SSB")+ylab("Recruits")
 g3
 ggsave(file.path(StockDirFigs, paste0("FIG4_Stock-Recruit_",stocks[j],".png")),
