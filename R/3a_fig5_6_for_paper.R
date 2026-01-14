@@ -2,6 +2,8 @@
 # January 3, 2026
 # Robyn Forrest
 
+library(here)
+
 # FIGURE 5. TIME SERIES OF M AND LRP UNDER ALTERNATIVE AVERAGING SCENARIOS
 # This is a subset of the plots made in my csrf-tvrp-herring-pac repo in the file
 #   2b_plot-pac-herring-mse-nf.R
@@ -28,9 +30,9 @@ fig_supp_dynb0 <- list()
 for(j in 1:nstocks){
   cat("~~~ Plotting Fig 5 for", paste(stocks[j]), "~~~\n")
 
-  StockDirOM    <- here(SpDirOM, paste(stocks[j]))
-  StockDirMSE   <- here(SpDirMSE, paste(stocks[j]))
-  StockDirFigs  <- here(SpDirFigs, paste(stocks[j]))
+  StockDirOM    <- here("OMs", paste(stocks[j]))
+  StockDirMSE   <- here("MSEs", paste(stocks[j]))
+  StockDirFigs  <- here("Figures", paste(stocks[j]))
   if(!file.exists(StockDirFigs)) dir.create(StockDirFigs, recursive=TRUE)
   StockDirFigs_NF <- here(StockDirFigs, "NF")
   if(!file.exists(StockDirMSE)) stop("Stop. No MSEs found. Please run 2_run-mse.R first. \n")
@@ -173,7 +175,8 @@ for(j in 1:nstocks){
     geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`B0 type`), alpha = 0.1)+
     geom_line(aes(x=year, y=med, col=`B0 type`, lty=`B0 type`),lwd=1.25)+
     geom_vline(xintercept=cyr, lty=2)+
-    geom_pointrange(data=LRP2023,aes(x=cyr ,y=med, ymin=lwr , ymax=upr), colour=meancol, lwd=1.5, size=1)+
+    geom_pointrange(data=LRP2023,aes(x=cyr ,y=med, ymin=lwr , ymax=upr),
+                    colour=meancol, lwd=1., size=0.5)+
     scale_color_manual(values=manualcolors)+
     scale_fill_manual(values=manualcolors)+
     scale_linetype_manual(values = c("SSB"=1,
