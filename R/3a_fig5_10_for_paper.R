@@ -60,7 +60,7 @@ for(j in 1:nstocks){
     geom_line(aes(x=year,y=med), color=ssbcol, lwd=1.25) +
     facet_wrap(vars(group), nrow=1)+
     theme(legend.position = "none")+
-    labs(x = "Year", y = "SSB", title= "")+
+    labs(x = "Year", y = "SB", title= "")+
     geom_vline(xintercept=cyr, lty=3)+
     mytheme_paper
  g1
@@ -110,15 +110,15 @@ for(j in 1:nstocks){
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Plot time series of all alternative B0-based reference points
-  refpt_levels <- c("SSB","hist", "mean", "recent", "dyn")
+  refpt_levels <- c("SB","hist", "mean", "recent", "dyn")
   histB0 <- purrr::map2_df(MSEscenarios,scenameHuman, getmeanB0, age=Mage, type="hist", quants=TRUE)
   meanB0 <- purrr::map2_df(MSEscenarios,scenameHuman, getmeanB0, age=Mage, type="mean", quants=TRUE)
   recentB0 <- purrr::map2_df(MSEscenarios,scenameHuman, getmeanB0,age=Mage, type="recent", quants=TRUE)
   dynB0 <- purrr::map2_df(MSEscenarios,scenameHuman, getdynB0,quants=TRUE)
   SSBnf <- purrr::map2_df(MSEscenarios,scenameHuman, getSSB, mp=1) |>
-    mutate(RefPtName="SSB") # dynamic B0 (from MSE object)# dynamic B0 for NF mp (from MSE object)
+    mutate(RefPtName="SB")
   allB0 <- rbind(histB0,meanB0,recentB0,dynB0,SSBnf) |>
-    mutate(`B0 type`=factor(RefPtName, levels=refpt_levels)) |>
+    mutate(`SB0 type`=factor(RefPtName, levels=refpt_levels)) |>
     select(-RefPtName)
 
   write_csv(allB0, file.path(StockDirFigs_NF, paste0("MSE-allB0_allScen_allYear_NF.csv")))
@@ -127,20 +127,20 @@ for(j in 1:nstocks){
   g3 <- allB0 |>
     mutate(group=factor(scenario, levels=scenameHuman)) |>
     ggplot()+
-    #geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`B0 type`), alpha = 0.1)+
-    geom_line(aes(x=year, y=med, col=`B0 type`, lty=`B0 type`),lwd=1.25)+
+    #geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`SB0 type`), alpha = 0.1)+
+    geom_line(aes(x=year, y=med, col=`SB0 type`, lty=`SB0 type`),lwd=1.25)+
     geom_vline(xintercept=cyr, lty=3)+
     scale_color_manual(values=manualcolors)+
     scale_fill_manual(values=manualcolors)+
     facet_wrap(vars(group), nrow=1)+
-    scale_linetype_manual(values = c("SSB"=1,
+    scale_linetype_manual(values = c("SB"=1,
                                      "hist" = 2,
                                      "mean" = 2,
                                      "recent" =5,
                                      "dyn" = 3))+
     scale_x_continuous(breaks=seq(syr,fyr,16))+
     geom_vline(xintercept=cyr, lty=3)+
-    labs(x = "Year", y = "SSB or B0", title= "")+
+    labs(x = "Year", y = "SB or SB0", title= "")+
     theme(panel.spacing = unit(0.5, "lines"))+
     theme(legend.position = "bottom")+
     mytheme_paper
@@ -154,16 +154,16 @@ for(j in 1:nstocks){
   # Now plot all years again as LRP (0.3B0)
   # multiply all ref points by 0.3
   LRP <- allB0 |>
-    filter(!`B0 type` %in% "SSB") |>
+    filter(!`SB0 type` %in% "SB") |>
     mutate(lwr=0.3*lwr, med=0.3*med, upr=0.3*upr)
 
   # add back to df with SSB
   LRP <- allB0 |>
-    filter(`B0 type` %in% "SSB") |>
+    filter(`SB0 type` %in% "SB") |>
     rbind(LRP)
 
   LRP2023 <- LRP |>
-    filter(year==cyr, `B0 type`=="mean")
+    filter(year==cyr, `SB0 type`=="mean")
 
   write_csv(LRP, file.path(StockDirFigs_NF, paste0("MSE-allLRPquants_allScen_allYear_NF.csv")))
 
@@ -172,14 +172,14 @@ for(j in 1:nstocks){
     filter(year>cyr) |>
     mutate(group=factor(scenario, levels=scenameHuman)) |>
     ggplot()+
-    geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`B0 type`), alpha = 0.1)+
-    geom_line(aes(x=year, y=med, col=`B0 type`, lty=`B0 type`),lwd=1.25)+
+    geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`SB0 type`), alpha = 0.1)+
+    geom_line(aes(x=year, y=med, col=`SB0 type`, lty=`SB0 type`),lwd=1.25)+
     geom_vline(xintercept=cyr, lty=2)+
     geom_pointrange(data=LRP2023,aes(x=cyr ,y=med, ymin=lwr , ymax=upr),
                     colour=meancol, lwd=1., size=0.5)+
     scale_color_manual(values=manualcolors)+
     scale_fill_manual(values=manualcolors)+
-    scale_linetype_manual(values = c("SSB"=1,
+    scale_linetype_manual(values = c("SB"=1,
                                      "hist" = 2,
                                      "mean" = 2,
                                      "recent" =5,
@@ -187,7 +187,7 @@ for(j in 1:nstocks){
     facet_wrap(vars(group), nrow=1)+
     scale_x_continuous(breaks=seq(cyr+1,fyr,6))+
     geom_vline(xintercept=cyr, lty=3)+
-    labs(x = "Year", y = "SSB or LRP", title= "")+
+    labs(x = "Year", y = "SB or LRP", title= "")+
     theme(panel.spacing = unit(1, "lines"))+
     mytheme_paper+
     theme(legend.position = "right")
@@ -209,18 +209,19 @@ for(j in 1:nstocks){
     mutate(MP="NFref")
 
   PLRPB0_NF <- rbind(PLRPhistB0, PLRPmeanB0, PLRPrecentB0, PLRPdynB0) |>
-    mutate(`B0 type`=factor(b0type, levels=c("hist", "mean", "recent", "dyn"))) |>
+    mutate(`SB0 type`=factor(b0type, levels=c("hist", "mean", "recent", "dyn"))) |>
     select(-b0type)
 
   write_csv(PLRPB0_NF,file.path(StockDirFigs_NF, "PLRP_Metrics_B0_NF.csv"))
 
   # Plot all B0 performance metrics on one plot
-  g5 <- plotPLRP(PLRPB0_NF,
+  # Version that uses SB0 instead of B0
+  g5 <- plotPLRP_SB0(PLRPB0_NF,
                 scentext=TRUE,
                 panel=FALSE)
   g5
 
-  ggsave(file.path(StockDirFigs, paste0("FIGURE6_MSE-PLRP_B0_allScen_NF.png")),
+  ggsave(file.path(StockDirFigs, paste0("FIGURE_MSE-PLRP_B0_allScen_NF.png")),
          width = 16, height = 10)
 
   # ##############################################################
@@ -229,19 +230,19 @@ for(j in 1:nstocks){
   dynB0_rel <- purrr::map2_df(MSEscenarios,scenameHuman, getdynB0rel) |>
     dplyr::select(year, scenario, med) |>
     rename(dynB0=med)
-  SSB_rel <- purrr::map2_df(MSEscenarios,scenameHuman, getSSBrel, mp=1) |>
+  SB_rel <- purrr::map2_df(MSEscenarios,scenameHuman, getSSBrel, mp=1) |>
     dplyr::select(year, scenario, med) |>
-    rename(SSB=med)
-  relSSBdynB0 <- left_join(SSB_rel, dynB0_rel) |>
+    rename(SB=med)
+  relSBdynB0 <- left_join(SB_rel, dynB0_rel) |>
     melt(id.vars= c("year", "scenario")) |>
     rename(refpt=variable) |>
     mutate(group=factor(scenario, levels=scenameHuman))
 
-  Ymax <- max(relSSBdynB0$value)
-  Ymaxpro <- max(relSSBdynB0[which(relSSBdynB0$year>cyr),]$value)
+  Ymax <- max(relSBdynB0$value)
+  Ymaxpro <- max(relSBdynB0[which(relSBdynB0$year>cyr),]$value)
 
   # all years
-  g6 <- relSSBdynB0 |>
+  g6 <- relSBdynB0 |>
     ggplot() +
     geom_line(aes(x=year,y=value, colour=refpt, lty=refpt), lwd=2) +
     geom_vline(xintercept = cyr, lty=3) +
@@ -255,7 +256,7 @@ for(j in 1:nstocks){
   ggsave(file.path(StockDirFigs, paste0("SUPPFIG_MSE-DynB0_v_SSB_allScen_allYear_NF.png")),
          width = 8, height = 5)
 
-  # Add the figures to lists
+  # Add the figures to lists - numbers no longer match paper
   fig5a[[j]] <- g1
   fig5b[[j]] <- g2
   fig5c[[j]] <- g3

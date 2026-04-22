@@ -164,7 +164,7 @@ for(j in 1:nstocks){
   g2 <-  ggplot(Outpars_range)+
     geom_ribbon(aes(x=M,ymin=Lwr,ymax=Upr), alpha=0.3, colour="purple", fill="purple")+
     geom_line(aes(x=M,y=Med), alpha=0.3, colour="purple", lwd=2)+
-    ylab("B0")+
+    ylab("SB0")+
     scale_x_continuous(breaks=seq(0.2,1.22,by=0.2))+
     mytheme_paper
   g2
@@ -195,7 +195,7 @@ g3 <- Outpars_rep |>
   geom_point(aes(x=xend1,y=yend1, colour=M), size=3)+
   scale_colour_viridis()+
   mytheme_paper+
-  xlab("SSB")+ylab("Recruits")
+  xlab("SB")+ylab("Recruits")
 g3
 ggsave(file.path(StockDirFigs, paste0("FIG4_Stock-Recruit_",stocks[j],".png")),
        width = 8, height = 5)

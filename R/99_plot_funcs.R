@@ -301,8 +301,8 @@ plotPLRP <- function(PLRPobject,
       mytheme_paper+
       theme(strip.text.x = element_blank())+
       scale_colour_manual(values=c("hist"=histcol,"mean"=meancol,"recent"=meanrecentcol,"dyn"=dyncol))+
-      guides(colour=guide_legend(title="B0 type"))+
-      ylab("P(SSB > LRP)")
+      guides(colour=guide_legend(title="SB0 type"))+
+      ylab("P(SB > LRP)")
 
     if(scentext==FALSE){
       g <- g +theme(strip.text.y = element_blank())
@@ -329,6 +329,65 @@ plotPLRP <- function(PLRPobject,
   } #end if
   g
 } #end function
+
+# plotPLRP
+# Plot probability of being above the LRP with different B0 metrics
+# Can either all be on the same plot (panel=FALSE), or individual plots (panel=TRUE)
+# the PLRP object is made in 2b_plot-pac-herring-mse-nf.R
+
+# THIS VERSION USES SB0 INSTEAD OF B0 (FOR PAPER)
+plotPLRP_SB0 <- function(PLRPobject,
+                     scentext=FALSE,
+                     panel=TRUE){
+
+  if(panel==FALSE){
+    PLRPobject <- PLRPobject #|>
+    #select(year, scenario, b0type) #!!b0type
+
+    g <- PLRPobject |>
+      ggplot() +
+      geom_line(aes(x=year,y=PLRPobject[,1], color=`SB0 type`), lwd=1.25) +
+      geom_hline(yintercept=0., lty=1, linewidth=0.5)+
+      geom_hline(yintercept=0.25, lty=2, linewidth=0.25)+
+      geom_hline(yintercept=0.5, lty=2, linewidth=0.5)+
+      geom_hline(yintercept=0.75, lty=2, linewidth=0.25)+
+      geom_hline(yintercept=1., lty=2, linewidth=0.5)+
+      facet_wrap(vars(scenario), nrow=1)+
+      theme(legend.position = "none") +
+      labs(x = "Year", y = "")+
+      ylim(0,1.05) +
+      mytheme_paper+
+      theme(strip.text.x = element_blank())+
+      scale_colour_manual(values=c("hist"=histcol,"mean"=meancol,"recent"=meanrecentcol,"dyn"=dyncol))+
+      guides(colour=guide_legend(title="SB0 type"))+
+      ylab("P(SB > LRP)")
+
+    if(scentext==FALSE){
+      g <- g +theme(strip.text.y = element_blank())
+    }
+  } #end if
+
+  if(panel==TRUE){
+    g <- PLRPobject |>
+      ggplot() +
+      geom_line(aes(x=year,y=PLRPobject[,1], color=`SB0 type`), lwd=1.5) +
+      geom_hline(yintercept=0., lty=1, linewidth=0.5)+
+      geom_hline(yintercept=0.25, lty=2, linewidth=0.25)+
+      geom_hline(yintercept=0.5, lty=2, linewidth=0.5)+
+      geom_hline(yintercept=0.75, lty=2, linewidth=0.25)+
+      geom_hline(yintercept=1., lty=2, linewidth=0.5)+
+      facet_grid(scenario~b0type)+
+      theme(legend.position = "none") +
+      labs(x = "Year", y = "")+
+      ylim(0,1.05) +
+      mytheme_paper+
+      theme(strip.text.x = element_blank())+
+      scale_colour_manual(values=c("hist"=histcol,"mean"=meancol,"recent"=meanrecentcol,"dyn"=dyncol))+
+      guides(colour=guide_legend(title="SB0 type"))
+  } #end if
+  g
+} #end function
+
 
 # === PLOTTING FUNCTIONS FOR A COUPLE OF COMPLEX PLOTS ============================================================
 # 1. plotasymRefPts
