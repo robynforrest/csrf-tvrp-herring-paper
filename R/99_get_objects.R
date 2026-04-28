@@ -155,7 +155,8 @@ getFec <- function(object, scen , type="annual", input_type="OM"){
     OMwa_Annual <- object@cpars$Wt_age[1,-c(1,2),] # weight at age, cut off age 0 and 1
     OMma_Annual <- object@cpars$Mat_age[1,-c(1,2),] # maturity at age, cut off age 0 and 1
   }# end if
-  # First argument is an MSEtool Hist object
+
+  # First argument is an MSEtool MSE object
   if(input_type=="MSE"){
     all_years <- seq(object@Hist@Data@OM$CurrentYr[1] - object@nyears + 1, object@Hist@Data@OM$CurrentYr[1]+object@proyears)
     # Note that wt_age and mat_age (dim=c(nrep,nage,nyear))are time-varying but are identical for each replicate in each year

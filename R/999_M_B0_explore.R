@@ -1,7 +1,8 @@
-# Make the figures for the paper - this is called from 0_run-analyses.R but
-# can stand alone
-# January 2, 2026
+# April 27, 2026
 # Robyn Forrest
+
+#2. Explore different steepness values - does M always decline
+#3. If easy, look at how selectivity affects the M BMSY relationship
 
 library(here)
 source(here("R","0_settings.R")) # this includes the function calc_tv_B0
@@ -40,12 +41,16 @@ for(j in 1:nstocks){
   # inputs for calc_B0
   # First get the stock-recruit parameters, using long-term mean and fec
   # iscam uses long-term mean and fec in calcStockRecruitment()
-  inputM   <- getM(OM,"scenario 1",age=3,type="mean", quant=FALSE) # A matrix of long-term mean M Dim: nrow=nreps, ncol=nyears
   inputFec <- getFec(OM,"scenario 1",type="mean") # A matrix of annual long-term mean fecundity-at-age (same for all reps). Dim: nrow=nages, ncol=nyears
-  inputSteep <- histMSE@OMPars$hs
   spawn_time_frac <- histMSE@OMPars$spawn_time_frac
+  #steepness doesn't match iscam- try re-deriving it using early values of M
+  inputSteep <- histMSE@OMPars$hs
 
-  # Get alpha and beta (these are assumed fixed with changing M)
+  histM    <- getM(OM,"scenario 1",age=3,type="hist", quant=FALSE) # A matrix of long-term mean M Dim: nrow=nreps, ncol=nyears
+  meanM    <- getM(OM,"scenario 1",age=3,type="mean", quant=FALSE) # A matrix of long-term mean M Dim: nrow=nreps, ncol=nyears
+  inputM   <- meanM
+
+  # Get alpha and beta for the meanM case (these are assumed fixed with changing M)
   SRpars <- matrix(nrow=nsim,ncol=4) |> as.data.frame()
   colnames(SRpars) <- c("SRalpha","SRbeta", "M", "B0")
   for(simno in 1:nsim){
@@ -57,11 +62,31 @@ for(j in 1:nstocks){
         meanFec=inputFec[,nyears],  # long term mean fec in 2023 (final iscam year)
         spawn_frac=spawn_time_frac[simno]
       )
-      Out <- calc_tv_B0(Pars)
-      SRpars[simno,1] <- Out$SRalpha
-      SRpars[simno,2] <- Out$SRbeta
+      Out_mean <- calc_tv_B0(Pars)
+      SRpars[simno,1] <- Out_mean$SRalpha
+      SRpars[simno,2] <- Out_mean$SRbeta
       SRpars[simno,3] <- Pars$meanM # long-term mean M from OM
       SRpars[simno,4] <- Pars$B0 # original B0 from OM (default, calculated from hist M)
+  } # end simno
+
+  inputM   <- histM
+  # Get alpha and beta for the meanM case (these are assumed fixed with changing M)
+  SRpars <- matrix(nrow=nsim,ncol=4) |> as.data.frame()
+  colnames(SRpars) <- c("SRalpha","SRbeta", "M", "B0")
+  for(simno in 1:nsim){
+    Pars <- list(
+      B0=histMSE@OMPars$SSB0[simno], # A vector of B0 needed to get S-R  alpha and beta. Length=nreps
+      R0=histMSE@OMPars$R0[simno],
+      Steep=histMSE@OMPars$hs[simno],
+      meanM=inputM[simno,nyears], # long term mean M in 2023 (final iscam year)
+      meanFec=inputFec[,nyears],  # long term mean fec in 2023 (final iscam year)
+      spawn_frac=spawn_time_frac[simno]
+    )
+    Out_hist <- calc_tv_B0(Pars)
+    SRpars[simno,1] <- Out_hist$SRalpha
+    SRpars[simno,2] <- Out_hist$SRbeta
+    SRpars[simno,3] <- Pars$meanM # long-term mean M from OM
+    SRpars[simno,4] <- Pars$B0 # original B0 from OM (default, calculated from hist M)
   } # end simno
 
   # 2. Loop over the nsim SR parameters and M to get relationships between B0 and M
@@ -171,39 +196,10 @@ for(j in 1:nstocks){
   ggsave(file.path(StockDirFigs, paste0("FIG3_M_B0_v2_",stocks[j],".png")),
          width = 8, height = 5)
 
-# FIGURE 4. STOCK-RECRUIT CURVE WITH ALTERNATIVE B0, R0 AND REPLACEMENT LINES
-# Now take a random replicate from Outpars and make the S-R curve
-cat("~~~ Plotting Fig 4 for", paste(stocks[j]), "~~~\n")
-
-Reps <- unique(Outpars$Sim)
-randrep <- sample(Reps,1,replace=F)
-
-Outpars_rep <- Outpars |>
-  filter(Sim %in% randrep, M %in% seq(0.2,1,by=0.1))
-
-# Plot SR curve
-B <- seq(0, 1.25*max(Outpars_rep$B0), 0.01)
-R <- Outpars_rep$SRalpha[1] * B / (1 + Outpars_rep$SRbeta[1] * B)
-SR_xy <- cbind(B,R) |> as.data.frame()
-
-g3 <- Outpars_rep |>
-  mutate(x1=0,xend1=B0,y1=0,yend1=R0) |>
-  ggplot()+
-  geom_segment(aes(x=x1,y=y1,xend=xend1,yend=yend1, colour=M),linewidth=0.5,
-               inherit.aes = FALSE)+
-  geom_line(data=SR_xy, aes(x=B,y=R),linewidth=1)+
-  geom_point(aes(x=xend1,y=yend1, colour=M), size=3)+
-  scale_colour_viridis()+
-  mytheme_paper+
-  xlab("SB")+ylab("Recruits")
-g3
-ggsave(file.path(StockDirFigs, paste0("FIG4_Stock-Recruit_",stocks[j],".png")),
-       width = 8, height = 5)
 
 # Add the figures to lists
 fig3[[j]] <- g2
 fig3_alternative[[j]] <- g1
-fig4[[j]] <- g3
 
 # Write out table of values for a single replicate
 write_csv(Outpars_rep, file=file.path(StockDirFigs, paste0("TABLE1_Stock-Recruit_fromFig3",stocks[j],".csv")))
