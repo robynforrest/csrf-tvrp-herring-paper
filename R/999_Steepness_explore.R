@@ -5,7 +5,7 @@
 
 # QUANG:
 # openMSE parameterizes the SRR from R0 and steepness
-# but uses a hard-coded defitiniton of phi_0 (similar to what's done for Historical B_0).
+# but uses a hard-coded definiton of phi_0 (similar to what's done for Historical B_0).
 # The alpha and beta parameters between openMSE and iSCAM are compared to validate the SRR
 
 # Compare OM to iscam R0, Steepness, baseline M, SBt, Rt,RecDevs, Mt
@@ -45,12 +45,12 @@ for(j in 1:nstocks){
   colnames(rt) <- colnames(rdev) <- (syr+2):(nyr)
   colnames(mt) <- syr:nyr
 
-   # Make iscam dataframes for plotting
+  # Make iscam dataframes
   # Parameters
   mcmcout_df <- mcmcout |>
     select(ro_gr1,h_gr1,m_gs1, sbo) |>
     as.data.frame() |>
-    rename(ro=ro_gr1,h=h_gr1,m=m_gs1, bo=sbo)
+    rename(ro=ro_gr1,h=h_gr1,m=m_gs1, sbo=sbo)
 
   nrep <- length(mcmcout_df$ro)
 
@@ -72,7 +72,7 @@ for(j in 1:nstocks){
   rm(bo)
 
   # M
-  mt_om <- getM(mse,"Historical", age=3, type="annual", quant=FALSE, input_type="MSE")
+  mt_om <- getM(mse,"Annual", age=3, type="annual", quant=FALSE, input_type="MSE")
 
   ##################################################################################
   # Now get iscam alpha and beta posteriors based on steepness and ro posteriors
@@ -82,197 +82,142 @@ for(j in 1:nstocks){
   # Get alpha and beta
   SRpars_iscam <- matrix(nrow=nrep,ncol=4) |> as.data.frame()
   colnames(SRpars_iscam) <- c("ro","steepness","SRalpha","SRbeta")
+  annualfec <- getFec(mse,"annual", type="annual", input_type="MSE") #(check - matches d3_wt_mat in iscam rep file)
+  meanfec <- getFec(mse,"Long-term mean", type="mean", input_type="MSE")[,nyrs]
+
   for(simno in 1:nrep){
     R0orig <- mcmcout_df$ro
     Steeporig <- mcmcout_df$h
-    phie0orig <- mcmcout_df$bo/mcmcout_df$ro
-    #M_histmean <- mean(as.numeric(mt[simno,1:5]))
-    # phie0hist <-
+    phie0orig <- mcmcout_df$sbo[simno]/mcmcout_df$ro[simno]
+    # check that phie0 matches long-term mean (this is how iscam calculates phib, i.e., phie0)
+    meanM <- mean(as.numeric(mt[simno,1:nyrs]))
+    # get fec from OM, it is read in perfectly
+    phie0test <- calc_phie0(meanM,meanfec,spawn_frac=1)
+    round(phie0orig,3) # ignore rounding error
+    round(phie0test,3)
 
     #output df
     SRpars_iscam$ro <- R0orig
     SRpars_iscam$steepness  <- Steeporig
-    SRpars_iscam$SRalpha[simno] <- MSEtool::SRalphaconv(Steeporig[simno], phie0orig[simno], SR=1, type = 1)
-    SRpars_iscam$SRbeta[simno]  <- MSEtool::SRbetaconv(Steeporig[simno], phie0orig[simno], R0orig[simno], SR=1, type = 1)
+    SRpars_iscam$SRalpha[simno] <- MSEtool::SRalphaconv(Steeporig[simno], phie0orig, SR=1, type = 1)
+    SRpars_iscam$SRbeta[simno]  <- MSEtool::SRbetaconv(Steeporig[simno], R0orig[simno], phie0orig, SR=1, type = 1)
   } # end simno
 
-  endhistyr <-10
+  # iscam doesn't report alpha and beta posteriors but the MPDs are close to the medians
+  #  calculated here (for HG stock)
+  # median(SRpars_iscam$SRalpha) # MPD (HG) = 199.3
+  # median(SRpars_iscam$SRbeta)  # MPD (HG) = 0.76
+  # quantile(SRpars_iscam$SRalpha)
+  # quantile(SRpars_iscam$SRbeta)
 
-  # OM
-  # Get alpha and beta using phie0 from early hist M
-  SRpars_om <- matrix(nrow=nsim,ncol=4) |> as.data.frame()
-  colnames(SRpars_om) <- c("ro","steepness","SRalpha","SRbeta")
-  for(simno in 1:nsim){
-    R0orig     <- ompars$ro
-    Steeporig  <- ompars$h
-    # We just want the historical average of the first five years
-    inputM     <- mean(mt_om[simno,1:endhistyr])
-    # fecundity
-    OMwa_Annual <- mse@Hist@AtAge$Weight[1,-c(1,2),1:endhistyr] # weight at age, cut off age 0 and 1
-    OMma_Annual <- mse@Hist@AtAge$Maturity[1,-c(1,2),1:endhistyr] # maturity at age, cut off age 0 and 1
-    OMfa_Annual <- OMwa_Annual*OMma_Annual # ages 2:10, dim: nrow=nages ncol=nyears
-    OMfa_mean <- apply(OMfa_Annual,1,mean) # historical mean fec at age
-    spawn_time_frac <- 1
-
-    phie0hist  <- calc_phie0(M=inputM,fec=OMfa_mean,spawn_frac=spawn_time_frac)
-
-    #output df
-    SRpars_om$ro <- R0orig
-    SRpars_om$steepness  <- Steeporig
-    SRpars_om$SRalpha[simno] <- MSEtool::SRalphaconv(Steeporig[simno], phie0hist, SR=1, type = 1)
-    SRpars_om$SRbeta[simno]  <- MSEtool::SRbetaconv(Steeporig[simno], phie0hist, R0orig[simno], SR=1, type = 1)
-  } # end simno
-
-  # Plot parameters
+  # OK. These are the iscam alpha and beta values.
   cols <- pal_lancet("lanonc")(5)[1:3]
 
- g1 <- SRpars_iscam |>
+  g1 <- SRpars_iscam |>
     ggplot()+
-    geom_density(aes(x=steepness, fill="iscam"), alpha=0.3)+
-    geom_density(data=SRpars_om,aes(x=steepness, fill="OM"), alpha=0.3)+
+    geom_density(aes(x=SRalpha), fill=cols[1], alpha=0.3)+
     mytheme_paper+
-    scale_fill_manual(name="Model",values=c("iscam"=cols[1], "OM"=cols[2]))+
-    ggtitle("Steepness")
-  g1
+    ggtitle("iscam SRalpha")
 
   g2 <- SRpars_iscam |>
     ggplot()+
-    geom_density(aes(x=SRalpha, fill="iscam"), alpha=0.3)+
-    geom_density(data=SRpars_om,aes(x=SRalpha, fill="OM"), alpha=0.3)+
+    geom_density(aes(x=SRbeta), fill=cols[1], alpha=0.3)+
     mytheme_paper+
+    ggtitle("iscam SRbeta")
 
-    scale_fill_manual(name="Model",values=c("iscam"=cols[1], "OM"=cols[2]))+
-    ggtitle("SRalpha")
-  g2
+  cowplot::plot_grid(g1,g2)
+  ggsave(here("Figures",paste0("Testing_SRpars",stocks[j],".png")),
+         width = 8, height = 5)
 
-  g3 <- SRpars_iscam |>
+  # Assuming that these are the alpha and beta paramters being used in the OM
+  # I should be able to back-calculate om steepness using the alpha parameter
+  # and a historical phie0 value
+  endhistyrM <- 9
+  endhistyrFec <- 9
+  SRpars_om_hist <- matrix(nrow=nsim,ncol=5) |> as.data.frame()
+  colnames(SRpars_om_hist) <- c("steepness_iscam","steepness_om","SRalpha", "phie0", "steepness_back")
+
+  for(simno in 1:nsim){
+    SRalpha_iscam <- SRpars_iscam$SRalpha[simno]
+
+    #steepness values for comparison
+    Steep_iscam  <- mcmcout_df$h[simno]  # start with iscam values
+    SteepOM    <- ompars$h[simno]
+
+    # Get the inputs of phie0 for first 'endhistyr' years
+    inputM     <- mean(as.numeric(mt[simno,1:endhistyrM]))
+    # fecundity (get from OM it is the same as iscam rep file)
+    OMwa_Annual <- mse@Hist@AtAge$Weight[1,-c(1,2),1:endhistyrFec] # weight at age, cut off age 0 and 1
+    OMma_Annual <- mse@Hist@AtAge$Maturity[1,-c(1,2),1:endhistyrFec] # maturity at age, cut off age 0 and 1
+    OMfa_Annual <- OMwa_Annual*OMma_Annual # ages 2:10, dim: nrow=nages ncol=nyears
+    inputFec <- apply(OMfa_Annual,1,mean) # historical mean fec at age
+    spawn_time_frac <- 1
+
+    # Make a hard wired historical phie0
+    phie0hist  <- calc_phie0(M=inputM,fec=inputFec,spawn_frac=spawn_time_frac)
+
+    #output df
+    SRpars_om_hist$steepness_iscam[simno]  <- Steep_iscam # iscam value
+    SRpars_om_hist$steepness_om[simno]  <- SteepOM # iscam value
+    SRpars_om_hist$SRalpha[simno] <- SRalpha_iscam
+    SRpars_om_hist$phie0[simno]   <- phie0hist
+    # back-calculate steepness - should be same as OM
+    SRpars_om_hist$steepness_back[simno] <- MSEtool::hconv(SRalpha_iscam,phie0hist, SR=1, type = 1)
+  } # end simno
+
+  g3 <- SRpars_om_hist |>
     ggplot()+
-    geom_density(aes(x=SRbeta, fill="iscam"), alpha=0.3)+
-    geom_density(data=SRpars_om,aes(x=SRbeta, fill="OM"), alpha=0.3)+
+    geom_density(aes(x=steepness_iscam, fill="iscam"), alpha=0.3)+
+    geom_density(aes(x=steepness_om, fill="OM_orig"), alpha=0.3)+
+    geom_density(aes(x=steepness_back, fill="OM_back_calc"),lty=2, alpha=0.3)+
     mytheme_paper+
-    scale_fill_manual(name="Model",values=c("iscam"=cols[1], "OM"=cols[2]))+
-    ggtitle("SRbeta")
+    scale_fill_manual(name="Model",values=c("iscam"=cols[1], "OM_orig"=cols[2], "OM_back_calc"=cols[3]))+
+    ggtitle("Steepness - back-calculated from phie0 with hist M and fec")
   g3
+  ggsave(here("Figures",paste0("Testing_Steep_histphie0",stocks[j],".png")),
+         width = 8, height = 5)
 
+  # Now use long-term average M and fec to calculate phie0
+  # Should match iscam steepness
+  SRpars_om_mean <- matrix(nrow=nsim,ncol=5) |> as.data.frame()
+  colnames(SRpars_om_mean) <- c("ro","steepness_orig","SRalpha","SRbeta", "steepness_longterm")
+  meanM <- getM(mse,"Long-term mean", age=3, type="mean", quant=FALSE, input_type="MSE")
+  meanFeca <- getFec(mse,"Long-term mean", type="mean", input_type="MSE")
 
+  for(simno in 1:nsim){
+    Steep_iscam  <- mcmcout_df$h[simno]  # start with iscam values
+    SRalpha_iscam <- SRpars_iscam$SRalpha[simno]
+    SteepOM    <- ompars$h[simno]
 
+    # We just want the long term mean in 2023
+    inputM <- meanM[simno,mse@nyears]
+    # fecundity
+    inputFec <- meanFeca[,mse@nyears]
+    spawn_time_frac <- 1
+
+    # Make mean phie0 to match iscam
+    phie0mean  <- calc_phie0(M=inputM,fec=inputFec,spawn_frac=spawn_time_frac)
+
+    #output df
+    SRpars_om_mean$steepness_iscam[simno]  <- Steep_iscam # iscam value
+    SRpars_om_mean$steepness_om[simno]  <- SteepOM # iscam value
+    SRpars_om_mean$SRalpha[simno] <- SRalpha_iscam
+    SRpars_om_mean$phie0[simno]   <- phie0hist
+    # back-calculate steepness - should be exactly the same as iscam
+    SRpars_om_mean$steepness_back[simno] <- MSEtool::hconv(SRalpha_iscam,phie0mean, SR=1, type = 1)
+  } # end simno
+
+  g4 <- SRpars_om_mean |>
+    ggplot()+
+    geom_density(aes(x=steepness_iscam, fill="iscam"), alpha=0.3)+
+    geom_density(aes(x=steepness_om, fill="OM_orig"), alpha=0.3)+
+    geom_density(aes(x=steepness_back, fill="OM_back_calc"),lty=2, alpha=0.3)+
+    mytheme_paper+
+    scale_fill_manual(name="Model",values=c("iscam"=cols[1], "OM_orig"=cols[2], "OM_back_calc"=cols[3]))+
+    ggtitle("Steepness - back-calculated from phie0 with long-term mean M and fec")
+  g4
+  ggsave(here("Figures",paste0("Testing_Steep_meanphie0",stocks[j],".png")),
+         width = 8, height = 5)
 
 }
 
-
-
-
-
-  # back-calculate om steepness from sr parameters and long-term mean M
-
-  g5 <- mcmcout_df |>
-    ggplot()+
-    geom_density(aes(x=h, fill="iscam"), alpha=0.3)+
-    geom_density(data=ompars,aes(x=h, fill="OM"), alpha=0.3)+
-    mytheme_paper+
-    scale_fill_manual(name="Model",values=c("iscam"=cols[1], "OM"=cols[2]))+
-    ggtitle("Steepness")
-  g5
-  ggsave(here("Figures",paste0("Supp_compare_Steepness",stocks[j],".png")),
-         width = 8, height = 5)
-
-  g6 <- mcmcout_df |>
-    ggplot()+
-    geom_density(aes(x=m, fill="iscam"), alpha=0.3)+
-    geom_density(data=ompars,aes(x=m, fill="OM"), alpha=0.3)+
-    mytheme_paper+
-    scale_fill_manual(name="Model",values=c("iscam"=cols[1], "OM"=cols[2]))+
-    ggtitle("Baseline M")
-  g6
-  ggsave(here("Figures",paste0("Supp_compare_BaseM",stocks[j],".png")),
-         width = 8, height = 5)
-
-  g7 <- mcmcout_df |>
-    ggplot()+
-    geom_density(aes(x=bo, fill="iscam"), alpha=0.3)+
-    geom_density(data=ompars,aes(x=bo, fill="OM"), alpha=0.3)+
-    mytheme_paper+
-    scale_fill_manual(name="Model",values=c("iscam"=cols[1], "OM"=cols[2]))+
-    ggtitle("B0")
-  g7
-  ggsave(here("Figures",paste0("Supp_compare_B0",stocks[j],".png")),
-         width = 8, height = 5)
-
-
-  # Investigate what MSEtool is doing for its BaseM?
-  mt_iscam_2023 <- mt[,73]
-  mt_iscam_1951 <- mt[,1]
-
-  mt_om_2023 <- getM(mse,"Historical", age=3, type="annual",
-                     quant=FALSE, input_type="MSE")[,73]
-  mt_om_1951 <- getM(mse,"Historical", age=3, type="annual",
-                     quant=FALSE, input_type="MSE")[,1]
-
-  mt_iscam_2023_df  <- mt_iscam_2023 |>
-    as.data.frame() |>
-    rename(m=mt_iscam_2023)
-  mt_iscam_1951_df  <- mt_iscam_1951 |>
-    as.data.frame() |>
-    rename(m=mt_iscam_1951)
-
-  mt_om_1951_df  <- mt_om_1951 |>
-    as.data.frame() |>
-    rename(m=mt_om_1951)
-  mt_om_2023_df  <- mt_om_2023 |>
-    as.data.frame() |>
-    rename(m=mt_om_2023)
-
-  g7 <- mcmcout_df |>
-    ggplot()+
-    geom_density(aes(x=m, fill="iscambase"), alpha=0.3)+
-    geom_density(data=mt_iscam_1951_df,aes(x=m, fill="iscamM1"), alpha=0.3)+
-    geom_density(data=mt_iscam_2023_df,aes(x=m, fill="iscamM73"), alpha=0.3)+
-    mytheme_paper+
-    scale_fill_manual(name="Model",values=c("iscambase"=cols[1], "iscamM1"=cols[2], "iscamM73"=cols[3]))+
-    ggtitle("Baseline M")+
-    xlim(0,2)+ylim(0,4)
-  g7
-  ggsave(here("Figures",paste0("Extra_compare_BaseM_iscam",stocks[j],".png")),
-         width = 8, height = 5)
-
-  g8 <- mcmcout_df |>
-    ggplot()+
-    geom_density(aes(x=m, fill="iscambase"), alpha=0.3)+
-    geom_density(data=mt_iscam_2023_df,aes(x=m, fill="iscamM73"), alpha=0.3)+
-    mytheme_paper+
-    scale_fill_manual(name="Model",values=c("iscambase"=cols[1], "iscamM73"=cols[3]))+
-    ggtitle("Baseline M")+
-    xlim(0,2)+ylim(0,4)
-  g8
-  ggsave(here("Figures",paste0("Extra_compare_BaseM_iscam2023",stocks[j],".png")),
-         width = 8, height = 5)
-
-  g9 <- mcmcout_df |>
-    ggplot()+
-    geom_density(aes(x=m, fill="iscambase"), alpha=0.3)+
-    geom_density(data=mt_iscam_1951_df,aes(x=m, fill="iscamM1"), alpha=0.3)+
-    mytheme_paper+
-    scale_fill_manual(name="Model",values=c("iscambase"=cols[1], "iscamM1"=cols[2]))+
-    ggtitle("Baseline M")+
-    xlim(0,2)+ylim(0,4)
-  g9
-  ggsave(here("Figures",paste0("Extra_compare_BaseM_iscam1951",stocks[j],".png")),
-         width = 8, height = 5)
-
-  # So iscam base m = iscam Mt in year 1
-  g10 <- ompars |>
-    ggplot()+
-    geom_density(aes(x=m, fill="OMbase"), alpha=0.3)+
-    geom_density(data=mt_om_1951_df,aes(x=m, fill="OM1"), alpha=0.3)+
-    geom_density(data=mt_om_2023_df,aes(x=m, fill="OM73"), alpha=0.3)+
-    mytheme_paper+
-    scale_fill_manual(name="Model",values=c("OMbase"=cols[1], "OM1"=cols[2], "OM73"=cols[3]))+
-    ggtitle("Baseline M")+
-    xlim(0,2)+ylim(0,10)
-  g10
-  ggsave(here("Figures",paste0("Extra_compare_BaseM_OM",stocks[j],".png")),
-         width = 8, height = 5)
-
-  # No idea where OM is getting its baseline M from - ignore it and use Mt in
-  # year 1 for the stock recruit pars
-}
