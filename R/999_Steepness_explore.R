@@ -218,6 +218,5 @@ for(j in 1:nstocks){
   g4
   ggsave(here("Figures",paste0("Testing_Steep_meanphie0",stocks[j],".png")),
          width = 8, height = 5)
-
 }
 

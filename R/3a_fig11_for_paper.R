@@ -11,9 +11,9 @@ nsim <- hOMs[[1]]@nsim
 histMSEs <- readRDS(here("MSEs/hist_hMSEs.rda"))
 scenameHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
 
-# # FIGURE 7. HARVEST CONTROL RULES
+# # FIGURE 11. HARVEST CONTROL RULES (now moved to supp)
 for(j in 1:nstocks){
-  cat("~~~ Plotting Fig 7 for", paste(stocks[j]), "~~~\n")
+  cat("~~~ Plotting Fig 11 for", paste(stocks[j]), "~~~\n")
 
   StockDirOM    <- here(SpDirOM, paste(stocks[j]))
   StockDirMSE   <- here(SpDirMSE, paste(stocks[j]))
