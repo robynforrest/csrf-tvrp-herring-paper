@@ -123,7 +123,7 @@ for(j in 1:nstocks){
     geom_line(aes(x=year, y=med, col=Model, lty=Model),lwd=1.25)+
     #facet_wrap(vars(Model), nrow=1)+
     scale_x_continuous(breaks=seq(syr,nyr,5))+
-    labs(x = "Year", y = "SSB", title= "")+
+    labs(x = "Year", y = "SB", title= "")+
     scale_color_lancet()+
     scale_fill_lancet()+
     mytheme_paper+

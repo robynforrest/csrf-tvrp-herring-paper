@@ -34,6 +34,8 @@ confhi <- 0.975
 
 for(j in 1:nstocks){
 
+
+
   # ISCAM MCMC OUTPUTS
   iscamloc <- iscamlocs[j]
   mcmcout <- read.csv(file.path(iscamloc,"iscam_mcmc.csv"), header=T)
@@ -57,6 +59,7 @@ for(j in 1:nstocks){
   # Read in MSE object
   StockDirMSE   <- here("MSEs", paste(stocks[j]))
   mse <- readRDS(here(StockDirMSE, "hMSEs_NF.rda"))[[1]] # just take first scenario
+  msehist <- histMSEs[j]
 
   # Parameters
   ompars <- getPars_om_static(mse, "ompars", species="pac-herring") |>
@@ -102,6 +105,8 @@ for(j in 1:nstocks){
     SRpars_iscam$SRalpha[simno] <- MSEtool::SRalphaconv(Steeporig[simno], phie0orig, SR=1, type = 1)
     SRpars_iscam$SRbeta[simno]  <- MSEtool::SRbetaconv(Steeporig[simno], R0orig[simno], phie0orig, SR=1, type = 1)
   } # end simno
+
+
 
   # iscam doesn't report alpha and beta posteriors but the MPDs are close to the medians
   #  calculated here (for HG stock)

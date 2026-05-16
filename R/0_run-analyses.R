@@ -2,17 +2,14 @@
 # ======== 0 Run all the analyses from here ================================================
 # Load packages, universal settings, source code
 
-# CSRF Project for paper on time-varying reference points for Pacific herring
+# Paper on time-varying reference points for Pacific herring
 
-# AUTHORS/CONTRIBUTORS:
+# AUTHORS:
 # Robyn Forrest (RF) (DFO)
 # Quang Huynh (QH) (Blue Matter Science)
 # Adrian Hordyk (AH) (Blue Matter Science)
 
 # Created January 2 2026, following earlier exploratory repository (2023)
-
-# TODO: Ask QH about steepness values in OM. Too high.
-
 library(here)
 
 omspecies <- "pac-herring"
