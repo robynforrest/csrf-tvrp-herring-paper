@@ -68,12 +68,51 @@ if(make_oms==TRUE){
       nproyears <- hOMs[[j]]@proyears
       maxage <- hOMs[[j]]@maxage
 
+      # Checking whether increasing rec devs fixes problem with declining biomass
+      # under constant M scenario
+      # # get tau (sigmaR)
+      # rho <- mcmc_output$params$rho_gr1
+      # vartheta <- mcmc_output$params$vartheta_gr1 #inverse of total variance
+      # varphi <- sqrt(1/vartheta) # total standard deviation
+      # tau <- sqrt(1-rho)*varphi  #sigmaR (process error)
+      # tau2 <- tau^2
+      # medtau2 <- median(tau2)
+      #
+      # # Now correct OM devs - just use median value of tau bc OM is sampling
+      # # from iscam results
+      # default_perr <- log(hOMs[[j]]@cpars$Perr_y)
+      # corrected_perr <- default_perr + 0.5*medtau2
+      #
+      # hOMs[[j]]@cpars$Perr_y <- exp(corrected_perr)
+      # This does correct the rec devs (although they are still offset by a year)
+      # but it wrecks the fit of biomass and recruitment likely because of
+      # another correction in MSEtool
+
+
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       # code from Quang to fix minor error in some versions of MSEtool
       if(is.null(hOMs[[j]]@cpars[["hs"]]) && !is.null(hOMs[[j]]@cpars[["h"]])) { # Use of $ is often confusing since R deploys partial matching
          hOMs[[j]]@cpars[["hs"]] <- hOMs[[j]]@cpars[["h"]]
          hOMs[[j]]@cpars[["h"]] <- NULL
       }
+
+      # look at rec deviations
+      default_perr <- hOMs[[j]]@cpars$Perr_y
+      png(paste0(StockDirFigs, "/OM_rec_devs_",stocks[j], ".png"), height=720, width=720)
+      matplot(1:(nyears+maxage+pro_years), log(t(default_perr)), type="l", col=2, main=paste(stocks[j]))
+      abline(h=0, lty=1, lwd=0.5)
+      abline(v=nyears+maxage, lty=2, lwd=0.5)
+      dev.off()
+
+      # compare rec devs with iscam outputs
+      iscam_perr_file <- file.path(iscamlocs[iscamfolder],"iscam_rdev_mcmc.csv")
+      burn <- 4500
+      iscam_perr <- read_csv(iscam_perr_file)
+      iscam_perr <- iscam_perr[(burn+1):nrow(iscam_perr),]
+      png(paste0(StockDirFigs, "/iscam_rec_devs_",stocks[j], ".png"), height=720, width=720)
+      matplot(1:(nyears-2), t(iscam_perr), type="l", col=3, main=paste(stocks[j]))
+      abline(h=0, lty=1, lwd=0.5)
+      dev.off()
 
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       #~ 2. Now make OMS with alternative future M scenarios ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

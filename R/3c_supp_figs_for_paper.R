@@ -2,7 +2,7 @@
 # January 11, 2026
 # Robyn Forrest
 
-# Compare OM to iscam R0, Steepness, baseline M, SBt, Rt,RecDevs, Mt
+# Compare OM to iscam SBt, Rt,RecDevs, Mt
 library(here)
 library(tidyverse)
 library(reshape2)
@@ -41,7 +41,9 @@ for(j in 1:nstocks){
 
   # Read in MSE object
   StockDirMSE   <- here("MSEs", paste(stocks[j]))
+  StockDirOM   <- here("OMs", paste(stocks[j]))
   mse <- readRDS(here(StockDirMSE, "hMSEs_NF.rda"))[[1]] # just take first scenario
+  om <- readRDS(here(StockDirOM, "OMScenarios.rda"))[[1]]
 
   # Make iscam dataframes for plotting
   # Parameters
@@ -71,6 +73,14 @@ for(j in 1:nstocks){
     as.data.frame()|>
     select(year,lwr,upr,med,Model)
 
+  rdev_df <- rdev |>
+    apply(2,quantile,probs=c(conflo,0.5,confhi)) |> t() |>
+    as.data.frame() |>
+    mutate(year=(syr+2):nyr, Model="iscam") |>
+    dplyr::rename(lwr=1, med=`50%`, upr=3) |>
+    as.data.frame()|>
+    select(year,lwr,upr,med,Model)
+
   mt_df <- mt |>
     apply(2,quantile,probs=c(conflo,0.5,confhi)) |> t() |>
     as.data.frame() |>
@@ -89,6 +99,12 @@ for(j in 1:nstocks){
   rt_om_df <- getRec(mse,"Historical", mp=1) |>
     filter(year>(syr+1))|>
     filter(year<=nyr)|>
+    mutate(Model="OM")|>
+    select(year,lwr,upr,med,Model)
+
+  rdev_om_df <- getperry(om,"Historical") |>
+    #filter(year>(syr+1))|>
+    #filter(year<=nyr)|>
     mutate(Model="OM")|>
     select(year,lwr,upr,med,Model)
 
@@ -115,6 +131,7 @@ for(j in 1:nstocks){
   # Plot time series
   allsbt <- rbind(sbt_df,sbt_om_df)
   allrt <- rbind(rt_df,rt_om_df)
+  allrdev <- rbind(rdev_df,rdev_om_df)
   allmt <- rbind(mt_df,mt_om_df)
 
   g1 <- allsbt |>
@@ -159,6 +176,22 @@ for(j in 1:nstocks){
   g3
   ggsave(here("Figures",paste0("Supp_compare_Mt",stocks[j],".png")),
          width = 8, height = 5)
+
+  g4 <- allrdev |>
+    ggplot()+
+    geom_pointrange(aes(x=year, y=med, ymin=lwr , ymax=upr, color=Model))+
+    geom_line(aes(x=year, y=med, col=Model, lty=Model),lwd=1.25)+
+    geom_hline(yintercept=0, linetype="dashed", color = 1, linewidth=0.5)+
+    scale_x_continuous(breaks=seq((syr+2),nyr,5))+
+    labs(x = "Year", y = "Log recruit deviations", title= "")+
+    scale_color_lancet()+
+    scale_fill_lancet()+
+    mytheme_paper+
+    theme(legend.position = "right")
+  g4
+  ggsave(here("Figures",paste0("Supp_compare_RecDevs",stocks[j],".png")),
+         width = 8, height = 5)
+
 
   ##################################################################################
   # Plot parameters

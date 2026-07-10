@@ -203,7 +203,7 @@ getFec <- function(object, scen , type="annual", input_type="OM"){
 } # end function
 
 ###################################################################################################################
-# Recruitment errors
+# Log recruitment errors
 getperry <- function(om, scen){
   all_years <- seq(om@CurrentYr - om@nyears + 1, om@CurrentYr+om@proyears)
   # Need to add on the devs for the 10 years prior to the start of the series (if maxage=10)
@@ -211,7 +211,7 @@ getperry <- function(om, scen){
   preyr1 <- all_years[1]-maxage
   preyrs <- preyr1:(all_years[1]-1)
 
-  perr_y <- om@cpars$Perr_y %>%
+  perr_y <- log(om@cpars$Perr_y) %>%
     apply(2,quantile,probs=c(conflo,0.5,confhi)) %>% t() %>%
     as.data.frame() %>%
     mutate(year=c(preyrs,all_years), scenario=scen) %>%
