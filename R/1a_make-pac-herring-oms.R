@@ -48,7 +48,7 @@ if(make_oms==TRUE){
                                       nsim=nsim,
                                       proyears=pro_years,
                                       mcmc=mcmc_output,
-                                      report=T,
+                                      report=F,
                                       Name=stocks[j])
       dev.off()
 
@@ -60,7 +60,7 @@ if(make_oms==TRUE){
       hOMs[[j]]@Common_Name <- "Pacific Herring"
       hOMs[[j]]@Species <- "Clupea pallasii"
       hOMs[[j]]@cpars$spawn_time_frac <- rep(1.,nsim) # Set spawn timing same as iscam (new MSEtool feature)
-      hOMs[[j]]@AC <- 0. #autocorrelation in future rec devs
+      hOMs[[j]]@AC <- 0.5 #autocorrelation in future rec devs
       hOMs[[j]]@beta <- c(1., 1.) # beta=1 means no hyperstability
 
       stockname <- hOMs[[j]]@Name

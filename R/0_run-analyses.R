@@ -27,7 +27,7 @@ SpDirFigs <- here("Figures")
 if(!file.exists(SpDirFigs)) dir.create(SpDirFigs, recursive=TRUE)
 
 # Universal settings that are changed frequently
-nsim <- 32
+nsim <- 16
 pro_years <- 30
 Mage <- 3 # age at which to extract constant M from cpars M_age_array
 
