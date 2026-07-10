@@ -105,7 +105,7 @@ for(j in 1:nstocks){
   rdev_om_df <- getperry(om,"Historical") |>
     #filter(year>(syr+1))|>
     #filter(year<=nyr)|>
-    mutate(Model="OM")|>
+    mutate(Model="OM", lwr=log(lwr), med=log(med),upr=log(upr))|>
     select(year,lwr,upr,med,Model)
 
   mt_om_df <- getM(mse,"Historical", age=3, type="annual", quant=TRUE, input_type="MSE") |>
