@@ -59,15 +59,15 @@ for(j in 1:nstocks){
       as.data.frame() %>%
       mutate(group=factor(scenario, levels=ScenarioNamesHuman)) %>%
       ggplot() +
-      geom_pointrange(aes(x=year, y=log(med),ymin=log(lwr), ymax=log(upr), color=scenario)) +
-      geom_line(aes(x=year,y=log(med), color=scenario), lwd=0.25, lty=1) +
-      geom_hline(yintercept=0, linetype="dashed", color = 1, linewidth=1)+
-      geom_vline(xintercept=cyr, linetype=3, color = 1, linewidth=1)+
+      geom_pointrange(aes(x=year, y=med,ymin=lwr, ymax=upr, color=scenario)) +
+      geom_line(aes(x=year,y=med, color=scenario), lwd=0.25, lty=1) +
+      geom_hline(yintercept=1, linetype="dashed", color = 1, linewidth=1)+
+      geom_vline(xintercept=cyr, linetype=3, color = 1, linewidth=0.5)+
       facet_grid(group~.)+
       gfplot::theme_pbs() +
       scale_fill_startrek()+  # ggsci package
       scale_color_startrek()+
-      labs(x = "Year", y = "", title="Log recruitment deviations")+
+      labs(x = "Year", y = "", title="Recruitment deviations")+
       theme(plot.title = element_text(face="bold", size=20),
           axis.title.x = element_text(size=16,face="bold"),
           axis.text.y = element_text(size=12,face="bold"),

@@ -211,11 +211,11 @@ getperry <- function(om, scen){
   preyr1 <- all_years[1]-maxage
   preyrs <- preyr1:(all_years[1]-1)
 
-  perr_y <- om@cpars$Perr_y %>%
-    apply(2,quantile,probs=c(conflo,0.5,confhi)) %>% t() %>%
-    as.data.frame() %>%
-    mutate(year=c(preyrs,all_years), scenario=scen) %>%
-    dplyr::rename(lwr=1, med=`50%`, upr=3) %>%  as.data.frame()
+  perr_y <- om@cpars$Perr_y |>
+    apply(2,quantile,probs=c(conflo,0.5,confhi)) |> t() |>
+    as.data.frame() |>
+    mutate(year=c(preyrs,all_years), scenario=scen) |>
+    dplyr::rename(lwr=1, med=`50%`, upr=3) |>  as.data.frame()
   perr_y
 }
 ###################################################################################################################

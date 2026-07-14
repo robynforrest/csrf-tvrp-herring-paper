@@ -48,7 +48,7 @@ if(make_oms==TRUE){
                                       nsim=nsim,
                                       proyears=pro_years,
                                       mcmc=mcmc_output,
-                                      report=F,
+                                      report=T,
                                       Name=stocks[j])
       dev.off()
 
@@ -60,46 +60,50 @@ if(make_oms==TRUE){
       hOMs[[j]]@Common_Name <- "Pacific Herring"
       hOMs[[j]]@Species <- "Clupea pallasii"
       hOMs[[j]]@cpars$spawn_time_frac <- rep(1.,nsim) # Set spawn timing same as iscam (new MSEtool feature)
-      #hOMs[[j]]@AC <- 0.9 #autocorrelation in future rec devs
       hOMs[[j]]@beta <- c(1., 1.) # beta=1 means no hyperstability
 
       stockname <- hOMs[[j]]@Name
       nyears <- hOMs[[j]]@nyears
       nproyears <- hOMs[[j]]@proyears
       maxage <- hOMs[[j]]@maxage
+      syr <- hOMs[[j]]@CurrentYr - hOMs[[j]]@nyears + 1
+      allhistyears <- (syr-hOMs[[j]]@maxage):hOMs[[j]]@CurrentYr # includes maxage burnin years
+      Hist_RecDevs_real <- hOMs[[j]]@cpars$Perr_y[,(hOMs[[j]]@maxage +1):length(allhistyears)]
 
-      # Checking whether increasing rec devs fixes problem with declining biomass
-      # under constant M scenario
-      # # get tau (sigmaR)
-      # rho <- mcmc_output$params$rho_gr1
-      # vartheta <- mcmc_output$params$vartheta_gr1 #inverse of total variance
-      # varphi <- sqrt(1/vartheta) # total standard deviation
-      # tau <- sqrt(1-rho)*varphi  #sigmaR (process error)
-      # tau2 <- tau^2
-      # medtau2 <- median(tau2)
-      #
-      # # Now correct OM devs - just use median value of tau bc OM is sampling
-      # # from iscam results
-      # default_perr <- log(hOMs[[j]]@cpars$Perr_y)
-      # corrected_perr <- default_perr + 0.5*medtau2
-      #
-      # hOMs[[j]]@cpars$Perr_y <- exp(corrected_perr)
-      # This does correct the rec devs (although they are still offset by a year)
-      # but it wrecks the fit of biomass and recruitment likely because of
-      # another correction in MSEtool
-
-
-      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      # code from Quang to fix minor error in some versions of MSEtool
-      if(is.null(hOMs[[j]]@cpars[["hs"]]) && !is.null(hOMs[[j]]@cpars[["h"]])) { # Use of $ is often confusing since R deploys partial matching
-         hOMs[[j]]@cpars[["hs"]] <- hOMs[[j]]@cpars[["h"]]
-         hOMs[[j]]@cpars[["h"]] <- NULL
+      # TRY increasing projected rec devs to answer reviewer 1's question
+      # Modified version of MSEtool:::sample_recruitment
+      # without bias correction
+      samp_recruitment <- function (Perr_hist, proyears, procsd, AC, seed)
+      {
+        if (!missing(seed))
+          set.seed(seed)
+        nsim <- nrow(Perr_hist)
+        if (length(procsd) == 1)
+          procsd <- rep(procsd, nsim)
+        if (length(AC) == 1)
+          AC <- rep(AC, nsim)
+        #procmu <- -0.5 * procsd^2 * (1 - AC)/sqrt(1 - AC^2)
+        #procmu <- rep(0,nsim)#
+        procmu <- log(apply(Perr_hist[,ncol(Perr_hist):(ncol(Perr_hist)-4)],1,mean))
+        Perr_delta <- rnorm(nsim * proyears, procmu, procsd) %>% # the sampled rec devs are just a function of procsd
+          matrix(nrow = nsim, ncol = proyears)
+        Perr_proj <- matrix(NA_real_, nsim, proyears)
+        Perr_proj[, 1] <- AC * Perr_hist[, ncol(Perr_hist)] + Perr_delta[,
+                                                                         1] * sqrt(1 - AC^2)
+        for (y in 2:ncol(Perr_proj)) Perr_proj[, y] <- AC * Perr_proj[,
+                                                                      y - 1] + Perr_delta[, y] * sqrt(1 - AC^2)
+        return(Perr_proj)
       }
+
+      # Reset perr_y in proj period to have mean 0 without the bias correction
+      # new_perry <- samp_recruitment(Hist_RecDevs_real,nproyears,hOMs[[j]]@cpars$Perr, hOMs[[j]]@cpars$AC, 101) |>
+      #   exp()
+      # hOMs[[j]]@cpars$Perr_y[, hOMs[[j]]@maxage + hOMs[[j]]@nyears + seq(1, hOMs[[j]]@proyears)] <- new_perry
 
       # look at rec deviations
       default_perr <- hOMs[[j]]@cpars$Perr_y
       png(paste0(StockDirFigs, "/OM_rec_devs_",stocks[j], ".png"), height=720, width=720)
-      matplot(1:(nyears+maxage+pro_years), log(t(default_perr)), type="l", col=2, main=paste(stocks[j]))
+      matplot(1:(nyears+maxage+pro_years), t(default_perr), type="l", col=2, main=paste(stocks[j]))
       abline(h=0, lty=1, lwd=0.5)
       abline(v=nyears+maxage, lty=2, lwd=0.5)
       dev.off()
@@ -113,6 +117,13 @@ if(make_oms==TRUE){
       matplot(1:(nyears-2), t(iscam_perr), type="l", col=3, main=paste(stocks[j]))
       abline(h=0, lty=1, lwd=0.5)
       dev.off()
+
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # code from Quang to fix minor error in some versions of MSEtool
+      if(is.null(hOMs[[j]]@cpars[["hs"]]) && !is.null(hOMs[[j]]@cpars[["h"]])) { # Use of $ is often confusing since R deploys partial matching
+        hOMs[[j]]@cpars[["hs"]] <- hOMs[[j]]@cpars[["h"]]
+        hOMs[[j]]@cpars[["h"]] <- NULL
+      }
 
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       #~ 2. Now make OMS with alternative future M scenarios ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

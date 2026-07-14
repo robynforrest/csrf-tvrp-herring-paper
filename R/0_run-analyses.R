@@ -54,7 +54,7 @@ Interval <- 1 #1 # stock assessment interval
 
 # ======================================================================================================
 # Choose whether to run the OMs and MSEs (only need to do this once)
-make_oms  <- TRUE #T/F Turn off if you have already made and saved the base OMs
+make_oms  <- TRUE #TRUE/FALSE Turn off if you have already made and saved the base OMs
 run_mses  <- TRUE #T/F Turn off if you have already run the MSEs.
 # ======================================================================================================
 
