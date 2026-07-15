@@ -86,7 +86,7 @@ for(j in 1:nstocks){
     g <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getperry) |>
       as.data.frame() %>%
       filter(year>=pyr1) %>%
-      mutate(group=factor(scenario, levels=ScenarioNamesHuman))
+      mutate(group=factor(scenario, levels=ScenarioNamesHuman)) |>
       ggplot() +
       geom_pointrange(aes(x=year, y=log(med),ymin=log(lwr), ymax=log(upr), color=scenario)) +
       geom_line(aes(x=year,y=log(med), color=scenario), lwd=0.5, lty=1) +
