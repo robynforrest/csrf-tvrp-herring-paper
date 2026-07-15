@@ -32,13 +32,13 @@ for(j in 1:nstocks){
 
     #~~~~~~~~~~~PLOT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Plot the M time series
-    Mtout <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual", quant=TRUE, input_type="OM") %>%
-      mutate(Scenario = factor(scenario, levels = ScenarioNamesHuman)) %>%
+    Mtout <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual", quant=TRUE, input_type="OM")  |>
+      mutate(Scenario = factor(scenario, levels = ScenarioNamesHuman)) |>
       as.data.frame()
     write_csv(Mtout, file=file.path(StockDirFigs, paste0("OM-M_All_M_scenarios_",stocks[j],".csv")))
 
-    g <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual",quant=TRUE, input_type="OM") %>%
-      mutate(scenario = factor(scenario, levels = ScenarioNamesHuman)) %>%
+    g <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual",quant=TRUE, input_type="OM") |>
+      mutate(scenario = factor(scenario, levels = ScenarioNamesHuman)) |>
       as.data.frame() %>%
       ggplot() +
       geom_ribbon(aes(x=year, ymin=lwr, ymax=upr, fill=scenario), alpha = 0.3) +
@@ -55,15 +55,20 @@ for(j in 1:nstocks){
                width = 8, height = 5)
 
     # 2. Rec deviations
-    g <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getperry) %>%
-      as.data.frame() %>%
-      mutate(group=factor(scenario, levels=ScenarioNamesHuman)) %>%
+    meandev <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getperry_mean) |>
+      as.data.frame()
+    quantdev <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getperry) |>
+      as.data.frame()
+    g <- left_join(quantdev,meandev) |>
+      mutate(group=factor(scenario, levels=ScenarioNamesHuman)) |>
+      filter(scenario==ScenarioNamesHuman[1]) |>
       ggplot() +
       geom_pointrange(aes(x=year, y=med,ymin=lwr, ymax=upr, color=scenario)) +
+      geom_point(aes(x=year, y=mean), color=1, shape=15) +
       geom_line(aes(x=year,y=med, color=scenario), lwd=0.25, lty=1) +
       geom_hline(yintercept=1, linetype="dashed", color = 1, linewidth=1)+
       geom_vline(xintercept=cyr, linetype=3, color = 1, linewidth=0.5)+
-      facet_grid(group~.)+
+      #facet_grid(group~.)+
       gfplot::theme_pbs() +
       scale_fill_startrek()+  # ggsci package
       scale_color_startrek()+
@@ -78,10 +83,10 @@ for(j in 1:nstocks){
     ggsave(file.path(StockDirFigs, paste0("OM-Recdevs.png")),
        width = 12, height = 7.5)
 
-    g <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getperry) %>%
+    g <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getperry) |>
       as.data.frame() %>%
       filter(year>=pyr1) %>%
-      mutate(group=factor(scenario, levels=ScenarioNamesHuman)) %>%
+      mutate(group=factor(scenario, levels=ScenarioNamesHuman))
       ggplot() +
       geom_pointrange(aes(x=year, y=log(med),ymin=log(lwr), ymax=log(upr), color=scenario)) +
       geom_line(aes(x=year,y=log(med), color=scenario), lwd=0.5, lty=1) +
