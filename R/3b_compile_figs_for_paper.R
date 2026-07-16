@@ -29,7 +29,6 @@ cowplot::plot_grid(fig2ahg,fig2bhg,NULL,NULL,fig2asg,fig2bsg,NULL,NULL,fig2awc,f
                    labels=c("(a)","","","","(b)","","","","(c)"),
                    rel_heights=c(1,-0.11,1,-0.11,1),
                    align="h",  hjust = 0.25)
-ggsave(here("Figures","Figure2alt.png"), width = 8, height = 5)
 ggsave(here("Figures","Figure2.png"), width = 8, height = 7) # make plots higher
 
 # MAKE FIGURE 3 (relationship between M and B0, 3 stocks)
@@ -65,7 +64,6 @@ fig4wc <- fig4[[3]]
 cowplot::plot_grid(fig4hg,fig4sg,fig4wc, nrow=3, labels=c("(a)","(b)","(c)"),
                    align="v",  hjust = 0.25)
 ggsave(here("Figures","Figure4.png"), width = 8, height = 7)
-ggsave(here("Figures","Figure4alt.png"), width = 8, height = 5)
 
 # MAKE FIGURE 5 (time series of SSB, M and B0)
 # SSB

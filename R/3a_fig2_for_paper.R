@@ -79,8 +79,8 @@ g2 <- purrr::map2_df(MSEscenarios,ScenarioNamesHuman, getSSB, mp=1) |>
   ggplot() +
   geom_ribbon(aes(x=year, ymin=lwr, ymax=upr), fill=1, alpha = 0.2) +
   geom_line(aes(x=year,y=med), color=1, lwd=2) +
-  geom_ribbon(data=LRP_ribbon, aes(x=year, ymin=lwr, ymax=upr), fill=2, alpha = 0.1) +
-  geom_line(data=LRP_ribbon,aes(x=year,y=med), color=2, lwd=1, lty=2) +
+  geom_ribbon(data=LRP_ribbon, aes(x=year, ymin=lwr, ymax=upr), fill=meancol, alpha = 0.1) +
+  geom_line(data=LRP_ribbon,aes(x=year,y=med), color=meancol, lwd=1, lty=2) +
   theme(legend.position = "none") +
   labs(x = "Year", y = "SB")+
   scale_x_continuous(breaks = seq(1951,2023,by=10))+
