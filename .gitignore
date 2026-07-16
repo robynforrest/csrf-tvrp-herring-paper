@@ -19,6 +19,7 @@
 *.zip
 *.rep
 z_*
+x_*
 Figures/
 OMs/
 MSEs/
@@ -32,6 +33,7 @@ fromQuang/
 report/
 wishlist.txt
 Data/
+xOld_folders/
 2023_results/
 2024_WFC_version/
 gfiscam_tpl/
