@@ -6,7 +6,7 @@
 # 3a files are run. These files put the figure lists into the environment, which are
 #  used here.
 
-# NOTE. Fig 7 is made directly in 3a_fig7_for_paper.R
+# NOTE. Fig 12 is made directly in 3a_fig12_for_paper.R
 
 # MAKE FIGURE 2 (Historical M and B0, 3 stocks)
 fig2ahg <- fig2a[[1]]+
@@ -29,124 +29,87 @@ cowplot::plot_grid(fig2ahg,fig2bhg,NULL,NULL,fig2asg,fig2bsg,NULL,NULL,fig2awc,f
                    labels=c("(a)","","","","(b)","","","","(c)"),
                    rel_heights=c(1,-0.11,1,-0.11,1),
                    align="h",  hjust = 0.25)
-ggsave(here("Figures","Figure2.png"), width = 8, height = 7) # make plots higher
+ggsave(here("Figures","Figure2.png"), width = 8, height = 7)
 
-# MAKE FIGURE 3 (relationship between M and B0, 3 stocks)
-fig3hg <- fig3[[1]]
-fig3sg <- fig3[[2]]+
-  ylab("")
-fig3wc <- fig3[[3]]+
-  ylab("")
-
-cowplot::plot_grid(fig3hg,fig3sg,fig3wc, nrow=1,
-                   labels=c("(a)","(b)","(c)"), align="h", vjust=1.)
-ggsave(here("Figures","Figure3.png"), width = 8, height = 5)
-
-# MAKE FIGURE 3 alternative (relationship between M and B0, 3 stocks, 10 replicates)
-fig3hg_alt <- fig3_alternative[[1]]+
-  theme(legend.position = "none")
-fig3sg_alt <- fig3_alternative[[2]]+
-  ylab("")+theme(legend.position = "none")
-fig3wc_alt <- fig3_alternative[[3]]+
-  ylab("")+theme(legend.position = "none")
-
-cowplot::plot_grid(fig3hg_alt,fig3sg_alt,fig3wc_alt, nrow=1,
-                   labels=c("(a)","(b)","(c)"), align="h", vjust=1.4)
-ggsave(here("Figures","Figure3_alternative.png"), width = 8, height = 5)
-
-# MAKE FIGURE 4 (S-R relationships and replacement lines)
-fig4hg <- fig4[[1]]+
-  xlab("")
+# MAKE FIGURE 4 (relationship between M and B0, 3 stocks)
+fig4hg <- fig4[[1]]
 fig4sg <- fig4[[2]]+
+  ylab("")
+fig4wc <- fig4[[3]]+
+  ylab("")
+
+cowplot::plot_grid(fig4hg,fig4sg,fig4wc, nrow=1,
+                   labels=c("(a)","(b)","(c)"), align="h", vjust=1.)
+ggsave(here("Figures","Figure4.png"), width = 8, height = 5)
+
+# MAKE FIGURE 4 alternative (relationship between M and B0, 3 stocks, 10 replicates)
+fig4hg_alt <- fig4_alternative[[1]]+
+  theme(legend.position = "none")
+fig4sg_alt <- fig4_alternative[[2]]+
+  ylab("")+theme(legend.position = "none")
+fig4wc_alt <- fig4_alternative[[3]]+
+  ylab("")+theme(legend.position = "none")
+
+cowplot::plot_grid(fig4hg_alt,fig4sg_alt,fig4wc_alt, nrow=1,
+                   labels=c("(a)","(b)","(c)"), align="h", vjust=1.4)
+ggsave(here("Figures","Figure4_alternative.png"), width = 8, height = 5)
+
+# MAKE FIGURE 5 (S-R relationships and replacement lines)
+fig5hg <- fig5[[1]]+
   xlab("")
-fig4wc <- fig4[[3]]
+fig5sg <- fig5[[2]]+
+  xlab("")
+fig5wc <- fig5[[3]]
 
-cowplot::plot_grid(fig4hg,fig4sg,fig4wc, nrow=3, labels=c("(a)","(b)","(c)"),
+cowplot::plot_grid(fig5hg,fig5sg,fig5wc, nrow=3, labels=c("(a)","(b)","(c)"),
                    align="v",  hjust = 0.25)
-ggsave(here("Figures","Figure4.png"), width = 8, height = 7)
+ggsave(here("Figures","Figure5.png"), width = 8, height = 7)
 
-# MAKE FIGURE 5 (time series of SSB, M and B0)
-# SSB
-fig5ahg <- fig5a[[1]]+
+# MAKE FIGURE 6 (time series of M)
+# M
+fig6hg <- fig6[[1]]+
   xlab("")+
   theme(axis.text.x=element_blank())
-fig5asg <- fig5a[[2]]+
+fig6sg <- fig6[[2]]+
   xlab("")+
   theme(axis.text.x=element_blank())
-fig5awc <- fig5a[[3]]
+fig6wc <- fig6[[3]]
 
-#M
-fig5bhg <- fig5b[[1]]+
+#SSB
+fig7hg <- fig7[[1]]+
   xlab("")+
   theme(axis.text.x=element_blank())
-fig5bsg <- fig5b[[2]]+
+fig7sg <- fig7[[2]]+
   xlab("")+
   theme(legend.position = "none")+
   theme(axis.text.x=element_blank())
-fig5bwc <- fig5b[[3]]+
+fig7wc <- fig7[[3]]+
   theme(legend.position = "none")
 
 #B0
-fig5chg <- fig5c[[1]]+
+fig8hg <- fig8[[1]]+
   xlab("")+
   theme(axis.text.x=element_blank())
-fig5csg <- fig5c[[2]]+
+fig8sg <- fig8[[2]]+
   xlab("")+
   theme(legend.position = "none")+
   theme(axis.text.x=element_blank())
-fig5cwc <- fig5c[[3]]+
+fig8wc <- fig8[[3]]+
   theme(legend.position = "none")
 
 ## ~Join plots by type~ ##
 # add null plots with negative relative heights to reduce white space
-cowplot::plot_grid(fig5bhg,NULL,fig5bsg,NULL,fig5bwc, nrow=5, labels=c("(a)","","(b)","","(c)"),
+cowplot::plot_grid(fig6hg,NULL,fig6sg,NULL,fig6wc, nrow=5, labels=c("(a)","","(b)","","(c)"),
                    align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
-ggsave(here("Figures","Figure5_M_all_stocks.png"), width = 8, height = 7)
+ggsave(here("Figures","Figure6_M_all_stocks.png"), width = 8, height = 7)
 
-cowplot::plot_grid(fig5ahg,NULL,fig5asg,NULL,fig5awc, nrow=5, labels=c("(a)","","(b)","","(c)"),
+cowplot::plot_grid(fig7hg,NULL,fig7sg,NULL,fig7wc, nrow=5, labels=c("(a)","","(b)","","(c)"),
                    align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
-ggsave(here("Figures","Figure6_ssb_all_stocks.png"), width = 8, height = 7)
+ggsave(here("Figures","Figure7_ssb_all_stocks.png"), width = 8, height = 7)
 
-cowplot::plot_grid(fig5chg,NULL,fig5csg,NULL,fig5cwc, nrow=5, labels=c("(a)","","(b)","","(c)"),
+cowplot::plot_grid(fig8hg,NULL,fig8sg,NULL,fig8wc, nrow=5, labels=c("(a)","","(b)","","(c)"),
                    align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
-ggsave(here("Figures","Figure7_B0_all_stocks_med_only.png"), width = 8, height = 7)
-
-## ~Join plots by stock and maybe put two in the supp material~ ##
-# SSB
-fig5ahg <- fig5a[[1]]+
-  xlab("")+
-  theme(axis.text.x=element_blank())
-fig5asg <- fig5a[[2]]+
-  xlab("")+
-  theme(axis.text.x=element_blank())
-fig5awc <- fig5a[[3]]+
-  theme(axis.text.x=element_blank())
-#M
-fig5bhg <- fig5b[[1]]+
-  xlab("")+
-  theme(axis.text.x=element_blank())
-fig5bsg <- fig5b[[2]]+
-  xlab("")+
-  theme(axis.text.x=element_blank())
-fig5bwc <- fig5b[[3]]+
-  theme(axis.text.x=element_blank())
-
-#B0
-fig5chg <- fig5c[[1]]
-fig5csg <- fig5c[[2]]
-fig5cwc <- fig5c[[3]]
-
-cowplot::plot_grid(fig5ahg,NULL,fig5bhg,NULL,fig5chg, nrow=5, labels=c("(a)","","(b)","","(c)"),
-                   align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
-ggsave(here("Figures","Figure5_HG.png"), width = 8, height = 7)
-
-cowplot::plot_grid(fig5asg,NULL,fig5bsg,NULL,fig5csg, nrow=5, labels=c("(a)","","(b)","","(c)"),
-                   align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
-ggsave(here("Figures","Figure6_SOG.png"), width = 8, height = 7)
-
-cowplot::plot_grid(fig5awc,NULL,fig5bwc,NULL,fig5cwc, nrow=5, labels=c("(a)","","(b)","","(c)"),
-                   align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
-ggsave(here("Figures","Figure7_WCVI.png"), width = 8, height = 7)
+ggsave(here("Figures","Figure8_B0_all_stocks_med_only.png"), width = 8, height = 7)
 
 # MAKE FIGURE 6 (LRP and PLRP plots)
 # LRP

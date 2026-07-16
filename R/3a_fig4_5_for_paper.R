@@ -14,13 +14,13 @@ stocks <- names(histMSEs)
 nstocks <- length(stocks)
 
 # Create lists for putting figures
-fig3 <- list()
-fig3_alternative <- list()
 fig4 <- list()
+fig4_alternative <- list()
+fig5 <- list()
 
-# FIGURE 3.ANALYTICAL RELATIONSHIP BETWEEN M AND B0
+# FIGURE 4.ANALYTICAL RELATIONSHIP BETWEEN M AND B0
 for(j in 1:nstocks){
-  cat("~~~ Plotting Fig 3 for", paste(stocks[j]), "~~~\n")
+  cat("~~~ Plotting Fig 4 for", paste(stocks[j]), "~~~\n")
 
   nsim <- histMSEs[[j]]@OM@nsim
   nyears <- histMSEs[[j]]@OM@nyears
@@ -116,7 +116,7 @@ for(j in 1:nstocks){
     scale_colour_viridis_d()+
     mytheme
   g1
-  ggsave(file.path(StockDirFigs, paste0("FIG3_M_B0_v1_",stocks[j],".png")),
+  ggsave(file.path(StockDirFigs, paste0("FIG4_M_B0_v1_",stocks[j],".png")),
          width = 8, height = 5)
 
   # Look at ribbon plot version (use all sims)
@@ -168,12 +168,12 @@ for(j in 1:nstocks){
     scale_x_continuous(breaks=seq(0.2,1.22,by=0.2))+
     mytheme_paper
   g2
-  ggsave(file.path(StockDirFigs, paste0("FIG3_M_B0_v2_",stocks[j],".png")),
+  ggsave(file.path(StockDirFigs, paste0("FIG4_M_B0_v2_",stocks[j],".png")),
          width = 8, height = 5)
 
-# FIGURE 4. STOCK-RECRUIT CURVE WITH ALTERNATIVE B0, R0 AND REPLACEMENT LINES
+# FIGURE 5. STOCK-RECRUIT CURVE WITH ALTERNATIVE B0, R0 AND REPLACEMENT LINES
 # Now take a random replicate from Outpars and make the S-R curve
-cat("~~~ Plotting Fig 4 for", paste(stocks[j]), "~~~\n")
+cat("~~~ Plotting Fig 5 for", paste(stocks[j]), "~~~\n")
 
 Reps <- unique(Outpars$Sim)
 randrep <- sample(Reps,1,replace=F)
@@ -197,16 +197,16 @@ g3 <- Outpars_rep |>
   mytheme_paper+
   xlab("SB")+ylab("Recruits")
 g3
-ggsave(file.path(StockDirFigs, paste0("FIG4_Stock-Recruit_",stocks[j],".png")),
+ggsave(file.path(StockDirFigs, paste0("FIG5_Stock-Recruit_",stocks[j],".png")),
        width = 8, height = 5)
 
 # Add the figures to lists
-fig3[[j]] <- g2
-fig3_alternative[[j]] <- g1
-fig4[[j]] <- g3
+fig4[[j]] <- g2
+fig4_alternative[[j]] <- g1
+fig5[[j]] <- g3
 
 # Write out table of values for a single replicate
-write_csv(Outpars_rep, file=file.path(StockDirFigs, paste0("TABLE1_Stock-Recruit_fromFig3",stocks[j],".csv")))
+write_csv(Outpars_rep, file=file.path(StockDirFigs, paste0("TABLE1_Stock-Recruit_fromFig4",stocks[j],".csv")))
 
 # Write all reps out for supp
 write_csv(Outpars, file=file.path(StockDirFigs, paste0("TABLE1_Stock-Recruit_allreps_for_supp",stocks[j],".csv")))

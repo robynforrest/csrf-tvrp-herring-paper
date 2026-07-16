@@ -4,7 +4,7 @@
 
 library(here)
 
-# FIGURE 5. TIME SERIES OF M AND LRP UNDER ALTERNATIVE AVERAGING SCENARIOS
+# FIGURE 6. TIME SERIES OF M AND LRP UNDER ALTERNATIVE AVERAGING SCENARIOS
 # This is a subset of the plots made in my csrf-tvrp-herring-pac repo in the file
 #   2b_plot-pac-herring-mse-nf.R
 # --- Load Base Herring OMs just to get the number and names of stocks and nsim --------------------
@@ -20,15 +20,15 @@ histMSEs <- readRDS(here("MSEs/hist_hMSEs.rda"))
 scenameHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
 
 # Create lists for putting figures
-fig5a <- list()
-fig5b <- list()
-fig5c <- list()
-fig6a <- list()
-fig6b <- list()
+fig6 <- list() #M
+fig7 <- list() #SSB
+fig8 <- list() #SB0
+fig9a <- list() #LRP
+fig9b <- list() #PLRP
 fig_supp_dynb0 <- list()
 
 for(j in 1:nstocks){
-  cat("~~~ Plotting Fig 5 for", paste(stocks[j]), "~~~\n")
+  cat("~~~ Plotting Figs 6-8 for", paste(stocks[j]), "~~~\n")
 
   StockDirOM    <- here("OMs", paste(stocks[j]))
   StockDirMSE   <- here("MSEs", paste(stocks[j]))
@@ -63,11 +63,8 @@ for(j in 1:nstocks){
     labs(x = "Year", y = "SB", title= "")+
     geom_vline(xintercept=cyr, lty=3)+
     mytheme_paper
- g1
-  ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-SSB_allScen_allYear_NF.png")),
-         width = 16, height = 10)
-
-  ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-SSB_allScen_allYear_NF.png")),
+  g1
+  ggsave(file.path(StockDirFigs, paste0("MSE-SSB_allScen_allYear_NF.png")),
          width = 16, height = 10)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -105,7 +102,7 @@ for(j in 1:nstocks){
     theme(legend.position = "bottom")+
     mytheme_paper
 
-  ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-allM_allScen_allYear_NF.png")),
+  ggsave(file.path(StockDirFigs, paste0("MSE-allM_allScen_allYear_NF.png")),
          width = 16, height = 10)
 
   #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -145,12 +142,12 @@ for(j in 1:nstocks){
     theme(legend.position = "bottom")+
     mytheme_paper
 
-  ggsave(file.path(StockDirFigs, paste0("FIGURE5_MSE-allB0_allScen_allYear_NF_med.png")),
+  ggsave(file.path(StockDirFigs, paste0("MSE-allB0_allScen_allYear_NF_med.png")),
          width = 16, height = 10)
 
-  # FIGURE 6. NO FISHING SCENARIO WITH ALTERNATIVE LRPS - BIOMASS AND PROBABILITIES
+  # FIGURE 9. NO FISHING SCENARIO WITH ALTERNATIVE LRPS - BIOMASS AND PROBABILITIES
   #   #########################################################################################################
-  cat("~~~ Plotting Fig 6 for", paste(stocks[j]), "~~~\n")
+  cat("~~~ Plotting Fig 9 for", paste(stocks[j]), "~~~\n")
   # Now plot all years again as LRP (0.3B0)
   # multiply all ref points by 0.3
   LRP <- allB0 |>
@@ -257,11 +254,11 @@ for(j in 1:nstocks){
          width = 8, height = 5)
 
   # Add the figures to lists - numbers no longer match paper
-  fig5a[[j]] <- g1
-  fig5b[[j]] <- g2
-  fig5c[[j]] <- g3
-  fig6a[[j]] <- g4
-  fig6b[[j]] <- g5
+  fig6[[j]] <- g2
+  fig7[[j]] <- g1
+  fig8[[j]] <- g3
+  fig9a[[j]] <- g4
+  fig9b[[j]] <- g5
   fig_supp_dynb0[[j]] <- g6
 
 } # end for j in stocks
