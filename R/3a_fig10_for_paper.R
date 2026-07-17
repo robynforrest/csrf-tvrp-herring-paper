@@ -96,7 +96,8 @@ for(j in 1:nstocks){
 
   cowplot::plot_grid(g1,g2,g3,g4, nrow=4, labels=c("(a)","(b)","(c)","(d)"),
                      hjust = 0.25)#, align="h")
-  ggsave(here("Figures",paste0("Figure10_",stocks[j],".png")))
+  ggsave(here("Figures",paste0("Figure10_",stocks[j],".png")),
+         width = 8, height = 7)
 
 
 }# end j
