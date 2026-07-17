@@ -75,7 +75,7 @@ fig6sg <- fig6[[2]]+
   theme(axis.text.x=element_blank())
 fig6wc <- fig6[[3]]
 
-#SSB
+#FIGURE 7 SSB
 fig7hg <- fig7[[1]]+
   xlab("")+
   theme(axis.text.x=element_blank())
@@ -86,7 +86,7 @@ fig7sg <- fig7[[2]]+
 fig7wc <- fig7[[3]]+
   theme(legend.position = "none")
 
-#B0
+#FIGURE 8 B0
 fig8hg <- fig8[[1]]+
   xlab("")+
   theme(axis.text.x=element_blank())
@@ -111,67 +111,107 @@ cowplot::plot_grid(fig8hg,NULL,fig8sg,NULL,fig8wc, nrow=5, labels=c("(a)","","(b
                    align="v", rel_heights=c(1,-0.11,1,-0.11,1),  hjust = 0.25)
 ggsave(here("Figures","Figure8_B0_all_stocks_med_only.png"), width = 8, height = 7)
 
-# MAKE FIGURE 6 (LRP and PLRP plots)
-# LRP
-fig6ahg <- fig6a[[1]]+
+# MAKE FIGURE 9 (LRP and PLRP plots for Increasing M Scenario)
+# MAKE FIGURE 9SUPP (LRP and PLRP plots for Constant M Scenario) in Supp Material
+# Make combined plots for each scenario
+
+# Had to cut off the y lab and legend so the plots would be the same size
+# Get them back and add them at the end
+legend_top <- get_legend(
+  # create some space to the left of the legend
+  fig9a[[1]] + theme(legend.box.margin = margin(0, 0, 0, 0))
+)
+legend_bottom <- get_legend(
+  # create some space to the left of the legend
+  fig9b[[1]] + theme(legend.box.margin = margin(0, 0, 0, 0))
+)
+
+# LRP Increasing M scenario for Supp material
+fig9ahg <- fig9a[[1]]+
   xlab("")+
-  theme(axis.text.x=element_blank())
-fig6asg <- fig6a[[2]]+
-  xlab("")+
+  theme(axis.text.x=element_blank())+
   theme(legend.position = "none")+
-  theme(axis.text.x=element_blank())
-fig6awc <- fig6a[[3]]+
-  theme(legend.position = "none")
+  theme(plot.margin = margin(0.,0.5,0.5,-0.5,unit="cm"))
+fig9asg <- fig9a[[2]]+
+  xlab("")+
+  theme(axis.text.x=element_blank())+
+  ylab("")+
+  # theme(axis.text.y=element_blank())+
+  theme(legend.position = "none")+
+  theme(plot.margin = margin(0.,0.5,0.5,-0.5,unit="cm"))
+fig9awc <- fig9a[[3]]+
+  xlab("")+
+  theme(axis.text.x=element_blank())+
+  ylab("")+
+  # theme(axis.text.y=element_blank())+
+  theme(legend.position = "none")+
+  theme(plot.margin = margin(0.,0.5,0.5,-0.5,unit="cm"))
 
 # PLRP
-fig6bhg <- fig6b[[1]]+
-  xlab("")+
-  theme(axis.text.x=element_blank())
-fig6bsg <- fig6b[[2]]+
-  xlab("")+
+fig9bhg <- fig9b[[1]]+
   theme(legend.position = "none")+
-  theme(axis.text.x=element_blank())
-fig6bwc <- fig6b[[3]]+
-  theme(legend.position = "none")
+  theme(plot.margin = margin(0.,0.5,0.,-0.5,unit="cm"))
+fig9bsg <- fig9b[[2]]+
+  theme(legend.position = "none")+
+  ylab("")+
+  # theme(axis.text.y=element_blank())+
+  theme(plot.margin = margin(0.,0.5,0.,-0.5,unit="cm"))
+fig9bwc <- fig9b[[3]]+
+  theme(legend.position = "none")+
+  ylab("")+
+  # theme(axis.text.y=element_blank())+
+  theme(plot.margin = margin(0.,0.5,0.,-0.5,unit="cm"))
 
-## ~Join plots by type~ ##
-cowplot::plot_grid(fig6ahg,NULL,fig6asg,NULL,fig6awc, nrow=5, labels=c("(a)","","(b)","","(c)"),
-                   align="v", rel_heights=c(1,-0.12,1,-0.12,1))
-ggsave(here("Figures","Figure6_LRP_all_stocks.png"), width = 8, height = 5)
+plots <- cowplot::plot_grid(NULL,fig9ahg,fig9asg,fig9awc,NULL,fig9bhg,fig9bsg,fig9bwc,
+                            ncol=4, byrow=TRUE, labels=c("","(a)","(b)","(c)"),
+                            rel_widths=c(0.3,3,3,3))
 
-cowplot::plot_grid(fig6bhg,NULL,fig6bsg,NULL,fig6bwc, nrow=5, labels=c("(a)","","(b)","","(c)"),
-                   align="v", rel_heights=c(1,-0.1,1,-0.1,1),  hjust = 0.25)
-ggsave(here("Figures","Figure6_PLRP_all_stocks.png"), width = 8, height = 5)
+legends <- cowplot::plot_grid(legend_top,legend_bottom, nrow=2)
+cowplot::plot_grid(plots,legends,rel_widths=c(3,0.4))
+ggsave(here("Figures","Figure9_LRP_Mincrease.png"), width = 8, height = 5, bg = "white")
 
-## ~Join plots by stock and maybe put two in the supp material~ ##
-# LRP
-fig6ahg <- fig6a[[1]]+
+# LRP Constant M scenario
+#margins: T R B L (TRouBLe)
+fig9asupphg <- fig9asupp[[1]]+
   xlab("")+
-  theme(axis.text.x=element_blank())
-fig6asg <- fig6a[[2]]+
+  theme(axis.text.x=element_blank())+
+  theme(legend.position = "none")+
+  theme(plot.margin = margin(0.,0.5,0.5,-0.5,unit="cm"))
+fig9asuppsg <- fig9asupp[[2]]+
   xlab("")+
-  theme(axis.text.x=element_blank())
-fig6awc <- fig6a[[3]]+
-  xlab("")
+  theme(axis.text.x=element_blank())+
+  ylab("")+
+  # theme(axis.text.y=element_blank())+
+  theme(legend.position = "none")+
+  theme(plot.margin = margin(0.,0.5,0.5,-0.5,unit="cm"))
+fig9asuppwc <- fig9asupp[[3]]+
+  xlab("")+
+  theme(axis.text.x=element_blank())+
+  ylab("")+
+  # theme(axis.text.y=element_blank())+
+  theme(legend.position = "none")+
+  theme(plot.margin = margin(0.,0.5,0.5,-0.5,unit="cm"))
 
 # PLRP
-fig6bhg <- fig6b[[1]]+
-  theme(legend.position = "none")
-fig6bsg <- fig6b[[2]]+
-  theme(legend.position = "none")
-fig6bwc <- fig6b[[3]]+
-  theme(legend.position = "none")
+fig9bsupphg <- fig9bsupp[[1]]+
+  theme(legend.position = "none")+
+  theme(plot.margin = margin(0.,0.5,0.,-0.5,unit="cm"))
+fig9bsuppsg <- fig9bsupp[[2]]+
+  theme(legend.position = "none")+
+  ylab("")+
+  # theme(axis.text.y=element_blank())+
+  theme(plot.margin = margin(0.,0.5,0.,-0.5,unit="cm"))
+fig9bsuppwc <- fig9bsupp[[3]]+
+  theme(legend.position = "none")+
+  ylab("")+
+  # theme(axis.text.y=element_blank())+
+  theme(plot.margin = margin(0.,0.5,0.,-0.5,unit="cm"))
 
-cowplot::plot_grid(fig6ahg,NULL,fig6bhg, nrow=3, labels=c("(a)","","(b)"),
-                   align="v", rel_heights=c(1,-0.05,1), hjust = 0.25)
-ggsave(here("Figures","Figure8_HG.png"), width = 8, height = 5)
+plots <- cowplot::plot_grid(NULL,fig9asupphg,fig9asuppsg,fig9asuppwc,NULL,fig9bsupphg,fig9bsuppsg,fig9bsuppwc,
+                            ncol=4, byrow=TRUE, labels=c("","(a)","(b)","(c)"),
+                            rel_widths=c(0.3,3,3,3))
 
-cowplot::plot_grid(fig6asg,NULL,fig6bsg, nrow=3, labels=c("(a)","","(b)"),
-                   align="v", rel_heights=c(1,-0.05,1), hjust = 0.25)
-ggsave(here("Figures","Figure9_SOG.png"), width = 8, height = 5)
-
-cowplot::plot_grid(fig6awc,NULL,fig6bwc, nrow=3, labels=c("(a)","","(b)"),
-                   align="v", rel_heights=c(1,-0.05,1), hjust = 0.25)
-ggsave(here("Figures","Figure10_WCVI.png"), width = 8, height = 5)
-
+legends <- cowplot::plot_grid(legend_top,legend_bottom, nrow=2)
+cowplot::plot_grid(plots,legends,rel_widths=c(3,0.4))
+ggsave(here("Figures","Figure9SUPP_LRP_Mconstant.png"), width = 8, height = 5, bg = "white")
 
