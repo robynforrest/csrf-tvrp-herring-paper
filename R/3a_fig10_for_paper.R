@@ -11,9 +11,9 @@ nsim <- hOMs[[1]]@nsim
 histMSEs <- readRDS(here("MSEs/hist_hMSEs.rda"))
 scenameHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
 
-# # FIGURE 11. HARVEST CONTROL RULES (now moved to supp)
+# # FIGURE 10. HARVEST CONTROL RULES (HG and WCVI moved to supp)
 for(j in 1:nstocks){
-  cat("~~~ Plotting Fig 11 for", paste(stocks[j]), "~~~\n")
+  cat("~~~ Plotting Fig 10 for", paste(stocks[j]), "~~~\n")
 
   StockDirOM    <- here(SpDirOM, paste(stocks[j]))
   StockDirMSE   <- here(SpDirMSE, paste(stocks[j]))
@@ -49,6 +49,7 @@ for(j in 1:nstocks){
 
   # OM HCR - no phase plot - this will save the plots into dir
   # This function is in 99_plot_funcs.R
+  # ONLY FOR INCREASING M SCENARIO
   g1 <- plotTVHCRom_oneplot(allB0,
                     b0type="hist",
                     scenario=ScenarioNamesHuman[2],
@@ -95,7 +96,7 @@ for(j in 1:nstocks){
 
   cowplot::plot_grid(g1,g2,g3,g4, nrow=4, labels=c("(a)","(b)","(c)","(d)"),
                      hjust = 0.25)#, align="h")
-  ggsave(here("Figures",paste0("Figure11_",stocks[j],".png")))
+  ggsave(here("Figures",paste0("Figure10_",stocks[j],".png")))
 
 
 }# end j
