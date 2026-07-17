@@ -88,17 +88,26 @@ for(j in 1:nstocks){
     theme(axis.text.x=element_blank())
   g2 <- g2+
     xlab("")+
-    theme(axis.text.x=element_blank())
+    theme(axis.text.x=element_blank())+
+    theme(legend.position = "none")
   g3 <- g3+
     xlab("")+
-    theme(axis.text.x=element_blank())
-  g4 <- g4
+    theme(axis.text.x=element_blank())+
+    theme(legend.position = "none")
+  g4 <- g4+
+    theme(legend.position = "none")
+
+  # TODO: Add Legend in Null space, as for Fig 5
 
   cowplot::plot_grid(g1,g2,g3,g4, nrow=4, labels=c("(a)","(b)","(c)","(d)"),
-                     hjust = 0.25)#, align="h")
-  ggsave(here("Figures",paste0("Figure10_",stocks[j],".png")),
-         width = 8, height = 7)
-
+                     hjust = 0.25, align="v")
+  #cowplot::plot_grid(fig5hg,fig5sg,fig5wc, nrow=3, labels=c("(a)","(b)","(c)"),
+   #                  align="v",  hjust = 0.25)
+  if(j==2){
+    ggsave(here("Figures",paste0("Figure10_HCR",stocks[j],".png")),width = 8, height = 7)
+  }else{
+    ggsave(here("Figures",paste0("Supp_HCR",stocks[j],".png")),width = 8, height = 7)
+  }
 
 }# end j
 

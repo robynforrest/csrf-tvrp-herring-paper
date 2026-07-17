@@ -207,7 +207,7 @@ plotTVHCRom <- function(allB0,
       gfplot::theme_pbs()+
       labs(x = "Spawning biomass", y = "Fishing mortality", title=paste("B0 type =", b0types[ii]))+
       mytheme_lg
-   ggsave(file.path(dir, paste0("FIGURE6_MSE-HCR_OM_",b0types[ii],".png")),
+   ggsave(file.path(dir, paste0("FIGURE10_MSE-HCR_OM_",b0types[ii],".png")),
            width = 16, height = 10)
   } # end ii
 

@@ -43,8 +43,8 @@ fig4wc <- fig4[[3]]
 
 cowplot::plot_grid(NULL,fig4hg,NULL,fig4sg,NULL,fig4wc, nrow=3,
                    labels=c("(a)","","(b)","","(c)"), align="v", vjust=1.,
-                   rel_widths=c(0.2,3))
-ggsave(here("Figures","Figure4.png"), width = 8, height = 7, bg="white")
+                   rel_widths=c(0.25,3))
+ggsave(here("Figures","Figure4.png"), width = 5, height = 7, bg="white")
 
 # MAKE FIGURE 4 alternative (relationship between M and B0, 3 stocks, 10 replicates)
 fig4hg_alt <- fig4_alternative[[1]]+
