@@ -68,10 +68,13 @@ if(make_oms==TRUE){
       maxage <- hOMs[[j]]@maxage
       syr <- hOMs[[j]]@CurrentYr - hOMs[[j]]@nyears + 1
       allhistyears <- (syr-hOMs[[j]]@maxage):hOMs[[j]]@CurrentYr # includes maxage burnin years
+      realhistyears <- syr:hOMs[[j]]@CurrentYr #just the historical model years
+      # Hist_RecDevs_all <- hOMs[[j]]@cpars$Perr_y[,1:length(allhistyears)]
+      # Hist_RecDevs_real <- hOMs[[j]]@cpars$Perr_y[,(hOMs[[j]]@maxage +1):length(allhistyears)]
+      # Hist_RecDevs_last5 <- hOMs[[j]]@cpars$Perr_y[,(hOMs[[j]]@maxage +69):length(allhistyears)]
 
       # TRY increasing projected rec devs to answer reviewer 1's question
       # Modified version of MSEtool:::sample_recruitment
-      # without bias correction
       # samp_recruitment <- function (Perr_hist, proyears, procsd, AC, seed)
       # {
       #   if (!missing(seed))
@@ -85,7 +88,7 @@ if(make_oms==TRUE){
       #   #procmu <- rep(0,nsim)#
       #   # Demo of what we get if we base the mean on the last 5 years
       #   # TODO: I think I need to add the bias correction back to this
-      #   procmu <- log(apply(Perr_hist[,ncol(Perr_hist):(ncol(Perr_hist)-4)],1,mean))
+      #   procmu <- log(apply(Perr_hist[,ncol(Perr_hist):(ncol(Perr_hist)-4)],1,mean))-0.5 * procsd^2 * (1 - AC)/sqrt(1 - AC^2)
       #   Perr_delta <- rnorm(nsim * proyears, procmu, procsd) %>% # the sampled rec devs are just a function of procsd
       #     matrix(nrow = nsim, ncol = proyears)
       #   Perr_proj <- matrix(NA_real_, nsim, proyears)
@@ -95,11 +98,12 @@ if(make_oms==TRUE){
       #                                                                 y - 1] + Perr_delta[, y] * sqrt(1 - AC^2)
       #   return(Perr_proj)
       # }
-
-      # Reset perr_y in proj period to have mean 0 without the bias correction
-      # new_perry <- samp_recruitment(Hist_RecDevs_real,nproyears,hOMs[[j]]@cpars$Perr, hOMs[[j]]@cpars$AC, 101) |>
-      #   exp()
-      # hOMs[[j]]@cpars$Perr_y[, hOMs[[j]]@maxage + hOMs[[j]]@nyears + seq(1, hOMs[[j]]@proyears)] <- new_perry
+      #
+      # # Reset perr_y in proj period to have mean 0 without the bias correction
+      #  new_perry <- samp_recruitment(Hist_RecDevs_last5,nproyears,
+      #                                hOMs[[j]]@cpars$Perr, hOMs[[j]]@cpars$AC, 101) |>
+      #    exp()
+      #  hOMs[[j]]@cpars$Perr_y[, hOMs[[j]]@maxage + hOMs[[j]]@nyears + seq(1, hOMs[[j]]@proyears)] <- new_perry
 
       # look at rec deviations
       default_perr <- hOMs[[j]]@cpars$Perr_y

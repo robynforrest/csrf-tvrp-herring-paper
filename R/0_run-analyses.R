@@ -27,15 +27,15 @@ SpDirFigs <- here("Figures")
 if(!file.exists(SpDirFigs)) dir.create(SpDirFigs, recursive=TRUE)
 
 # Universal settings that are changed frequently
-nsim <- 250 #Base: 2499
+nsim <- 2499 #Base: 2499. Sensitivities 250
 pro_years <- 30
 Mage <- 3 # age at which to extract constant M from cpars M_age_array
 
 # OM SETTINGS
 # Random walk parameters for om M
-alpha_m_inc <- 0.015#Base: 0.009 # setting for random walk in M with upward drift
+alpha_m_inc <- 0.009 #Base: 0.009 # setting for random walk in M with upward drift
 alpha_m_dec <- -0.012  # setting for random walk in M with downward drift (not used)
-sigma_m   <- 0.03#Base: 0.03 # setting for random walk in M
+sigma_m   <- 0.03 #Base: 0.03 # setting for random walk in M
 
 # what sd for M (across reps) should we base M projections on? nyears-sd_numyears.
 # sd across reps for M is really large in final year, sample from sd_numyears earlier
