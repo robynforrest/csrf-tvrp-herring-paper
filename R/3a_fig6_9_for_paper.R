@@ -122,7 +122,7 @@ for(j in 1:nstocks){
 
   write_csv(allB0, file.path(StockDirFigs_NF, paste0("MSE-allB0_allScen_allYear_NF.csv")))
 
-  # all years with uncertainty
+  # all years median only
   g3 <- allB0 |>
     mutate(group=factor(scenario, levels=scenameHuman)) |>
     ggplot()+
@@ -196,7 +196,7 @@ for(j in 1:nstocks){
   ggsave(file.path(StockDirFigs, paste0("MSE-allLRP_proYear_NF_constantM.png")),
          width = 16, height = 10)
 
-  # Pro years only - Constant M
+  # Pro years only - Increasing M
   g4 <- LRP |>
     filter(year>cyr) |>
     mutate(group=factor(scenario, levels=scenameHuman)) |>
@@ -227,8 +227,6 @@ for(j in 1:nstocks){
          width = 16, height = 10)
 
   # # Plot P(B > 0.3B0)
-  # # Make 5 panel plot with probs
-  # # Show conservation performance metrics
   PLRPhistB0   <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="hist", mp=1) |>
     mutate(MP="NFref")
   PLRPmeanB0   <- purrr::map2_df(MSEscenarios,scenameHuman, getPLRP_B0, age=Mage,type="mean", mp=1)|>
