@@ -72,7 +72,7 @@ for(j in 1:nstocks){
       gfplot::theme_pbs() +
       scale_fill_startrek()+  # ggsci package
       scale_color_startrek()+
-      labs(x = "Year", y = "", title="Log_recruitment deviations")+
+      labs(x = "Year", y = "Log_recruitment deviations", title="")+
       theme(plot.title = element_text(face="bold", size=20),
             axis.title.x = element_text(size=16,face="bold"),
             axis.text.y = element_text(size=12,face="bold"),
@@ -99,7 +99,7 @@ for(j in 1:nstocks){
       gfplot::theme_pbs() +
       scale_fill_startrek()+  # ggsci package
       scale_color_startrek()+
-      labs(x = "Year", y = "", title="Log_recruitment deviations")+
+      labs(x = "Year", y = "Log_recruitment deviations", title="")+
       theme(plot.title = element_text(face="bold", size=20),
             axis.title.x = element_text(size=16,face="bold"),
             axis.text.y = element_text(size=12,face="bold"),
