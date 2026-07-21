@@ -25,6 +25,7 @@ for(j in 1:nstocks){
     syr <- cyr-OMscenarios[[1]]@nyears+1
     ScenarioNames <- names(OMscenarios)
     nsc <- length(ScenarioNames)
+    proc_err <- OMscenarios[[1]]@cpars$Perr
 
     # Make a directory for the figures
     StockDirFigs <- here::here(SpDirFigs, paste(stocks[j]))
@@ -54,57 +55,59 @@ for(j in 1:nstocks){
       ggsave(file.path(StockDirFigs, paste0("OM-M_All_M_scenarios_",stocks[j],".png")),
                width = 8, height = 5)
 
-    # 2. Rec deviations
-    meandev <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getperry_mean) |>
+    # 2. Log rec devs
+    meanlogdev <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getlogperry_mean, proc_err)|>
       as.data.frame()
-    quantdev <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getperry) |>
+    quantlogdev <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getlogperry, proc_err) |>
       as.data.frame()
-    g <- left_join(quantdev,meandev) |>
+    g <- left_join(quantlogdev,meanlogdev) |>
       mutate(group=factor(scenario, levels=ScenarioNamesHuman)) |>
-      filter(scenario==ScenarioNamesHuman[1]) |>
+      filter(scenario==ScenarioNamesHuman[1], year>=syr) |>
       ggplot() +
-      geom_pointrange(aes(x=year, y=med,ymin=lwr, ymax=upr, color=scenario)) +
-      geom_point(aes(x=year, y=mean), color=1, shape=15) +
-      geom_line(aes(x=year,y=med, color=scenario), lwd=0.25, lty=1) +
-      geom_hline(yintercept=1, linetype="dashed", color = 1, linewidth=1)+
-      geom_vline(xintercept=cyr, linetype=3, color = 1, linewidth=0.5)+
-      #facet_grid(group~.)+
-      gfplot::theme_pbs() +
-      scale_fill_startrek()+  # ggsci package
-      scale_color_startrek()+
-      labs(x = "Year", y = "", title="Recruitment deviations")+
-      theme(plot.title = element_text(face="bold", size=20),
-          axis.title.x = element_text(size=16,face="bold"),
-          axis.text.y = element_text(size=12,face="bold"),
-          axis.text.x = element_text(size=12,face="bold"),
-          strip.text.y = element_blank(),
-          legend.text = element_text(size=12),
-          legend.title = element_text(size=12, face="bold"))
-    ggsave(file.path(StockDirFigs, paste0("OM-Recdevs.png")),
-       width = 12, height = 7.5)
-
-    g <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getperry) |>
-      as.data.frame() %>%
-      filter(year>=pyr1) %>%
-      mutate(group=factor(scenario, levels=ScenarioNamesHuman)) |>
-      ggplot() +
-      geom_pointrange(aes(x=year, y=log(med),ymin=log(lwr), ymax=log(upr), color=scenario)) +
-      geom_line(aes(x=year,y=log(med), color=scenario), lwd=0.5, lty=1) +
-      geom_vline(xintercept = pyr1, lty=3) +
+      geom_pointrange(aes(x=year, y=med,ymin=lwr, ymax=upr), color=2) +
+      #geom_point(aes(x=year, y=mean), color=1, shape=15) +
+      geom_line(aes(x=year,y=med), color=2, lwd=0.25, lty=1) +
       geom_hline(yintercept=0, linetype="dashed", color = 1, linewidth=1)+
-      facet_grid(group~.)+
+      geom_vline(xintercept=cyr, linetype=3, color = 1, linewidth=0.5)+
       gfplot::theme_pbs() +
       scale_fill_startrek()+  # ggsci package
       scale_color_startrek()+
-      labs(x = "Year", y = "", title="Projected log recruitment deviations")+
+      labs(x = "Year", y = "", title="Log_recruitment deviations")+
       theme(plot.title = element_text(face="bold", size=20),
-          axis.title.x = element_text(size=16,face="bold"),
-          axis.text.y = element_text(size=12,face="bold"),
-          axis.text.x = element_text(size=12,face="bold"),
-          strip.text.y = element_blank(),
-          legend.text = element_text(size=12),
-          legend.title = element_text(size=12, face="bold"))
-    ggsave(file.path(StockDirFigs, paste0("OM-Recdevs_pro.png")),
+            axis.title.x = element_text(size=16,face="bold"),
+            axis.text.y = element_text(size=12,face="bold"),
+            axis.text.x = element_text(size=12,face="bold"),
+            strip.text.y = element_blank(),
+            legend.text = element_text(size=12),
+            legend.title = element_text(size=12, face="bold"))
+    g
+    ggsave(file.path(StockDirFigs, paste0("Supp_OM-LogRecdevs",stocks[j],".png")),
+           width = 12, height = 7.5)
+
+    # Pro years only
+    # 2. Log rec devs
+    g <- left_join(quantlogdev,meanlogdev) |>
+      mutate(group=factor(scenario, levels=ScenarioNamesHuman)) |>
+      filter(scenario==ScenarioNamesHuman[1], year>=pyr1) |>
+      mutate(group=factor(scenario, levels=ScenarioNamesHuman)) |>
+      ggplot() +
+      geom_pointrange(aes(x=year, y=med,ymin=lwr, ymax=upr), color=2) +
+      #geom_point(aes(x=year, y=mean), color=1, shape=15) +
+      geom_line(aes(x=year,y=med), color=2, lwd=0.25, lty=1) +
+      geom_hline(yintercept=0, linetype="dashed", color = 1, linewidth=1)+
+      geom_vline(xintercept=cyr, linetype=3, color = 1, linewidth=0.5)+
+      gfplot::theme_pbs() +
+      scale_fill_startrek()+  # ggsci package
+      scale_color_startrek()+
+      labs(x = "Year", y = "", title="Log_recruitment deviations")+
+      theme(plot.title = element_text(face="bold", size=20),
+            axis.title.x = element_text(size=16,face="bold"),
+            axis.text.y = element_text(size=12,face="bold"),
+            axis.text.x = element_text(size=12,face="bold"),
+            strip.text.y = element_blank(),
+            legend.text = element_text(size=12),
+            legend.title = element_text(size=12, face="bold"))
+    ggsave(file.path(StockDirFigs, paste0("Supp_OM-LogRecdevs_pro",stocks[j],".png")),
        width = 16, height = 10)
 
 } #end j

@@ -87,7 +87,6 @@ if(make_oms==TRUE){
       #   #procmu <- -0.5 * procsd^2 * (1 - AC)/sqrt(1 - AC^2)
       #   #procmu <- rep(0,nsim)#
       #   # Demo of what we get if we base the mean on the last 5 years
-      #   # TODO: I think I need to add the bias correction back to this
       #   procmu <- log(apply(Perr_hist[,ncol(Perr_hist):(ncol(Perr_hist)-4)],1,mean))-0.5 * procsd^2 * (1 - AC)/sqrt(1 - AC^2)
       #   Perr_delta <- rnorm(nsim * proyears, procmu, procsd) %>% # the sampled rec devs are just a function of procsd
       #     matrix(nrow = nsim, ncol = proyears)
@@ -98,8 +97,9 @@ if(make_oms==TRUE){
       #                                                                 y - 1] + Perr_delta[, y] * sqrt(1 - AC^2)
       #   return(Perr_proj)
       # }
-      #
-      # # Reset perr_y in proj period to have mean 0 without the bias correction
+
+
+      # # Reset perr_y in proj period
       #  new_perry <- samp_recruitment(Hist_RecDevs_last5,nproyears,
       #                                hOMs[[j]]@cpars$Perr, hOMs[[j]]@cpars$AC, 101) |>
       #    exp()

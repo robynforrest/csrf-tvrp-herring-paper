@@ -203,36 +203,52 @@ getFec <- function(object, scen , type="annual", input_type="OM"){
 } # end function
 
 ###################################################################################################################
-# Log recruitment errors
-getperry <- function(om, scen){
+#log rec devs
+getlogperry <- function(om, scen, procerr){
   all_years <- seq(om@CurrentYr - om@nyears + 1, om@CurrentYr+om@proyears)
   # Need to add on the devs for the 10 years prior to the start of the series (if maxage=10)
   maxage <- om@maxage
   preyr1 <- all_years[1]-maxage
   preyrs <- preyr1:(all_years[1]-1)
 
-  perr_y <- om@cpars$Perr_y |>
+  perr_y <- om@cpars$Perr_y
+  logperr_y <- matrix(0,nrow=nrow(perr_y), ncol=ncol(perr_y)) |>
+    as.data.frame()
+  # correct bias
+  for(ii in 1:nrow(perr_y)){
+    logperr_y[ii,] <- log(perr_y[ii,])+0.5*procerr[ii]^2
+   }
+
+  logperr_y_quants <- logperr_y |>
     apply(2,quantile,probs=c(conflo,0.5,confhi)) |> t() |>
     as.data.frame() |>
     mutate(year=c(preyrs,all_years), scenario=scen) |>
     dplyr::rename(lwr=1, med=`50%`, upr=3) |>  as.data.frame()
-  perr_y
+  logperr_y_quants
 }
 
-getperry_mean <- function(om, scen){
+getlogperry_mean <- function(om, scen, procerr){
   all_years <- seq(om@CurrentYr - om@nyears + 1, om@CurrentYr+om@proyears)
   # Need to add on the devs for the 10 years prior to the start of the series (if maxage=10)
   maxage <- om@maxage
   preyr1 <- all_years[1]-maxage
   preyrs <- preyr1:(all_years[1]-1)
 
-  perr_y <- om@cpars$Perr_y |>
+  # correct bias
+  perr_y <- om@cpars$Perr_y
+  logperr_y <- matrix(0,nrow=nrow(perr_y), ncol=ncol(perr_y)) |>
+    as.data.frame()
+  for(ii in 1:nrow(perr_y)){
+    logperr_y[ii,] <- log(perr_y[ii,])+0.5*procerr[ii]^2
+  }
+
+  logperr_y_mean <- logperr_y |>
     apply(2,mean) |>
     as.data.frame() |>
     mutate(year=c(preyrs,all_years), scenario=scen) |>
     dplyr::rename(mean=1) |>
     as.data.frame()
-  perr_y
+  logperr_y_mean
 }
 ###################################################################################################################
 
