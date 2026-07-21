@@ -134,19 +134,6 @@ if(make_oms==TRUE){
       #~ 2. Now make OMS with alternative future M scenarios ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       hOM <- hOMs[[j]]
 
-      # Response to Reviewer #3. Comment C14. Find the range and sd of historical M
-      historicalM <- hOMs[[j]]@cpars$M_ageArray[,Mage,1:(nyears-2)]
-      # Get the standard deviation across years for all reps
-      sdM <- apply(historicalM,2,sd) # annual standard deviation across reps
-      rangeM <- apply(historicalM,1,range)
-      meansdM <- mean(sdM)
-      meanrangeM <- apply(rangeM,1,mean)
-      historicalMstats <- list(sdMmean=meansdM,
-                               rangeMmean=meanrangeM) |>
-        as.data.frame()
-        historicalMstats$sdMmean[2]<-NA
-      write_csv(historicalMstats,file=file.path(StockDirFigs,"Mstats.csv"))
-
       # Make a list to put the alternative scenarios
       OMscenarios <- list()
 

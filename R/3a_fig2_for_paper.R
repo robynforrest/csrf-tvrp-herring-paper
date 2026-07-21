@@ -43,59 +43,78 @@ for(j in 1:nstocks){
     filter(year<=cyr) |>
     as.data.frame()
 
-  g1 <- Mtout |>
-    as.data.frame()  |>
+    g1 <- Mtout |>
+      as.data.frame()  |>
+      ggplot() +
+      geom_ribbon(aes(x=year, ymin=lwr, ymax=upr), fill=1, alpha = 0.2) +
+      geom_line(aes(x=year,y=med), color=1, lwd=2) +
+      # geom_line(aes(x=year,y=Trace1), color=1, lwd=0.25) +
+      # geom_line(aes(x=year,y=Trace2), color=1, lwd=0.25) +
+      # geom_line(aes(x=year,y=Trace3), color=1, lwd=0.25) +
+      # geom_line(aes(x=year,y=Trace4), color=1, lwd=0.25) +
+      # geom_line(aes(x=year,y=Trace5), color=1, lwd=0.25) +
+      scale_y_continuous(breaks = seq(0,3,by=0.25))+
+      scale_x_continuous(breaks = seq(1951,2023,by=10))+
+      gfplot::theme_pbs() +
+      labs(x = "Year", y = "M")+
+      mytheme_paper+
+      theme(legend.position = "none")
+  g1
+
+  # Get the LRP
+  LRP <- getmeanB0(MSEscenarios[[1]], ScenarioNamesHuman[1], age=Mage,
+                        type="mean", quants=TRUE)|>
+    as.data.frame() |>
+    filter(year==2023) |>
+    mutate(lwr=0.3*lwr,med=0.3*med,upr=0.3*upr)
+
+  LRP_ribbon <-cbind(Mtout$year,rep(LRP$lwr,nyears),rep(LRP$med,nyears),rep(LRP$upr,nyears)) |>
+    as.data.frame()
+  colnames(LRP_ribbon) <- c("year","lwr","med","upr")
+
+  # Plot the SSB time series
+  g2 <- purrr::map2_df(MSEscenarios,ScenarioNamesHuman, getSSB, mp=1) |>
+    as.data.frame() |>
+    filter(year<=cyr, scenario %in% ScenarioNamesHuman[1]) |>
     ggplot() +
     geom_ribbon(aes(x=year, ymin=lwr, ymax=upr), fill=1, alpha = 0.2) +
     geom_line(aes(x=year,y=med), color=1, lwd=2) +
-    # geom_line(aes(x=year,y=Trace1), color=1, lwd=0.25) +
-    # geom_line(aes(x=year,y=Trace2), color=1, lwd=0.25) +
-    # geom_line(aes(x=year,y=Trace3), color=1, lwd=0.25) +
-    # geom_line(aes(x=year,y=Trace4), color=1, lwd=0.25) +
-    # geom_line(aes(x=year,y=Trace5), color=1, lwd=0.25) +
-    scale_y_continuous(breaks = seq(0,3,by=0.25))+
+    geom_ribbon(data=LRP_ribbon, aes(x=year, ymin=lwr, ymax=upr), fill=meancol, alpha = 0.1) +
+    geom_line(data=LRP_ribbon,aes(x=year,y=med), color=meancol, lwd=1, lty=2) +
+    theme(legend.position = "none") +
+    labs(x = "Year", y = "SB")+
     scale_x_continuous(breaks = seq(1951,2023,by=10))+
     gfplot::theme_pbs() +
-    labs(x = "Year", y = "M")+
     mytheme_paper+
     theme(legend.position = "none")
-g1
+  g2
 
-# Get the LRP
-LRP <- getmeanB0(MSEscenarios[[1]], ScenarioNamesHuman[1], age=Mage,
-                      type="mean", quants=TRUE)|>
-  as.data.frame() |>
-  filter(year==2023) |>
-  mutate(lwr=0.3*lwr,med=0.3*med,upr=0.3*upr)
+  cowplot::plot_grid(g1,g2,nrow=2)
+  ggsave(file.path(StockDirFigs, paste0("FIG2_M_SSB_",stocks[j],".png")),
+         width = 8, height = 5)
 
-LRP_ribbon <-cbind(Mtout$year,rep(LRP$lwr,nyears),rep(LRP$med,nyears),rep(LRP$upr,nyears)) |>
-  as.data.frame()
-colnames(LRP_ribbon) <- c("year","lwr","med","upr")
+    # Add the figures to lists
+    fig2a[[j]] <- g1
+    fig2b[[j]] <- g2
 
-# Plot the SSB time series
-g2 <- purrr::map2_df(MSEscenarios,ScenarioNamesHuman, getSSB, mp=1) |>
-  as.data.frame() |>
-  filter(year<=cyr, scenario %in% ScenarioNamesHuman[1]) |>
-  ggplot() +
-  geom_ribbon(aes(x=year, ymin=lwr, ymax=upr), fill=1, alpha = 0.2) +
-  geom_line(aes(x=year,y=med), color=1, lwd=2) +
-  geom_ribbon(data=LRP_ribbon, aes(x=year, ymin=lwr, ymax=upr), fill=meancol, alpha = 0.1) +
-  geom_line(data=LRP_ribbon,aes(x=year,y=med), color=meancol, lwd=1, lty=2) +
-  theme(legend.position = "none") +
-  labs(x = "Year", y = "SB")+
-  scale_x_continuous(breaks = seq(1951,2023,by=10))+
-  gfplot::theme_pbs() +
-  mytheme_paper+
-  theme(legend.position = "none")
-g2
+    ####################################################################################
+    # Response to Reviewer #3. Comment C14. Find the range and sd of historical M
 
-cowplot::plot_grid(g1,g2,nrow=2)
-ggsave(file.path(StockDirFigs, paste0("FIG2_M_SSB_",stocks[j],".png")),
-       width = 8, height = 5)
-
-# Add the figures to lists
-fig2a[[j]] <- g1
-fig2b[[j]] <- g2
+    historicalM <- OMscenarios[[1]]@cpars$M_ageArray[,Mage,1:(nyears-2)]
+    # Get the standard deviation two ways
+    sdM_annual <- apply(historicalM,2,sd) # annual standard deviation across reps
+    sdM_rep <- apply(historicalM,1,sd) # annual standard deviation across historical years
+    rangeM <- apply(historicalM,1,range) # range across historical years
+    meansdM_annual <- mean(sdM_annual)
+    meansdM_rep <- mean(sdM_rep)
+    meanrangeM <- apply(rangeM,1,mean)
+    historicalMstats <- list(sdMmean_annual=meansdM_annual,
+                             sdMmean_rep=meansdM_rep,
+                             rangeMmean=meanrangeM) |>
+      as.data.frame()
+    historicalMstats$sdMmean_annual[2]<-NA
+    historicalMstats$sdMmean_rep[2]<-NA
+    write_csv(historicalMstats,file=file.path(paste0(StockDirFigs,"Mstats_",stock,".csv")))
 
 } #end for j
 
