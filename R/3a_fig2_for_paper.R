@@ -100,7 +100,7 @@ for(j in 1:nstocks){
     ####################################################################################
     # Response to Reviewer #3. Comment C14. Find the range and sd of historical M
 
-    historicalM <- OMscenarios[[1]]@cpars$M_ageArray[,Mage,1:(nyears-2)]
+    historicalM <- OMscenarios[[1]]@cpars$M_ageArray[,Mage,1:(nyears-1)]
     # Get the standard deviation two ways
     sdM_annual <- apply(historicalM,2,sd) # annual standard deviation across reps
     sdM_rep <- apply(historicalM,1,sd) # annual standard deviation across historical years
@@ -114,7 +114,14 @@ for(j in 1:nstocks){
       as.data.frame()
     historicalMstats$sdMmean_annual[2]<-NA
     historicalMstats$sdMmean_rep[2]<-NA
-    write_csv(historicalMstats,file=file.path(paste0(StockDirFigs,"Mstats_",stock,".csv")))
+    write_csv(historicalMstats,file=file.path(paste0(StockDirFigs,"/Mstats_",stock,".csv")))
+
+    # recruitment process error
+    meanprocsd <- mean(OMscenarios[[1]]@cpars$Perr)
+    meanAC <- mean(OMscenarios[[1]]@cpars$AC)
+    historicalDevstats <- data.frame(procsd=meanprocsd,AC=meanAC)
+    write_csv(historicalDevstats,file=file.path(paste0(StockDirFigs,"/Devstats_",stock,".csv")))
+
 
 } #end for j
 
