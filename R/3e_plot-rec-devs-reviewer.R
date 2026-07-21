@@ -13,13 +13,24 @@ stocks <- names(hist_MSEs)
 nstocks <- length(stocks)
 
 for(j in 1:nstocks){
-  cat("~~~ Plotting OM figs for", paste(stocks[j]), "~~~\n")
+  cat("~~~ Plotting Sensitivity figs for", paste(stocks[j]), "~~~\n")
 
    nsim<-hist_MSEs[[j]]@OM@nsim
    yind<-hist_MSEs[[j]]@OM@nyears+(1:hist_MSEs[[j]]@OM@proyears)
 
-    # Get the OMs with alternative M scenarios
-    OMscenarios <- readRDS(here(SpDirOM, paste(stocks[j]),"OMScenarios.rda"))
+    # Get the OMs with alternative M scenarios - just 250 reps
+   OMscenarios <- readRDS(here("Sensitivity_results","BaseCase", "OMs",
+                                   paste(stocks[j]),"OMScenarios.rda"))
+   MSEscenarios <- readRDS(here("Sensitivity_results","BaseCase", "MSEs",
+                                    paste(stocks[j]),"hMSEs_NF.rda"))
+   # Alternative with higher rec devs
+   OMscenarios_alt <- readRDS(here("Sensitivity_results","IncreaseRecDevs_reviewer_only", "OMs",
+                                    paste(stocks[j]),"OMScenarios.rda"))
+   MSEscenarios_alt <- readRDS(here("Sensitivity_results","IncreaseRecDevs_reviewer_only", "MSEs",
+                                     paste(stocks[j]),"hMSEs_NF.rda"))
+
+
+
     pyr1 <- OMscenarios[[1]]@CurrentYr + 1 # get the first of the projection years (currently 2020)
     cyr <- OMscenarios[[1]]@CurrentYr
     syr <- cyr-OMscenarios[[1]]@nyears+1
@@ -32,35 +43,12 @@ for(j in 1:nstocks){
     if(!file.exists(StockDirFigs)) dir.create(StockDirFigs, recursive=TRUE)
 
     #~~~~~~~~~~~PLOT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Plot the M time series
-    Mtout <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual", quant=TRUE, input_type="OM")  |>
-      mutate(Scenario = factor(scenario, levels = ScenarioNamesHuman)) |>
-      as.data.frame()
-    write_csv(Mtout, file=file.path(StockDirFigs, paste0("OM-M_All_M_scenarios_",stocks[j],".csv")))
-
-    g <- purrr::map2_df(OMscenarios, ScenarioNamesHuman, getM, age=Mage, type="annual",quant=TRUE, input_type="OM") |>
-      mutate(scenario = factor(scenario, levels = ScenarioNamesHuman)) |>
-      as.data.frame() %>%
-      ggplot() +
-      geom_ribbon(aes(x=year, ymin=lwr, ymax=upr, fill=scenario), alpha = 0.3) +
-      geom_line(aes(x=year,y=med, color=scenario), lwd=1) +
-      geom_vline(xintercept=pyr1, lty=3)+
-      scale_fill_startrek()+  # ggsci package
-      scale_color_startrek()+
-      #ylim(0,3.)+
-      gfplot::theme_pbs() +
-      labs(x = "Year", y = "M")+
-      mytheme+
-      theme(legend.position = "bottom")
-      ggsave(file.path(StockDirFigs, paste0("OM-M_All_M_scenarios_",stocks[j],".png")),
-               width = 8, height = 5)
-
-    # 2. Log rec devs
+    # 2. Log rec devs - baseline
     meanlogdev <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getlogperry_mean, proc_err)|>
       as.data.frame()
     quantlogdev <- purrr::map2_df(OMscenarios,ScenarioNamesHuman, getlogperry, proc_err) |>
       as.data.frame()
-    g <- left_join(quantlogdev,meanlogdev) |>
+    g1 <- left_join(quantlogdev,meanlogdev) |>
       mutate(group=factor(scenario, levels=ScenarioNamesHuman)) |>
       filter(scenario==ScenarioNamesHuman[1], year>=syr) |>
       ggplot() +
@@ -81,16 +69,15 @@ for(j in 1:nstocks){
             strip.text.y = element_blank(),
             legend.text = element_text(size=12),
             legend.title = element_text(size=12, face="bold"))
-    g
-    ggsave(file.path(StockDirFigs, paste0("Supp_OM-LogRecdevs",stocks[j],".png")),
-           width = 12, height = 7.5)
+    g1
 
-    # Pro years only
-    # 2. Log rec devs
-    g <- left_join(quantlogdev,meanlogdev) |>
+    meanlogdev <- purrr::map2_df(OMscenarios_alt,ScenarioNamesHuman, getlogperry_mean, proc_err)|>
+      as.data.frame()
+    quantlogdev <- purrr::map2_df(OMscenarios_alt,ScenarioNamesHuman, getlogperry, proc_err) |>
+      as.data.frame()
+    g2 <- left_join(quantlogdev,meanlogdev) |>
       mutate(group=factor(scenario, levels=ScenarioNamesHuman)) |>
-      filter(scenario==ScenarioNamesHuman[1], year>=pyr1) |>
-      mutate(group=factor(scenario, levels=ScenarioNamesHuman)) |>
+      filter(scenario==ScenarioNamesHuman[1], year>=syr) |>
       ggplot() +
       geom_pointrange(aes(x=year, y=med,ymin=lwr, ymax=upr), color=2) +
       #geom_point(aes(x=year, y=mean), color=1, shape=15) +
@@ -109,7 +96,44 @@ for(j in 1:nstocks){
             strip.text.y = element_blank(),
             legend.text = element_text(size=12),
             legend.title = element_text(size=12, face="bold"))
-    ggsave(file.path(StockDirFigs, paste0("Supp_OM-LogRecdevs_pro",stocks[j],".png")),
-       width = 16, height = 10)
+    g2
 
+    cowplot::plot_grid(g1,g2,ncol=1)
+
+    ggsave(file.path(StockDirFigs, paste0("Sensitivity_OM-IncreasedLogRecdevs_250_",stocks[j],".png")),
+           width = 12, height = 7.5)
+
+    # Now show biomass
+    dat <- purrr::map2_df(MSEscenarios,ScenarioNamesHuman, getSSB, mp=1) |>
+      as.data.frame() |>
+      mutate(group=factor(scenario, levels=ScenarioNamesHuman))
+
+    g3 <- ggplot(dat) +
+      geom_ribbon(aes(x=year, ymin=lwr, ymax=upr), fill=ssbcol, alpha = 0.1) +
+      geom_line(aes(x=year,y=med), color=ssbcol, lwd=1.25) +
+      facet_wrap(vars(group), nrow=1)+
+      theme(legend.position = "none")+
+      labs(x = "Year", y = "SB", title= "")+
+      geom_vline(xintercept=cyr, lty=3)+
+      mytheme_paper
+    g3
+
+    dat <- purrr::map2_df(MSEscenarios_alt,ScenarioNamesHuman, getSSB, mp=1) |>
+      as.data.frame() |>
+      mutate(group=factor(scenario, levels=ScenarioNamesHuman))
+
+    g4 <- ggplot(dat) +
+      geom_ribbon(aes(x=year, ymin=lwr, ymax=upr), fill=ssbcol, alpha = 0.1) +
+      geom_line(aes(x=year,y=med), color=ssbcol, lwd=1.25) +
+      facet_wrap(vars(group), nrow=1)+
+      theme(legend.position = "none")+
+      labs(x = "Year", y = "SB", title= "")+
+      geom_vline(xintercept=cyr, lty=3)+
+      mytheme_paper
+    g4
+
+    cowplot::plot_grid(g3,g4,ncol=1, align="v")
+
+    ggsave(file.path(StockDirFigs, paste0("Sensitivity_MSE_SSB_IncreasedLogRecdevs_250_",stocks[j],".png")),
+           width = 16, height = 10)
 } #end j
