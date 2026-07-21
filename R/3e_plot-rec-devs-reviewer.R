@@ -11,6 +11,7 @@ ScenarioNamesHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
 
 stocks <- names(hist_MSEs)
 nstocks <- length(stocks)
+ymax <- c(80,200,220) #biomass ylims for each stock
 
 for(j in 1:nstocks){
   cat("~~~ Plotting Sensitivity figs for", paste(stocks[j]), "~~~\n")
@@ -60,12 +61,12 @@ for(j in 1:nstocks){
       gfplot::theme_pbs() +
       scale_fill_startrek()+  # ggsci package
       scale_color_startrek()+
-      labs(x = "Year", y = "Log recruitment deviations", title="")+
+      labs(x = "Year", y = "Log recruitment deviations", title=stocks[j])+
       theme(plot.title = element_text(face="bold", size=20),
             axis.title.x = element_text(size=16,face="bold"),
             axis.title.y = element_text(size=16,face="bold"),
-            axis.text.y = element_text(size=12,face="bold"),
-            axis.text.x = element_text(size=12,face="bold"),
+            axis.text.y = element_text(size=12),
+            axis.text.x = element_text(size=12),
             strip.text.y = element_blank(),
             legend.text = element_text(size=12),
             legend.title = element_text(size=12, face="bold"))
@@ -91,8 +92,8 @@ for(j in 1:nstocks){
       theme(plot.title = element_text(face="bold", size=20),
             axis.title.x = element_text(size=16,face="bold"),
             axis.title.y = element_text(size=16,face="bold"),
-            axis.text.y = element_text(size=12,face="bold"),
-            axis.text.x = element_text(size=12,face="bold"),
+            axis.text.y = element_text(size=12),
+            axis.text.x = element_text(size=12),
             strip.text.y = element_blank(),
             legend.text = element_text(size=12),
             legend.title = element_text(size=12, face="bold"))
@@ -114,8 +115,11 @@ for(j in 1:nstocks){
       facet_wrap(vars(group), nrow=1)+
       theme(legend.position = "none")+
       labs(x = "Year", y = "SB", title= "")+
+      ylim(0,ymax[j])+
       geom_vline(xintercept=cyr, lty=3)+
-      mytheme_paper
+      mytheme_sens_plots+
+      theme(axis.title.x = element_text(size=16,face="bold"),
+            axis.title.y = element_text(size=16,face="bold"))
     g3
 
     dat <- purrr::map2_df(MSEscenarios_alt,ScenarioNamesHuman, getSSB, mp=1) |>
@@ -128,12 +132,22 @@ for(j in 1:nstocks){
       facet_wrap(vars(group), nrow=1)+
       theme(legend.position = "none")+
       labs(x = "Year", y = "SB", title= "")+
+      ylim(0,ymax[j])+
       geom_vline(xintercept=cyr, lty=3)+
-      mytheme_paper
+      mytheme_sens_plots+
+      theme(axis.title.x = element_text(size=16,face="bold"),
+            axis.title.y = element_text(size=16,face="bold"))
     g4
 
-    cowplot::plot_grid(g3,g4,ncol=1, align="v")
-
+    constM <- cowplot::plot_grid(g1,g3,ncol=1, align="v")
+    ggsave(file.path(StockDirFigs, paste0("Sensitivity_MSE_SSB_BaseLogRecdevs_250_",stocks[j],".png")),
+           width = 16, height = 10)
+    IncreasM <- cowplot::plot_grid(g2,g4,ncol=1, align="v")
     ggsave(file.path(StockDirFigs, paste0("Sensitivity_MSE_SSB_IncreasedLogRecdevs_250_",stocks[j],".png")),
            width = 16, height = 10)
+
+    cowplot::plot_grid(constM,IncreasM,ncol=2, align="h")
+    ggsave(file.path(here("Figures"), paste0("/Sensitivity_MSE_LogRecdevs_250_",stocks[j],".png")),
+           width = 16, height = 10)
+
 } #end j

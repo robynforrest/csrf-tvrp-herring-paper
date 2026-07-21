@@ -206,10 +206,10 @@ fig4_alternative[[j]] <- g1
 fig5[[j]] <- g3
 
 # Write out table of values for a single replicate
-write_csv(Outpars_rep, file=file.path(StockDirFigs, paste0("TABLE1_Stock-Recruit_fromFig4",stocks[j],".csv")))
+write_csv(Outpars_rep, file=file.path(StockDirFigs, paste0("TABLE2_Stock-Recruit_fromFig4",stocks[j],".csv")))
 
 # Write all reps out for supp
-write_csv(Outpars, file=file.path(StockDirFigs, paste0("TABLE1_Stock-Recruit_allreps_for_supp",stocks[j],".csv")))
+write_csv(Outpars, file=file.path(StockDirFigs, paste0("TABLE2_Stock-Recruit_allreps_for_supp",stocks[j],".csv")))
 
 } #end for j
 
