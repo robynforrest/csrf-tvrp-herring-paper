@@ -10,7 +10,6 @@ mat <- c(0.00, 0.10, 0.55, 0.95, 1.00, 1.00, 1.00, 1.00) # maturity at age
 # RF reparameterise to get K in terms of steepness
 h<-0.7
 k <-  4*h/(1-h) #5 # k = CR = Compensation ratio (=4h/(1-h))
-
 R0 <- 10
 n <- length(mat) # number of ages
 
@@ -60,7 +59,7 @@ roh <- function(M) {
   c(S0 = R0 * p0, Fmsy = fmsy_for(M, a, b))
 }
 
-# Cahill suggested alternative
+# Cahill suggested alternative with alpha and beta fixed
 bot <- function(M) {
   p0 <- phi0(M)
   ap <- a0 * p0
@@ -71,14 +70,16 @@ bot <- function(M) {
 # What we are doing in R/0_settings.R function calc_tv_B0
 # starts with iscam leading parameters
 paper <- function(M){
-  # get alpha and beta from leading parameters (p0b would come from leading R0 and steepness)
-  alpha <- k/p0b # CR/baseline phi0
-  beta <- (alpha*p0b-1)/(R0*p0b)
+  # get alpha and beta from leading parameters
+  #alpha <- k/p0b # CR/baseline phi0
+  #beta <- (alpha*p0b-1)/(R0*p0b)
+  alpha <- MSEtool::SRalphaconv(h, p0b, SR=1, type = 1) # gives exactly the same as above
+  beta  <- MSEtool::SRbetaconv(h, p0b, R0, SR=1, type = 1) # gives exactly the same as above
   p0 <- phi0(M) # new phi0
   R0_new <- (alpha*p0 - 1)/(beta*p0)
-  S0 <- p0*R0_new
+  B0_new <- p0*R0_new
   #S0 <- (a0*p0 - 1)/(b0)
-  c(S0 = S0, Fmsy = fmsy_for(M, alpha, beta))
+  c(S0 = B0_new, Fmsy = fmsy_for(M, alpha, beta))
 }
 
 hcr <- function(B, S0, Fm) {
@@ -104,7 +105,7 @@ rrh <- lapply(mr, roh)
 rbo <- lapply(mr, bot)
 rpap <- lapply(mr, paper)
 
-png(here::here("Figures","Cahill_plots_compare.png"))
+png(here::here("Figures","Cahill_plots_compare.png"),width = 600, height = 600)
   par(mfrow = c(3, 3), mar = c(4, 4.4, 2.6, 1))
   yl1 <- c(0, max(rh["Fmsy", ]))
   plot(mseq, rh["Fmsy", ],
