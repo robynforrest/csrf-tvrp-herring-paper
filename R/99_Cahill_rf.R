@@ -9,7 +9,6 @@ mat <- c(0.00, 0.10, 0.55, 0.95, 1.00, 1.00, 1.00, 1.00) # maturity at age
 
 k <- 5
 h<- k/(4+k) # RF get steepness
-#k <-  4*h/(1-h) #5 # k = CR = Compensation ratio (=4h/(1-h))
 R0 <- 10
 n <- length(mat) # number of ages
 
@@ -73,7 +72,7 @@ paper <- function(M){
   # get alpha and beta from leading parameters
   #alpha <- k/p0b # CR/baseline phi0
   #beta <- (alpha*p0b-1)/(R0*p0b)
-  alpha <- MSEtool::SRalphaconv(h, p0b, SR=1, type = 1) # gives exactly the same as above
+  alpha <- MSEtool::SRalphaconv(h, p0b, SR=1, type = 1)    # gives exactly the same as above
   beta  <- MSEtool::SRbetaconv(h, p0b, R0, SR=1, type = 1) # gives exactly the same as above
   p0 <- phi0(M) # new phi0
   R0_new <- (alpha*p0 - 1)/(beta*p0)
