@@ -7,9 +7,9 @@ v <- c(0.05, 0.20, 0.50, 0.85, 0.97, 1.00, 1.00, 1.00) # selectivity
 wa <- c(0.02, 0.05, 0.09, 0.13, 0.17, 0.20, 0.22, 0.24) # weight at age
 mat <- c(0.00, 0.10, 0.55, 0.95, 1.00, 1.00, 1.00, 1.00) # maturity at age
 
-# RF reparameterise to get K in terms of steepness
-h<-0.7
-k <-  4*h/(1-h) #5 # k = CR = Compensation ratio (=4h/(1-h))
+k <- 5
+h<- k/(4+k) # RF get steepness
+#k <-  4*h/(1-h) #5 # k = CR = Compensation ratio (=4h/(1-h))
 R0 <- 10
 n <- length(mat) # number of ages
 
@@ -78,8 +78,9 @@ paper <- function(M){
   p0 <- phi0(M) # new phi0
   R0_new <- (alpha*p0 - 1)/(beta*p0)
   B0_new <- p0*R0_new
+  S0 <- ifelse(B0_new>0,B0_new,0) # don't need to do this for herring
   #S0 <- (a0*p0 - 1)/(b0)
-  c(S0 = B0_new, Fmsy = fmsy_for(M, alpha, beta))
+  c(S0 = S0, Fmsy = fmsy_for(M, alpha, beta))
 }
 
 hcr <- function(B, S0, Fm) {
@@ -105,8 +106,8 @@ rrh <- lapply(mr, roh)
 rbo <- lapply(mr, bot)
 rpap <- lapply(mr, paper)
 
-png(here::here("Figures","Cahill_plots_compare.png"),width = 600, height = 600)
-  par(mfrow = c(3, 3), mar = c(4, 4.4, 2.6, 1))
+png(here::here("Figures","Cahill_plots_compare.png"),width = 900, height = 900)
+  par(mfrow = c(3, 3), mar = c(4, 4.4, 2.6, 1), cex=1.2)
   yl1 <- c(0, max(rh["Fmsy", ]))
   plot(mseq, rh["Fmsy", ],
        type = "l", lwd = 3, col = pur, ylim = yl1,
