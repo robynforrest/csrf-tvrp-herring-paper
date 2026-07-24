@@ -27,7 +27,7 @@ fig2bsg <- fig2b[[2]]+
 fig2bwc <- fig2b[[3]]
 
 cowplot::plot_grid(fig2ahg,fig2bhg,fig2asg,fig2bsg,fig2awc,fig2bwc,nrow=3,
-                   labels=c("(a)","(b)","(c)"),
+                   labels=c("(a)","","(b)","","(c)",""),
                    #rel_heights=c(1,-0.11,1,-0.11,1),
                    align="v",  hjust = 0.25)
 ggsave(here("Figures","Figure2.png"), width = 8, height = 7)
@@ -75,7 +75,8 @@ ggsave(here("Figures","Figure5.png"), width = 8, height = 7)
 # M
 fig6hg <- fig6[[1]]+
   xlab("")+
-  theme(axis.text.x=element_blank())
+  theme(axis.text.x=element_blank())+
+  theme(legend.key.width = unit(1.25, "cm"))
 fig6sg <- fig6[[2]]+
   xlab("")+
   theme(axis.text.x=element_blank())+
@@ -97,7 +98,8 @@ fig7wc <- fig7[[3]]+
 #FIGURE 8 B0
 fig8hg <- fig8[[1]]+
   xlab("")+
-  theme(axis.text.x=element_blank())
+  theme(axis.text.x=element_blank())+
+  theme(legend.key.width = unit(1.25, "cm"))
 fig8sg <- fig8[[2]]+
   xlab("")+
   theme(legend.position = "none")+
@@ -128,11 +130,19 @@ ggsave(here("Figures","Figure8_B0_all_stocks_med_only.png"), width = 8, height =
 # Get them back and add them at the end
 legend_top <- get_legend(
   # create some space to the left of the legend
-  fig9a[[1]] + theme(legend.box.margin = margin(0, 0, 0, 0))
+  fig9a[[1]] +
+    theme(legend.box.margin = margin(0, 0, 0, 0),
+          legend.key.width = unit(1.2, "cm"),
+          legend.title = element_text(size = 12),
+          legend.text = element_text(size = 10))
 )
 legend_bottom <- get_legend(
   # create some space to the left of the legend
-  fig9b[[1]] + theme(legend.box.margin = margin(0, 0, 0, 0))
+  fig9b[[1]] +
+    theme(legend.box.margin = margin(0, 0, 0, 0),
+          legend.key.width = unit(1.2, "cm"),
+          legend.title = element_text(size = 12),
+          legend.text = element_text(size = 10))
 )
 
 # LRP Increasing M scenario for Supp material
@@ -145,14 +155,12 @@ fig9asg <- fig9a[[2]]+
   xlab("")+
   theme(axis.text.x=element_blank())+
   ylab("")+
-  # theme(axis.text.y=element_blank())+
   theme(legend.position = "none")+
   theme(plot.margin = margin(0.,0.5,0.5,-0.5,unit="cm"))
 fig9awc <- fig9a[[3]]+
   xlab("")+
   theme(axis.text.x=element_blank())+
   ylab("")+
-  # theme(axis.text.y=element_blank())+
   theme(legend.position = "none")+
   theme(plot.margin = margin(0.,0.5,0.5,-0.5,unit="cm"))
 
@@ -163,12 +171,10 @@ fig9bhg <- fig9b[[1]]+
 fig9bsg <- fig9b[[2]]+
   theme(legend.position = "none")+
   ylab("")+
-  # theme(axis.text.y=element_blank())+
   theme(plot.margin = margin(0.,0.5,0.,-0.5,unit="cm"))
 fig9bwc <- fig9b[[3]]+
   theme(legend.position = "none")+
   ylab("")+
-  # theme(axis.text.y=element_blank())+
   theme(plot.margin = margin(0.,0.5,0.,-0.5,unit="cm"))
 
 plots <- cowplot::plot_grid(NULL,fig9ahg,fig9asg,fig9awc,NULL,fig9bhg,fig9bsg,fig9bwc,

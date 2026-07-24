@@ -53,9 +53,10 @@ for(j in 1:nstocks){
       # geom_line(aes(x=year,y=Trace3), color=1, lwd=0.25) +
       # geom_line(aes(x=year,y=Trace4), color=1, lwd=0.25) +
       # geom_line(aes(x=year,y=Trace5), color=1, lwd=0.25) +
-      scale_y_continuous(breaks = seq(0,3,by=0.25))+
+      #scale_y_continuous(breaks = seq(0,3,by=0.25))+
       scale_x_continuous(breaks = seq(1951,2023,by=10))+
       gfplot::theme_pbs() +
+      ylim(0.,2.)+
       labs(x = "Year", y = "M")+
       mytheme_paper+
       theme(legend.position = "none")
@@ -121,7 +122,5 @@ for(j in 1:nstocks){
     meanAC <- mean(OMscenarios[[1]]@cpars$AC)
     historicalDevstats <- data.frame(procsd=meanprocsd,AC=meanAC)
     write_csv(historicalDevstats,file=file.path(paste0(StockDirFigs,"/Devstats_",stock,".csv")))
-
-
 } #end for j
 
