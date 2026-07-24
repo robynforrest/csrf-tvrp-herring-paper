@@ -132,7 +132,7 @@ legend_top <- get_legend(
   # create some space to the left of the legend
   fig9a[[1]] +
     theme(legend.box.margin = margin(0, 0, 0, 0),
-          legend.key.width = unit(1.2, "cm"),
+          legend.key.width = unit(1.1, "cm"),
           legend.title = element_text(size = 12),
           legend.text = element_text(size = 10))
 )
@@ -140,7 +140,7 @@ legend_bottom <- get_legend(
   # create some space to the left of the legend
   fig9b[[1]] +
     theme(legend.box.margin = margin(0, 0, 0, 0),
-          legend.key.width = unit(1.2, "cm"),
+          legend.key.width = unit(1.1, "cm"),
           legend.title = element_text(size = 12),
           legend.text = element_text(size = 10))
 )
@@ -229,4 +229,62 @@ plots <- cowplot::plot_grid(NULL,fig9asupphg,fig9asuppsg,fig9asuppwc,NULL,fig9bs
 legends <- cowplot::plot_grid(legend_top,legend_bottom, nrow=2)
 cowplot::plot_grid(plots,legends,rel_widths=c(3,0.4))
 ggsave(here("Figures","Figure9SUPP_LRP_Mconstant.png"), width = 8, height = 5, bg = "white")
+
+# Make Figures for extended abstract (for Catarina and Divya's working paper)
+# Figure 1: M and SB0 for drift scenario only
+legend_left <- get_legend(
+  # create some space to the left of the legend
+  fig_abstract_M[[1]] +
+    theme(legend.box.margin = margin(0, 0, 0, 0),
+          legend.key.width = unit(0.65, "cm"),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.position = "bottom")
+)
+legend_right <- get_legend(
+  # create some space to the left of the legend
+  fig_abstract_SB0[[1]] +
+    theme(legend.box.margin = margin(0, 0, 0, 0),
+          legend.key.width = unit(0.65, "cm"),
+          legend.title = element_text(size = 10),
+          legend.text = element_text(size = 10),
+          legend.position = "bottom")
+)
+
+
+fig_abstract_Mhg <- fig_abstract_M[[1]]+
+  xlab("")+
+  theme(axis.text.x=element_blank())+
+  theme(legend.position = "none")
+fig_abstract_Msog <- fig_abstract_M[[2]]+
+  xlab("")+
+  theme(axis.text.x=element_blank())+
+  theme(legend.position = "none")
+fig_abstract_Mwcvi <- fig_abstract_M[[3]]+
+  xlab("")+
+  theme(legend.position = "none")
+
+fig_abstract_SB0hg <- fig_abstract_SB0[[1]]+
+  theme(legend.position = "none")+
+  theme(axis.text.x=element_blank())
+fig_abstract_SB0sog <- fig_abstract_SB0[[2]]+
+  theme(legend.position = "none")+
+  theme(axis.text.x=element_blank())
+fig_abstract_SB0wcvi <- fig_abstract_SB0[[3]]+
+  theme(legend.position = "none")
+
+plots <- cowplot::plot_grid(fig_abstract_Mhg,fig_abstract_SB0hg,
+                   fig_abstract_Msog,fig_abstract_SB0sog,
+                   fig_abstract_Mwcvi,fig_abstract_SB0wcvi,nrow=3,
+                   labels=c("(a)","","(b)","","(c)",""),
+                   #rel_heights=c(1,-0.11,1,-0.11,1),
+                   align="v",  hjust = 0.25)
+legends <- cowplot::plot_grid(legend_left, legend_right, nrow=1)
+cowplot::plot_grid(plots,legends,rel_heights=c(3,0.4), nrow=2)
+
+ggsave(here("Figures","Figure_Extended_Abstract.png"), width = 8, height = 8, bg="white")
+
+
+
+
 

@@ -28,6 +28,7 @@ fig9b <- list() #PLRP increasing M
 fig9asupp <- list() #LRP constant M
 fig9bsupp <- list() #PLRP constant M
 fig_supp_dynb0 <- list()
+fig_abstract_M <- fig_abstract_SB0 <- list() # for the extended abstract
 
 for(j in 1:nstocks){
   cat("~~~ Plotting Figs 6-8 for", paste(stocks[j]), "~~~\n")
@@ -304,6 +305,53 @@ for(j in 1:nstocks){
   fig9asupp[[j]] <- g4supp
   fig9bsupp[[j]] <- g5supp
   fig_supp_dynb0[[j]] <- g6
+
+  cat("~~~ Plotting extended abstract figs for", paste(stocks[j]), "~~~\n")
+  # Make Figures for extended abstract (for Catarina and Divya's working paper)
+  # Figure 1: M and SB0 for drift scenario only
+  g7 <- allM |>
+    filter(scenario %in% ScenarioNamesHuman[2]) |>
+    ggplot()+
+    geom_ribbon(aes(x=year, ymin=lwr , ymax=upr, fill=`M type`), alpha = 0.1)+
+    geom_line(aes(x=year, y=med, col=`M type`, lty=`M type`),lwd=1.25)+
+    geom_vline(xintercept=cyr, lty=3)+
+    scale_color_manual(values=manualcolors[2:5])+
+    scale_fill_manual(values=manualcolors[2:5])+
+    scale_linetype_manual(values = c("hist" = 2,
+                                     "mean" = 2,
+                                     "recent" =5,
+                                     "annual" = 3))+
+    scale_x_continuous(breaks=seq(syr,fyr,16))+
+    geom_vline(xintercept=cyr, lty=3)+
+    labs(x = "Year", y = "M", title= "")+
+    theme(panel.spacing = unit(1, "lines"))+
+    theme(legend.position = "bottom")+
+    mytheme_paper
+  g7
+
+  g8 <- allB0 |>
+    filter(scenario %in% ScenarioNamesHuman[2]) |>
+    ggplot()+
+    geom_line(aes(x=year, y=med, col=`SB0 type`, lty=`SB0 type`),lwd=1.25)+
+    geom_vline(xintercept=cyr, lty=3)+
+    scale_color_manual(values=manualcolors)+
+    scale_fill_manual(values=manualcolors)+
+    scale_linetype_manual(values = c("SB"=1,
+                                     "hist" = 2,
+                                     "mean" = 2,
+                                     "recent" =5,
+                                     "dyn" = 3))+
+    scale_x_continuous(breaks=seq(syr,fyr,16))+
+    geom_vline(xintercept=cyr, lty=3)+
+    labs(x = "Year", y = "SB or SB0", title= "")+
+    theme(panel.spacing = unit(0.5, "lines"))+
+    theme(legend.position = "bottom")+
+    mytheme_paper
+  g8
+
+  fig_abstract_M[[j]] <- g7
+  fig_abstract_SB0[[j]] <- g8
+
 
 } # end for j in stocks
 

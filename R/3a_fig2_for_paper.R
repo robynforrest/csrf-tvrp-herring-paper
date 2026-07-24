@@ -122,5 +122,6 @@ for(j in 1:nstocks){
     meanAC <- mean(OMscenarios[[1]]@cpars$AC)
     historicalDevstats <- data.frame(procsd=meanprocsd,AC=meanAC)
     write_csv(historicalDevstats,file=file.path(paste0(StockDirFigs,"/Devstats_",stock,".csv")))
+
 } #end for j
 
