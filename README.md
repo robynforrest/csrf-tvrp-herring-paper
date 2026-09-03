@@ -1,6 +1,6 @@
 # csrf-tvrp-herring-paper
 
-This repository contains the code for the paper "What do we mean by unfished biomass in a changing environment?" exploring the 
+This repository contains the code for the paper "Non-stationarity in population parameters requires careful interpretation of equilibrium reference points" exploring the 
 use of time-varying equilibrium reference points for three Pacific Herring stocks.
 
 Run everything from 0_run-analyses.R.
