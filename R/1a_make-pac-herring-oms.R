@@ -113,16 +113,6 @@ if(make_oms==TRUE){
       abline(v=nyears+maxage, lty=2, lwd=0.5)
       dev.off()
 
-      # compare rec devs with iscam outputs
-      # iscam_perr_file <- file.path(iscamlocs[iscamfolder],"iscam_rdev_mcmc.csv")
-      # burn <- 4500
-      # iscam_perr <- read_csv(iscam_perr_file)
-      # iscam_perr <- iscam_perr[(burn+1):nrow(iscam_perr),]
-      # png(paste0(StockDirFigs, "/iscam_rec_devs_",stocks[j], ".png"), height=720, width=720)
-      # matplot(1:(nyears-2), t(iscam_perr), type="l", col=3, main=paste(stocks[j]))
-      # abline(h=0, lty=1, lwd=0.5)
-      # dev.off()
-
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
       # code from Quang to fix minor error in some versions of MSEtool
       if(is.null(hOMs[[j]]@cpars[["hs"]]) && !is.null(hOMs[[j]]@cpars[["h"]])) { # Use of $ is often confusing since R deploys partial matching
