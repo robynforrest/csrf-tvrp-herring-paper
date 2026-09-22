@@ -346,19 +346,26 @@ plotPLRP_SB0 <- function(PLRPobject,
 
     g <- PLRPobject |>
       ggplot() +
-      geom_line(aes(x=year,y=PLRPobject[,1], color=`SB0 type`), lwd=1.25) +
+      geom_line(aes(x=year,y=PLRPobject[,1], color=`SB0 type`, linetype=`SB0 type`), lwd=1.25) +
       geom_hline(yintercept=0., lty=1, linewidth=0.5)+
       geom_hline(yintercept=0.25, lty=2, linewidth=0.25)+
       geom_hline(yintercept=0.5, lty=2, linewidth=0.5)+
       geom_hline(yintercept=0.75, lty=2, linewidth=0.25)+
       geom_hline(yintercept=1., lty=2, linewidth=0.5)+
       facet_wrap(vars(scenario), nrow=1)+
-      theme(legend.position = "none") +
+            theme(legend.position = "none") +
       labs(x = "Year", y = "")+
       ylim(0,1.05) +
       mytheme_paper+
       theme(strip.text.x = element_blank())+
-      scale_colour_manual(values=c("hist"=histcol,"mean"=meancol,"recent"=meanrecentcol,"dyn"=dyncol))+
+      scale_colour_manual(values=c("hist"=histcol,
+                                   "mean"=meancol,
+                                   "recent"=meanrecentcol,
+                                   "dyn"=dyncol))+
+      scale_linetype_manual(values = c("hist" = 2,
+                                       "mean" = 4,
+                                       "recent" =5,
+                                       "dyn" = 3))+
       guides(colour=guide_legend(title="SB0 type"))+
       ylab("P(SB > LRP)")
 
@@ -370,7 +377,7 @@ plotPLRP_SB0 <- function(PLRPobject,
   if(panel==TRUE){
     g <- PLRPobject |>
       ggplot() +
-      geom_line(aes(x=year,y=PLRPobject[,1], color=`SB0 type`), lwd=1.5) +
+      geom_line(aes(x=year,y=PLRPobject[,1], color=`SB0 type`, linetype=`SB0 type`), lwd=1.5) +
       geom_hline(yintercept=0., lty=1, linewidth=0.5)+
       geom_hline(yintercept=0.25, lty=2, linewidth=0.25)+
       geom_hline(yintercept=0.5, lty=2, linewidth=0.5)+
@@ -382,7 +389,14 @@ plotPLRP_SB0 <- function(PLRPobject,
       ylim(0,1.05) +
       mytheme_paper+
       theme(strip.text.x = element_blank())+
-      scale_colour_manual(values=c("hist"=histcol,"mean"=meancol,"recent"=meanrecentcol,"dyn"=dyncol))+
+      scale_colour_manual(values=c("hist"=histcol,
+                                   "mean"=meancol,
+                                   "recent"=meanrecentcol,
+                                   "dyn"=dyncol))+
+      scale_linetype_manual(values = c("hist" = 2,
+                                       "mean" = 4,
+                                       "recent" =5,
+                                       "dyn" = 3))+
       guides(colour=guide_legend(title="SB0 type"))
   } #end if
   g

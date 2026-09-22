@@ -18,6 +18,7 @@ nstocks <- length(stocks)
 nsim <- hOMs[[1]]@nsim
 histMSEs <- readRDS(here("MSEs/hist_hMSEs.rda"))
 scenameHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda"))
+ScenarioNamesHuman <- readRDS(here(SpDirOM, "ScenarioNamesHuman.rda")) # TODO one of the plots is using this object, find and change to scenameHuman
 
 # Create lists for putting figures
 fig6 <- list() #M
@@ -94,7 +95,7 @@ for(j in 1:nstocks){
     scale_color_manual(values=manualcolors[2:5])+
     scale_fill_manual(values=manualcolors[2:5])+
     scale_linetype_manual(values = c("hist" = 2,
-                                     "mean" = 2,
+                                     "mean" = 4,
                                      "recent" =5,
                                      "annual" = 3))+
     facet_wrap(vars(group), nrow=1)+
@@ -135,7 +136,7 @@ for(j in 1:nstocks){
     facet_wrap(vars(group), nrow=1)+
     scale_linetype_manual(values = c("SB"=1,
                                      "hist" = 2,
-                                     "mean" = 2,
+                                     "mean" = 4,
                                      "recent" =5,
                                      "dyn" = 3))+
     scale_x_continuous(breaks=seq(syr,fyr,16))+
@@ -182,7 +183,7 @@ for(j in 1:nstocks){
     scale_fill_manual(values=manualcolors)+
     scale_linetype_manual(values = c("SB"=1,
                                      "hist" = 2,
-                                     "mean" = 2,
+                                     "mean" = 4,
                                      "recent" =5,
                                      "dyn" = 3))+
     #facet_wrap(vars(group), nrow=1)+
@@ -212,7 +213,7 @@ for(j in 1:nstocks){
     scale_fill_manual(values=manualcolors)+
     scale_linetype_manual(values = c("SB"=1,
                                      "hist" = 2,
-                                     "mean" = 2,
+                                     "mean" = 4,
                                      "recent" =5,
                                      "dyn" = 3))+
     #facet_wrap(vars(group), nrow=1)+

@@ -105,14 +105,15 @@ for(j in 1:nstocks){
         scale_color_manual(values=manualcolors[2:5])+
         scale_fill_manual(values=manualcolors[2:5])+
         scale_linetype_manual(values = c("hist" = 2,
-                                         "mean" = 2,
+                                         "mean" = 4,
                                          "recent" =5,
                                          "annual" = 3))+
         facet_wrap(~Sensitivity, nrow=1)+
         labs(x = "", y = "M")+
         scale_y_continuous(breaks=seq(0,3.,.4))+
         mytheme_sens_plots+
-        theme(axis.text.x=element_blank())
+        theme(axis.text.x=element_blank())+
+        theme(legend.key.width = unit(1.25, "cm"))
     g1
 
       #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -141,12 +142,13 @@ for(j in 1:nstocks){
         facet_wrap(vars(Sensitivity), nrow=1)+
         scale_linetype_manual(values = c("SB"=1,
                                          "hist" = 2,
-                                         "mean" = 2,
+                                         "mean" = 4,
                                          "recent" =5,
                                          "dyn" = 3))+
         labs(x = "", y = "SB or SB0", title= "")+
         mytheme_paper+
-        theme(axis.text.x=element_blank())
+        theme(axis.text.x=element_blank())+
+        theme(legend.key.width = unit(1.25, "cm"))
      g2
 
      # Plot time series of P(SB > LRP)
@@ -181,7 +183,8 @@ for(j in 1:nstocks){
       # Version that uses SB0 instead of B0
       g3 <- plotPLRP_SB0(PLRPB0_NF,
                     scentext=TRUE,
-                    panel=FALSE)
+                    panel=FALSE)+
+        theme(legend.key.width = unit(1.25, "cm"))
       g3
 
       cowplot::plot_grid(g1,NULL,g2,NULL,g3, nrow=5,
